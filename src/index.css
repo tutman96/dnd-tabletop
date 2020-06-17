@@ -1,0 +1,22 @@
+#root {
+	position: absolute;
+	top: 0; right: 0; bottom: 0; left: 0;
+}
+
+#battlemap {
+	background: #000;
+}
+
+.toolbar {
+	position: absolute;
+    transform: none;
+    top: 5px;
+    left: unset;
+    right: 5px;
+    bottom: unset;
+    background-color: rgba(19, 20, 22, 0.9);
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    padding: 2px 1px;
+}
