@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import useComponentSize from '@rehooks/component-size';
 import { css } from 'emotion';
 import Konva from 'konva';
-import { Stage, Text } from 'react-konva';
+import { Stage } from 'react-konva';
 import { useTheme } from 'sancho';
 
 const ZOOM_SPEED = 1.1;
@@ -66,9 +66,6 @@ const DraggableStage: React.SFC<Props> = ({ children, onClick, draggable }) => {
 					};
 					stage.position(newPos);
 					stage.batchDraw();
-				}}
-				onMouseDown={(e) => {
-					// stageRef.current?.setDraggable(e.evt.button === 1); //middle mouse
 				}}
 				onContextMenu={(e) => {
 					e.evt.preventDefault();

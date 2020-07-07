@@ -11,7 +11,7 @@ const { useOneValue } = useSceneDatabase();
 const { useOneValue: useOneSettingValue } = useSettingsDatabase();
 
 type Props = {};
-const TablePage: React.SFC<Props> = ({ }) => {
+const TablePage: React.SFC<Props> = () => {
 	const [displayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
 	const [tableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
 

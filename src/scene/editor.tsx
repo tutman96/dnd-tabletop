@@ -3,7 +3,7 @@ import { useRouteMatch } from "react-router-dom";
 import { Spinner, Text, useTheme, IconButton, IconPlay, IconRotateCcw, IconRotateCw, IconPause, IconUpload, IconEdit2, IconCheck, Input } from "sancho";
 import { css } from "emotion";
 
-import { useSceneDatabase as useSceneDatabase, IScene } from ".";
+import { useSceneDatabase, IScene } from ".";
 import Canvas from "./canvas";
 import AddAssetButton from "./addAssetButton";
 import { useSettingsDatabase, Settings } from "../settings";

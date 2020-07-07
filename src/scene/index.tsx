@@ -10,10 +10,17 @@ export enum AssetType {
 	VIDEO
 }
 
+export interface IAssetComponentProps<T extends IAsset> {
+	asset: T;
+	onUpdate: (asset: T) => void;
+	selected: boolean;
+	onSelected: () => void;
+}
+
 export const AssetTypeToComponent = {
 	[AssetType.IMAGE]: ImageAsset,
 	[AssetType.VIDEO]: VideoAsset
-}
+} as { [type: string]: React.SFC<IAssetComponentProps<any>> }
 
 export interface IAsset {
 	id: string;

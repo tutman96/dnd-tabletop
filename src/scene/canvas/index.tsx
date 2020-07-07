@@ -1,37 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { Layer, Rect } from 'react-konva';
 
-import { IScene, AssetType, AssetTypeToComponent } from '..';
+import { IScene, AssetTypeToComponent } from '..';
 import DraggableStage from './draggableStage';
-import { useTheme } from 'sancho';
-import ImageAsset, { IImageAsset } from './imageAsset';
-import VideoAsset, { IVideoAsset } from './videoAsset';
 
 type Props = { scene: IScene, onUpdate: (scene: IScene) => void };
 const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
-	const theme = useTheme();
-
 	const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
-
-	function onDelete() {
-		const assets = new Map(scene.assets.entries());
-		assets.delete(selectedAsset!);
-		onUpdate({
-			...scene,
-			assets
-		});
-		setSelectedAsset(null);
-	}
 
 	useEffect(() => {
 		function onKeyPress(e: KeyboardEvent) {
-			if ((e.key == 'Delete' || e.key == 'Backspace') && selectedAsset !== null) {
-				onDelete();
+			if ((e.key === 'Delete' || e.key === 'Backspace') && selectedAsset !== null) {
+				const assets = new Map(scene.assets.entries());
+				assets.delete(selectedAsset!);
+				onUpdate({
+					...scene,
+					assets
+				});
+				setSelectedAsset(null);
 			}
 		}
 		window.addEventListener('keyup', onKeyPress);
 		return () => window.removeEventListener('keyup', onKeyPress);
-	}, [selectedAsset])
+	}, [scene, selectedAsset, onUpdate])
 
 	return (
 		<DraggableStage onClick={() => setSelectedAsset(null)} draggable={selectedAsset == null}>
@@ -45,7 +36,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 						return (
 							<Component
 								key={asset.id}
-								asset={asset as IImageAsset}
+								asset={asset}
 								selected={selectedAsset === asset.id}
 								onSelected={() => setSelectedAsset(asset.id)}
 								onUpdate={(updatedAsset) => {
