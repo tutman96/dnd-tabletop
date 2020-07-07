@@ -8,13 +8,11 @@ import { Switch, Route, useRouteMatch, useHistory } from "react-router-dom";
 import SceneEditor from "../scene/editor";
 import SceneList from "../scene/list";
 import { IScene } from "../scene";
-import SceneTiles from "../scene/tiles";
-
 
 function useCurrentSelectedScene() {
-	const routeMatch = useRouteMatch();
-	const matchedSceneRoute = useRouteMatch<{ id: string }>({ path: routeMatch.path + '/scene/:id' });
-	return matchedSceneRoute?.params.id;
+  const routeMatch = useRouteMatch();
+  const matchedSceneRoute = useRouteMatch<{ id: string }>({ path: routeMatch.path + '/scene/:id' });
+  return matchedSceneRoute?.params.id;
 }
 
 type Props = {};
@@ -22,11 +20,11 @@ const Main: React.SFC<Props> = () => {
   const theme = useTheme();
   const history = useHistory();
   const routeMatch = useRouteMatch();
-  
+
   const currentSelectedScene = useCurrentSelectedScene();
 
   function onSceneSelect(scene: IScene) {
-    history.push(`${routeMatch.url}/scene/${scene.id}`)
+    history.push(`${routeMatch.path}/scene/${scene.id}`)
   }
 
   return (
@@ -54,10 +52,7 @@ const Main: React.SFC<Props> = () => {
         }}
       />
       <Switch>
-        <Route path={`${routeMatch.path}`} exact>
-          <SceneTiles onSceneSelect={onSceneSelect} />
-        </Route>
-        <Route path={`${routeMatch.path}/scene/:id`} exact>
+        <Route path={[`${routeMatch.path}`, `${routeMatch.path}/scene/:id`]} exact>
           <div
             className={css`
 				    display: flex;
@@ -65,7 +60,7 @@ const Main: React.SFC<Props> = () => {
             width: 100%;
             height: 100vh;
 			    `}>
-            <SceneList onSceneSelect={onSceneSelect} selectedSceneId={currentSelectedScene!}/>
+            <SceneList onSceneSelect={onSceneSelect} selectedSceneId={currentSelectedScene!} />
             <SceneEditor />
           </div>
         </Route>
