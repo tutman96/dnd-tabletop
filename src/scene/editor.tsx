@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouteMatch } from "react-router-dom";
-import { Spinner, Text, useTheme, IconButton, IconPlay, IconRotateCcw, IconRotateCw, IconPause, IconUpload } from "sancho";
+import { Spinner, Text, useTheme, IconButton, IconPlay, IconRotateCcw, IconRotateCw, IconPause, IconUpload, IconEdit2, IconCheck, Input } from "sancho";
 import { css } from "emotion";
 
 import { useSceneDatabase as useSceneDatabase, IScene } from ".";
@@ -10,6 +10,49 @@ import { useSettingsDatabase, Settings } from "../settings";
 
 const { useOneValue } = useSceneDatabase();
 const { useOneValue: useOneSettingValue } = useSettingsDatabase();
+
+function SceneNameHeader({ name, onUpdate: updateName }: { name: string, onUpdate: (name: string) => void }) {
+	const theme = useTheme();
+	const [inEdit, setInEdit] = useState(false);
+	const [localName, setLocalName] = useState(name);
+
+	useEffect(() => {
+		setLocalName(name);
+	}, [name]);
+
+	return (
+		<div
+			className={css`
+				display: flex;
+				align-items: center;
+			`}
+		>
+			{!inEdit &&
+				<>
+					<Text variant="lead">{name}</Text>
+					<IconButton icon={<IconEdit2 />} size="sm" variant="ghost" label="Edit Name" onClick={() => setInEdit(true)} />
+				</>
+			}
+			{inEdit &&
+				<>
+					<Input value={localName} onChange={(e) => setLocalName(e.target.value)} />
+					<IconButton
+						icon={<IconCheck />}
+						size="sm"
+						variant="ghost"
+						color={theme.colors.intent.success.base}
+						label="Save Name"
+						onClick={() => {
+							updateName(localName);
+							setInEdit(false);
+						}}
+						disabled={!localName.trim()}
+					/>
+				</>
+			}
+		</div >
+	);
+}
 
 function TableDisplayButton({ scene }: { scene: IScene }) {
 	const theme = useTheme();
@@ -23,7 +66,7 @@ function TableDisplayButton({ scene }: { scene: IScene }) {
 					icon={<IconPlay />}
 					variant="ghost"
 					label="Unfreeze Table"
-					color={theme.colors.palette.green.base} 
+					color={theme.colors.palette.green.base}
 					onPress={() => updateTableFreeze(false)}
 				/>
 			)
@@ -34,7 +77,7 @@ function TableDisplayButton({ scene }: { scene: IScene }) {
 					icon={<IconPause />}
 					variant="ghost"
 					label="Freeze Table"
-					color={theme.colors.palette.yellow.base} 
+					color={theme.colors.palette.yellow.base}
 					onPress={() => updateTableFreeze(true)}
 				/>
 			)
@@ -61,7 +104,7 @@ const SceneEditor: React.SFC<Props> = () => {
 
 	const match = useRouteMatch<{ id: string }>();
 	const [scene, updateScene] = useOneValue(match.params.id);
-	
+
 	if (!match.params.id) {
 		return null;
 	}
@@ -94,7 +137,7 @@ const SceneEditor: React.SFC<Props> = () => {
 					justify-content: space-between;
 				`}
 			>
-				<Text variant="lead">{scene.name}</Text>
+				<SceneNameHeader name={scene.name} onUpdate={(name) => updateScene({ ...scene, name })} />
 				<div>
 					<IconButton icon={<IconRotateCcw />} variant="ghost" label="Undo" />
 					<AddAssetButton scene={scene} onUpdate={updateScene} />
