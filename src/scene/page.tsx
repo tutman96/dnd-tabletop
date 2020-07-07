@@ -7,7 +7,7 @@ import { Switch, Route, useRouteMatch, useHistory } from "react-router-dom";
 
 import SceneEditor from "../scene/editor";
 import SceneList from "../scene/list";
-import { IScene } from "../scene";
+import { IScene } from ".";
 
 function useCurrentSelectedScene() {
   const routeMatch = useRouteMatch();
@@ -16,7 +16,7 @@ function useCurrentSelectedScene() {
 }
 
 type Props = {};
-const Main: React.SFC<Props> = () => {
+const ScenePage: React.SFC<Props> = () => {
   const theme = useTheme();
   const history = useHistory();
   const routeMatch = useRouteMatch();
@@ -68,4 +68,4 @@ const Main: React.SFC<Props> = () => {
     </>
   );
 };
-export default Main;
+export default ScenePage;
