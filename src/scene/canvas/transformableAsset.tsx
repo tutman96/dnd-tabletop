@@ -6,7 +6,7 @@ import { useTheme } from 'sancho';
 
 export type AssetTransform = IRect & { rotation: number };
 
-type Props = { rectTransform: IRect, onTransform: (newRect: AssetTransform) => void, isSelected: boolean, onSelected: () => void };
+type Props = { rectTransform: AssetTransform, onTransform: (newRect: AssetTransform) => void, isSelected: boolean, onSelected: () => void };
 const TransformableAsset: React.SFC<Props> = ({ rectTransform, onTransform, isSelected, onSelected, children }) => {
 	const theme = useTheme();
 
@@ -36,6 +36,7 @@ const TransformableAsset: React.SFC<Props> = ({ rectTransform, onTransform, isSe
 				y={rectTransform.y}
 				height={rectTransform.height}
 				width={rectTransform.width}
+				rotation={rectTransform.rotation}
 				onDragEnd={e => {
 					const node = groupRef.current!;
 					const scaleX = node.scaleX();
