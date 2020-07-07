@@ -34,10 +34,6 @@ const Table: React.SFC<Props> = ({ }) => {
 		return () => window.removeEventListener('resize', onResize)
 	}, [])
 
-	if (!tableScene) {
-		return null;
-	}
-
 	return (
 		<>
 			<Global
@@ -51,23 +47,25 @@ const Table: React.SFC<Props> = ({ }) => {
 				}}
 			/>
 			<Helmet title="D&amp;D Table View" />
-			<Stage
-				{...windowSize}
-			>
-				{Array.from(tableScene.assets.values())
-					.map((asset) => {
-						const Component = AssetTypeToComponent[asset.type];
-						return (
-							<Component
-								key={asset.id}
-								asset={asset as IImageAsset | IVideoAsset}
-								selected={false}
-								onSelected={() => { }}
-								onUpdate={() => { }}
-							/>
-						);
-					})}
-			</Stage>
+			{tableScene &&
+				<Stage
+					{...windowSize}
+				>
+					{Array.from(tableScene.assets.values())
+						.map((asset) => {
+							const Component = AssetTypeToComponent[asset.type];
+							return (
+								<Component
+									key={asset.id}
+									asset={asset as IImageAsset | IVideoAsset}
+									selected={false}
+									onSelected={() => { }}
+									onUpdate={() => { }}
+								/>
+							);
+						})}
+				</Stage>
+			}
 		</>
 	)
 }
