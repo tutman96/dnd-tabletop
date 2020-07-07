@@ -21,6 +21,8 @@ const VideoAsset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected })
 	useEffect(() => {
 		const video = document.createElement('video');
 		video.src = URL.createObjectURL(asset.file);
+		video.muted = true;
+		video.autoplay = true;
 		video.play();
 		setVideoEl(video);
 	}, [])
