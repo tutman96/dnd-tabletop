@@ -11,7 +11,7 @@ import { IScene } from "../scene";
 
 function useCurrentSelectedScene() {
   const routeMatch = useRouteMatch();
-  const matchedSceneRoute = useRouteMatch<{ id: string }>({ path: routeMatch.path + '/scene/:id' });
+  const matchedSceneRoute = useRouteMatch<{ id: string }>({ path: routeMatch.path + '/:id' });
   return matchedSceneRoute?.params.id;
 }
 
@@ -24,7 +24,7 @@ const Main: React.SFC<Props> = () => {
   const currentSelectedScene = useCurrentSelectedScene();
 
   function onSceneSelect(scene: IScene) {
-    history.push(`${routeMatch.path}/scene/${scene.id}`)
+    history.push(`${routeMatch.path}/${scene.id}`)
   }
 
   return (
@@ -52,7 +52,7 @@ const Main: React.SFC<Props> = () => {
         }}
       />
       <Switch>
-        <Route path={[`${routeMatch.path}`, `${routeMatch.path}/scene/:id`]} exact>
+        <Route path={[`${routeMatch.path}`, `${routeMatch.path}/:id`]} exact>
           <div
             className={css`
 				    display: flex;
