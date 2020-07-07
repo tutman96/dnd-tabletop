@@ -60,8 +60,11 @@ const SceneEditor: React.SFC<Props> = () => {
 	const theme = useTheme();
 
 	const match = useRouteMatch<{ id: string }>();
-
 	const [scene, updateScene] = useOneValue(match.params.id);
+	
+	if (!match.params.id) {
+		return null;
+	}
 
 	if (!scene) {
 		return <Spinner label="Loading scene..." center />
