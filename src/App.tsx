@@ -2,7 +2,8 @@ import React from 'react';
 import {
 	BrowserRouter as Router,
 	Switch,
-	Route
+	Route,
+	Redirect
 } from 'react-router-dom';
 
 import Main from './main';
@@ -15,12 +16,13 @@ const App: React.SFC<Props> = () => {
 		<DarkMode>
 			<Router>
 				<Switch>
-					<Route path="/main">
+					<Route path="/scenes">
 						<Main />
 					</Route>
 					<Route path="/table">
 						<Table />
 					</Route>
+					<Redirect to="/scenes" />
 				</Switch>
 			</Router>
 		</DarkMode>

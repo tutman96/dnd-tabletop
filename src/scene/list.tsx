@@ -23,6 +23,7 @@ function NoScenes(props: { onAdd: () => void }) {
 					align-items: center;
 					justify-content: center;
 					height: 100%;
+					width: 100%;
 				`}
 		>
 			<div
