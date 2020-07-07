@@ -6,9 +6,9 @@ import {
 	Redirect
 } from 'react-router-dom';
 
-import Main from './main';
 import { DarkMode } from 'sancho';
-import Table from './table';
+import TablePage from './table/page';
+import ScenePage from './scene/page';
 
 type Props = {};
 const App: React.SFC<Props> = () => {
@@ -16,12 +16,8 @@ const App: React.SFC<Props> = () => {
 		<DarkMode>
 			<Router>
 				<Switch>
-					<Route path="/scenes">
-						<Main />
-					</Route>
-					<Route path="/table">
-						<Table />
-					</Route>
+					<Route path="/scenes" component={ScenePage} />
+					<Route path="/table" component={TablePage} />
 					<Redirect to="/scenes" />
 				</Switch>
 			</Router>
