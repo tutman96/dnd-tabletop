@@ -1,7 +1,7 @@
 import React from "react";
 import { css } from 'emotion'
 import { Global } from '@emotion/core'
-import { useTheme, Text } from 'sancho';
+import { useTheme } from 'sancho';
 import { Helmet } from 'react-helmet';
 import { Switch, Route, useRouteMatch, useHistory } from "react-router-dom";
 

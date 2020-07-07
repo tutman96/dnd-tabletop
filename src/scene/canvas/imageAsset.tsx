@@ -1,18 +1,15 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { IAsset } from "..";
+import React, { useEffect, useState } from 'react';
 import { Image, Layer } from 'react-konva';
+
+import { IAsset, IAssetComponentProps } from "..";
 import TransformableAsset from './transformableAsset';
 
 export interface IImageAsset extends IAsset {
 	file: File
 }
 
-type Props = {
-	asset: IImageAsset,
-	onUpdate: (asset: IImageAsset) => void
-	selected: boolean;
-	onSelected: () => void;
-};
+interface Props extends IAssetComponentProps<IImageAsset> { };
+
 const ImageAsset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected }) => {
 	const [imageEl, setImageEl] = useState<HTMLImageElement>();
 
@@ -26,7 +23,7 @@ const ImageAsset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected })
 			}
 		}
 		fr.readAsDataURL(asset.file);
-	}, [])
+	}, [asset.file])
 
 	return (
 		<Layer>
