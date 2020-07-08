@@ -177,6 +177,7 @@ export default function useGlobalStorage<T>(name: string) {
 		useOneValue,
 		createItem: (key: string, object: T) => {
 			storage.setItem(key, object);
-		}
+		},
+		storage
 	};
 };

@@ -1,8 +1,12 @@
-import { IScene, IAsset, AssetType } from ".";
-import { IImageAsset } from "./canvas/imageAsset";
 import { v4 } from "uuid";
 import React from "react";
 import { IconButton, IconFilePlus } from "sancho";
+
+import { IImageAsset } from "./canvas/imageAsset";
+import { IVideoAsset } from "./canvas/videoAsset";
+import { IScene, IAsset, AssetType, useSceneFileDatabase } from ".";
+
+const { storage: sceneStorage } = useSceneFileDatabase();
 
 function getImageSize(file: File) {
 	return new Promise<{ width: number, height: number }>((res) => {
@@ -47,19 +51,19 @@ function getImageAsset() {
 			for (let i = 0; i < files.length; i++) {
 				const file = files.item(i);
 				if (!file) continue;
-				
+
 				if (file.type.indexOf('image') === 0) {
 					const { width, height } = await getImageSize(file);
 					const asset = {
 						id: v4(),
 						type: AssetType.IMAGE,
-						file: file,
 						transform: {
 							x: 0, y: 0,
 							width, height,
 							rotation: 0
 						}
 					} as IImageAsset;
+					await sceneStorage.setItem(asset.id, file);
 					res(asset);
 				}
 				else if (file.type.indexOf('video') === 0) {
@@ -67,20 +71,19 @@ function getImageAsset() {
 					const asset = {
 						id: v4(),
 						type: AssetType.VIDEO,
-						file: file,
 						transform: {
 							x: 0, y: 0,
 							width, height,
 							rotation: 0
 						}
-					} as IImageAsset;
+					} as IVideoAsset;
+					await sceneStorage.setItem(asset.id, file);
 					res(asset);
 				}
 			}
 		}
 	});
 }
-
 
 type Props = { scene: IScene, onUpdate: (scene: IScene) => void };
 const AddAssetButton: React.SFC<Props> = ({ scene, onUpdate }) => {
@@ -91,11 +94,9 @@ const AddAssetButton: React.SFC<Props> = ({ scene, onUpdate }) => {
 			label="Add Asset"
 			onClick={async () => {
 				const asset = await getImageAsset();
-				const assets = new Map(scene.assets);
-				assets.set(asset.id, asset);
+				scene.assets.set(asset.id, asset);
 				onUpdate({
-					...scene,
-					assets
+					...scene
 				})
 			}}
 		/>
