@@ -39,6 +39,11 @@ export function useSceneDatabase() {
 	return storage;
 }
 
+const fileStorage = useGlobalStorage<File>('scene_file');
+export function useSceneFileDatabase() {
+	return fileStorage;
+}
+
 export function createNewScene(): IScene {
 	return {
 		id: v4(),

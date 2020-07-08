@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Image, Layer } from 'react-konva';
 
-import { IAsset, IAssetComponentProps } from "..";
+import { IAsset, IAssetComponentProps, useSceneFileDatabase } from "..";
 import TransformableAsset from './transformableAsset';
 
 export interface IImageAsset extends IAsset {
-	file: File
+
 }
 
 interface Props extends IAssetComponentProps<IImageAsset> { };
@@ -13,17 +13,21 @@ interface Props extends IAssetComponentProps<IImageAsset> { };
 const ImageAsset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected }) => {
 	const [imageEl, setImageEl] = useState<HTMLImageElement>();
 
+	const [file] = useSceneFileDatabase().useOneValue(asset.id);
+
 	useEffect(() => {
-		var fr = new FileReader();
-		const img = document.createElement('img') as HTMLImageElement;
-		fr.onload = function () {
-			if (fr.result) {
-				img.src = fr.result as string;
-				setImageEl(img);
+		if (file) {
+			var fr = new FileReader();
+			const img = document.createElement('img') as HTMLImageElement;
+			fr.onload = function () {
+				if (fr.result) {
+					img.src = fr.result as string;
+					setImageEl(img);
+				}
 			}
+			fr.readAsDataURL(file);
 		}
-		fr.readAsDataURL(asset.file);
-	}, [asset.file])
+	}, [file])
 
 	return (
 		<Layer>

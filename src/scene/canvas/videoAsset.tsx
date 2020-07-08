@@ -2,27 +2,29 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Image, Layer } from 'react-konva';
 import Konva from 'konva';
 
-import { IAsset, IAssetComponentProps } from "..";
+import { IAsset, IAssetComponentProps, useSceneFileDatabase } from "..";
 import TransformableAsset from './transformableAsset';
 
 export interface IVideoAsset extends IAsset {
-	file: File
 }
 
 interface Props extends IAssetComponentProps<IVideoAsset> { };
-
 const VideoAsset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected }) => {
 	const [videoEl, setVideoEl] = useState<HTMLVideoElement>();
 	const layerRef = useRef<Konva.Layer>();
 
+	const [file] = useSceneFileDatabase().useOneValue(asset.id);
+
 	useEffect(() => {
-		const video = document.createElement('video');
-		video.src = URL.createObjectURL(asset.file);
-		video.muted = true;
-		video.autoplay = true;
-		video.play();
-		setVideoEl(video);
-	}, [asset.file])
+		if (file) {
+			const video = document.createElement('video');
+			video.src = URL.createObjectURL(file);
+			video.muted = true;
+			video.autoplay = true;
+			video.play();
+			setVideoEl(video);
+		}
+	}, [file])
 
 	useEffect(() => {
 		if (!layerRef.current) return;
