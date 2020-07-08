@@ -33,7 +33,7 @@ export function useTableResolution(): [TableResolution | undefined, Dispatch<Set
 
 export function useTableSize(): [number | undefined, Dispatch<SetStateAction<number>>] {
   const [tableSize, setTableSize] = useOneSettingValue<number>(Settings.TABLE_SIZE);
-console.log({tableSize})
+
   if (tableSize === null) {
     return [
       45,
@@ -42,6 +42,21 @@ console.log({tableSize})
   }
 
   return [tableSize, setTableSize];
+}
+
+export function useTablePPI(): number | null {
+  const [tableResolution] = useTableResolution();
+	const [tableSize] = useTableSize();
+	if (!tableResolution || !tableSize) {
+		return null;
+  }
+  
+  const theta = Math.atan(tableResolution.height / tableResolution.width);
+	const widthInch = tableSize * Math.cos(theta);
+	// const heightInch = tableSize * Math.sin(theta);
+
+  const ppi = tableResolution.width / widthInch;
+  return ppi;
 }
 
 const ScreenSizeSettings: React.SFC = () => {
