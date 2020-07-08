@@ -121,28 +121,31 @@ const RTStorage = require('rt-storage');
 
 export default function useGlobalStorage<T>(name: string) {
 	const storage = new RTStorage({ name });
-	const useOneValue = (key: string) => {
-		const [data, setState] = useState<T | null | undefined>(undefined);
+	const useOneValue = <V extends T = T>(key: string) => {
+		const [data, setState] = useState<V | null | undefined>(undefined);
 
 		useEffect(() => {
-			storage.getItem(key).then((lastData: T) => {
+			storage.getItem(key).then((lastData: V) => {
 				if (lastData) {
 					setState(lastData);
 				}
+				else {
+					setState(null);
+				}
 			});
 
-			const subscription = storage.subscribe(key, (d: T) => setState(d));
+			const subscription = storage.subscribe(key, (d: V) => setState(d));
 			return () => {
 				subscription.unsubscribe();
 			};
 		}, [key]);
 
-		const setData = async (newData: T) => {
+		const setData = async (newData: V) => {
 			setState(newData);
 			await storage.setItem(key, newData);
 		}
 
-		return [data, setData] as [T | null | undefined, Dispatch<SetStateAction<T>>];
+		return [data, setData] as [V | null | undefined, Dispatch<SetStateAction<V>>];
 	}
 
 	return {
