@@ -5,21 +5,38 @@ import {
 	Route,
 	Redirect
 } from 'react-router-dom';
-
 import { DarkMode } from 'sancho';
-import TablePage from './table/page';
-import ScenePage from './scene/page';
+import { css } from 'emotion';
 
-type Props = {};
-const App: React.SFC<Props> = () => {
+import routes from './routes';
+import Sidebar from './sidebar';
+
+const App: React.SFC = () => {
 	return (
 		<DarkMode>
 			<Router>
-				<Switch>
-					<Route path="/scenes" component={ScenePage} />
-					<Route path="/table" component={TablePage} />
-					<Redirect to="/scenes" />
-				</Switch>
+				<div
+					className={css`
+						display: flex;
+						width: 100%;
+					`}
+				>
+					<Sidebar />
+					<Switch>
+						{Object.keys(routes).map((routeName) => {
+							const route = routes[routeName as keyof typeof routes];
+							return (
+								<Route
+									key={routeName}
+									path={route.path}
+									exact={route.exact}
+									component={route.main}
+								/>
+							);
+						})}
+						<Redirect to={routes.scenes.path} />
+					</Switch>
+				</div>
 			</Router>
 		</DarkMode>
 	);

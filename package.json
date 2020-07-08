@@ -47,5 +47,17 @@
     "@types/react-helmet": "^6.0.0",
     "@types/react-router-dom": "^5.1.5",
     "@types/uuid": "^8.0.0"
+  },
+  "resolutions": {
+    "react-spring": "9.0.0-beta.34",
+    "@react-spring/core": "9.0.0-beta.33",
+    "@react-spring/native": "9.0.0-beta.33",
+    "@react-spring/web": "9.0.0-beta.34",    
+    "@react-spring/addons": "9.0.0-beta.33",
+    "@react-spring/konva": "9.0.0-beta.33",
+    "@react-spring/three": "9.0.0-beta.33",
+    "@react-spring/zdog": "9.0.0-beta.33",
+    "@react-spring/animated": "9.0.0-beta.33",
+    "@react-spring/shared": "9.0.0-beta.33"
   }
 }
