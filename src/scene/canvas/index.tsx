@@ -10,6 +10,7 @@ import { Vector2d } from 'konva/types/types';
 import { LayerTypeToComponent, LayerType, ILayer, createNewLayer } from '../layer';
 import { deleteLayer } from '../layer';
 import LayerList from './layerList';
+import { ToolbarPortalProvider } from '../layer/toolbarPortal';
 
 const TableViewOverlay: React.SFC<{ offset: Vector2d, rotation: number, showBorder: boolean, showGrid: boolean }> = ({ offset, rotation, showGrid, showBorder }) => {
 	const theme = useTheme();
@@ -72,12 +73,18 @@ const TableViewOverlay: React.SFC<{ offset: Vector2d, rotation: number, showBord
 type Props = { scene: IScene, onUpdate: (scene: IScene) => void };
 const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 	const theme = useTheme();
-	const [activeLayer, setActiveLayer] = useState<string | null>(scene.layers.length ? scene.layers[0].id : null);
+	const [activeLayer, setActiveLayer] = useState<string | null>(null);
 	const [toolbar, setToolbar] = useState<React.ReactNode | null>(null);
 
 	useEffect(() => {
+		if (
+			(activeLayer === null || !scene.layers.some((l) => l.id === activeLayer)) &&
+			scene.layers.length
+		) {
+			setActiveLayer(scene.layers[0].id);
+		}
 		setToolbar(null);
-	}, [activeLayer])
+	}, [activeLayer, scene])
 
 	const onLayerUpdate = useCallback((updatedLayer: ILayer) => {
 		const i = scene.layers.findIndex((l) => l.id === updatedLayer.id);
@@ -91,11 +98,11 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 		scene.layers.push(layer);
 		onUpdate({ ...scene });
 	}
-	
+
 	function editActiveLayerName(name: string) {
 		const layer = scene.layers.find((l) => l.id === activeLayer);
 		if (!layer) return;
-		
+
 		layer.name = name;
 		onUpdate({
 			...scene,
@@ -105,18 +112,18 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 
 	function moveActiveLayer(direction: 'up' | 'down') {
 		const layerIndex = scene.layers.findIndex((l) => l.id === activeLayer);
-		if (layerIndex !== -1) {			
+		if (layerIndex !== -1) {
 			const swapIndex = direction === 'up' ? layerIndex + 1 : layerIndex - 1;
 			if (swapIndex > scene.layers.length - 1 || swapIndex < 0) {
 				return;
 			}
-			
+
 			const currentLayer = scene.layers[layerIndex];
 			const layerToSwap = scene.layers[swapIndex];
-			
+
 			scene.layers[swapIndex] = currentLayer;
 			scene.layers[layerIndex] = layerToSwap;
-			
+
 			onUpdate({
 				...scene,
 				layers: [...scene.layers]
@@ -137,21 +144,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 	}
 
 	return (
-		<>
-			{/* Toolbar */}
-			<div
-				className={css`
-					position: relative;
-					top: 0; left: 0; right: 0;
-					padding-top: ${toolbar ? null : '40px'};
-					background-color: ${theme.colors.background.tint1};
-					box-shadow: ${theme.shadows.md};
-					z-index: 100;
-				`}
-			>
-				{toolbar}
-			</div>
-
+		<ToolbarPortalProvider>
 			{/* Canvas */}
 			<DraggableStage>
 				{
@@ -181,7 +174,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 				moveActiveLayer={moveActiveLayer}
 				deleteActiveLayer={deleteActiveLayer}
 			/>
-		</>
+		</ToolbarPortalProvider>
 	);
 }
 export default Canvas;
