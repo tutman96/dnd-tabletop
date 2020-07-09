@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { singletonHook } from 'react-singleton-hook';
 import { DarkMode } from 'sancho';
@@ -23,7 +23,7 @@ export default ToolbarPortal;
 
 export const ToolbarPortalProvider: React.SFC = ({ children }) => {
 	const node = useRef<HTMLSpanElement>();
-	const [portal, setPortal] = useToolbarPortal()!;
+	const [, setPortal] = useToolbarPortal()!;
 
 	useEffect(() => {
 		console.log('set portal')

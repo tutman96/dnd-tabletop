@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Layer, Rect, Line } from 'react-konva';
-import { css } from 'emotion';
 import { useTheme } from 'sancho';
 
 import { IScene } from '..';
@@ -72,10 +71,9 @@ const TableViewOverlay: React.SFC<{ offset: Vector2d, rotation: number, showBord
 
 type Props = { scene: IScene, onUpdate: (scene: IScene) => void };
 const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
-	const theme = useTheme();
 	const [activeLayer, setActiveLayer] = useState<string | null>(null);
-	const [toolbar, setToolbar] = useState<React.ReactNode | null>(null);
 
+	// Default selected layer to the first layer
 	useEffect(() => {
 		if (
 			(activeLayer === null || !scene.layers.some((l) => l.id === activeLayer)) &&
@@ -83,7 +81,6 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 		) {
 			setActiveLayer(scene.layers[0].id);
 		}
-		setToolbar(null);
 	}, [activeLayer, scene])
 
 	const onLayerUpdate = useCallback((updatedLayer: ILayer) => {
@@ -157,7 +154,6 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 								layer={layer}
 								onUpdate={onLayerUpdate}
 								active={activeLayer === layer.id}
-								setToolbar={setToolbar}
 							/>
 						);
 					})

@@ -8,7 +8,6 @@ import Konva from 'konva';
 import { IconFilePlus, IconTrash2 } from 'sancho';
 import ToolbarItem from '../toolbarItem';
 import ToolbarPortal from '../toolbarPortal';
-import Toolbar from '../toolbar';
 
 export interface IAssetComponentProps<T extends IAsset> {
 	asset: T;
@@ -27,7 +26,7 @@ export interface IAssetLayer extends ILayer {
 }
 
 interface Props extends ILayerComponentProps<IAssetLayer> { }
-const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, setToolbar }) => {
+const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive }) => {
 	const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
 	const layerRef = useRef<Konva.Layer>();
 
@@ -81,7 +80,7 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, se
 				/>
 			</>
 		);
-	}, [onUpdate, selectedAsset, deleteSelectedAsset]);
+	}, [layer, selectedAsset, onUpdate, deleteSelectedAsset]);
 
 	return (
 		<>
