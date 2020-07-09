@@ -24,7 +24,7 @@ const DraggableStage: React.SFC<Props> = ({ children, onClick, draggable }) => {
 			ref={containerRef}
 			className={css`
 				flex-grow: 2;
-				width: calc(100vw - ${SCENE_LIST_WIDTH}px);
+				width: calc(100vw - ${SCENE_LIST_WIDTH + 48}px);
 				height: calc(100vh - ${HEADER_HEIGHT}px);
 				
 				background-color: ${theme.colors.background.tint2};

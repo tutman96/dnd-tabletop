@@ -19,7 +19,6 @@ export interface ILayerComponentProps<T extends ILayer> {
 	layer: T;
 	onUpdate: (layer: T) => void;
 	active: boolean;
-	setToolbar: (component: React.ReactNode) => void
 }
 
 export const LayerTypeToComponent = {

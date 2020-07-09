@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useSettingsDatabase, Settings } from '../settings';
 import { useSceneDatabase, IScene } from '../scene';
 import { Stage } from 'react-konva';
-import { IVideoAsset } from '../scene/layer/assetLayer/videoAsset';
-import { IImageAsset } from '../scene/layer/assetLayer/imageAsset';
 import { Global } from '@emotion/core';
 import { Helmet } from 'react-helmet';
+import { LayerTypeToComponent } from '../scene/layer';
 
 const { useOneValue } = useSceneDatabase();
 const { useOneValue: useOneSettingValue } = useSettingsDatabase();
@@ -47,25 +46,26 @@ const TablePage: React.SFC<Props> = () => {
 				}}
 			/>
 			<Helmet title="D&amp;D Table View" />
-			{/* {tableScene &&
+			{tableScene &&
 				<Stage
 					{...windowSize}
 				>
-					{Array.from(tableScene.assets.values())
-						.map((asset) => {
-							const Component = AssetTypeToComponent[asset.type];
+					{
+						tableScene.layers.map((layer) => {
+							const Component = LayerTypeToComponent[layer.type];
+							if (!Component) return null;
 							return (
 								<Component
-									key={asset.id}
-									asset={asset as IImageAsset | IVideoAsset}
-									selected={false}
-									onSelected={() => { }}
+									key={layer.id}
+									layer={layer}
 									onUpdate={() => { }}
+									active={false}
 								/>
 							);
-						})}
+						})
+					}
 				</Stage>
-			} */}
+			}
 		</>
 	)
 }
