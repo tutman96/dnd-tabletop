@@ -1,8 +1,8 @@
 import { v4 } from "uuid";
 
-import { AssetType } from "..";
-import { IVideoAsset } from "../canvas/videoAsset";
+import { IVideoAsset } from "../layer/assetLayer/videoAsset";
 import { useAssetFileDatabase } from "./storage";
+import { AssetType } from ".";
 
 function getVideoSize(file: File) {
 	return new Promise<{ width: number, height: number }>((res) => {

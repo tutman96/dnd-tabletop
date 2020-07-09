@@ -5,7 +5,6 @@ import { css } from "emotion";
 
 import { useSceneDatabase, IScene } from ".";
 import Canvas from "./canvas";
-import AddAssetButton from "./addAssetButton";
 import { useSettingsDatabase, Settings } from "../settings";
 
 const { useOneValue } = useSceneDatabase();
@@ -27,6 +26,7 @@ function SceneNameHeader({ name, onUpdate: updateName }: { name: string, onUpdat
 			className={css`
 				display: flex;
 				align-items: center;
+				z-index: 200;
 			`}
 		>
 			{!inEdit &&
@@ -111,8 +111,12 @@ const SceneEditor: React.SFC<Props> = () => {
 		return null;
 	}
 
-	if (!scene) {
+	if (scene === undefined) {
 		return <Spinner label="Loading scene..." center />
+	}
+	
+	if (scene === null) {
+		return null;
 	}
 
 	return (
@@ -142,7 +146,6 @@ const SceneEditor: React.SFC<Props> = () => {
 				<SceneNameHeader name={scene.name} onUpdate={(name) => updateScene({ ...scene, name })} />
 				<div>
 					<IconButton icon={<IconRotateCcw />} variant="ghost" label="Undo" />
-					<AddAssetButton scene={scene} onUpdate={updateScene} />
 					<IconButton icon={<IconRotateCw />} variant="ghost" label="Redo" />
 				</div>
 				<div>

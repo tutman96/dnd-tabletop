@@ -1,8 +1,17 @@
-import { IAsset, AssetType } from "..";
-
-
 import { createImageAsset, deleteImageAsset } from "./image";
 import { createVideoAsset, deleteVideoAsset } from "./video";
+import { AssetTransform } from "../canvas/transformableAsset";
+
+export enum AssetType {
+	IMAGE,
+	VIDEO
+}
+
+export interface IAsset {
+	id: string;
+	transform: AssetTransform;
+	type: AssetType;
+}
 
 export function getNewAssets() {
 	const fileDialogInput = document.createElement('input');

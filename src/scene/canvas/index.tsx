@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Layer, Rect, Line } from 'react-konva';
+import { css } from 'emotion';
+import { useTheme } from 'sancho';
 
-import { IScene, AssetTypeToComponent } from '..';
+import { IScene } from '..';
 import DraggableStage from './draggableStage';
 import { useTableResolution, useTablePPI } from '../../settings';
 import { Vector2d } from 'konva/types/types';
-import { useTheme } from 'sancho';
-import { deleteAsset } from '../asset';
+import { LayerTypeToComponent, LayerType, ILayer, createNewLayer } from '../layer';
+import { deleteLayer } from '../layer';
+import LayerList from './layerList';
 
 const TableViewOverlay: React.SFC<{ offset: Vector2d, rotation: number, showBorder: boolean, showGrid: boolean }> = ({ offset, rotation, showGrid, showBorder }) => {
 	const theme = useTheme();
@@ -37,8 +40,9 @@ const TableViewOverlay: React.SFC<{ offset: Vector2d, rotation: number, showBord
 
 	return (
 		<Layer>
-			{lines.map((line) => (
+			{lines.map((line, i) => (
 				<Line
+					key={i}
 					x={offset.x}
 					y={offset.y}
 					rotation={rotation}
@@ -67,52 +71,117 @@ const TableViewOverlay: React.SFC<{ offset: Vector2d, rotation: number, showBord
 
 type Props = { scene: IScene, onUpdate: (scene: IScene) => void };
 const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
-	const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
+	const theme = useTheme();
+	const [activeLayer, setActiveLayer] = useState<string | null>(scene.layers.length ? scene.layers[0].id : null);
+	const [toolbar, setToolbar] = useState<React.ReactNode | null>(null);
 
 	useEffect(() => {
-		async function onKeyPress(e: KeyboardEvent) {
-			if (
-				(e.key === 'Delete' || e.key === 'Backspace') &&
-				selectedAsset !== null &&
-				scene.assets.has(selectedAsset)
-			) {
-				const asset = scene.assets.get(selectedAsset)!;
-				scene.assets.delete(selectedAsset);
-				await deleteAsset(asset);
-				onUpdate({ ...scene });
-				setSelectedAsset(null);
+		setToolbar(null);
+	}, [activeLayer])
+
+	const onLayerUpdate = useCallback((updatedLayer: ILayer) => {
+		const i = scene.layers.findIndex((l) => l.id === updatedLayer.id);
+		scene.layers[i] = updatedLayer;
+		onUpdate({ ...scene })
+	}, [scene, onUpdate]);
+
+	function addLayer(type: LayerType) {
+		const layer = createNewLayer(type);
+		layer.name = 'Layer ' + (scene.layers.length + 1);
+		scene.layers.push(layer);
+		onUpdate({ ...scene });
+	}
+	
+	function editActiveLayerName(name: string) {
+		const layer = scene.layers.find((l) => l.id === activeLayer);
+		if (!layer) return;
+		
+		layer.name = name;
+		onUpdate({
+			...scene,
+			layers: [...scene.layers]
+		});
+	}
+
+	function moveActiveLayer(direction: 'up' | 'down') {
+		const layerIndex = scene.layers.findIndex((l) => l.id === activeLayer);
+		if (layerIndex !== -1) {			
+			const swapIndex = direction === 'up' ? layerIndex + 1 : layerIndex - 1;
+			if (swapIndex > scene.layers.length - 1 || swapIndex < 0) {
+				return;
 			}
+			
+			const currentLayer = scene.layers[layerIndex];
+			const layerToSwap = scene.layers[swapIndex];
+			
+			scene.layers[swapIndex] = currentLayer;
+			scene.layers[layerIndex] = layerToSwap;
+			
+			onUpdate({
+				...scene,
+				layers: [...scene.layers]
+			});
 		}
-		window.addEventListener('keyup', onKeyPress);
-		return () => window.removeEventListener('keyup', onKeyPress);
-	}, [scene, selectedAsset, onUpdate])
+	}
+
+	async function deleteActiveLayer() {
+		const layer = scene.layers.find((l) => l.id === activeLayer);
+		if (layer) {
+			const newScene = await deleteLayer(scene, layer);
+			onUpdate({
+				...newScene,
+				layers: [...newScene.layers]
+			});
+			setActiveLayer(null);
+		}
+	}
 
 	return (
-		<DraggableStage onClick={() => setSelectedAsset(null)} draggable={selectedAsset == null}>
-			{
-				Array.from(scene.assets.values())
-					.map((asset) => {
-						const Component = AssetTypeToComponent[asset.type];
+		<>
+			{/* Toolbar */}
+			<div
+				className={css`
+					position: relative;
+					top: 0; left: 0; right: 0;
+					padding-top: ${toolbar ? null : '40px'};
+					background-color: ${theme.colors.background.tint1};
+					box-shadow: ${theme.shadows.md};
+					z-index: 100;
+				`}
+			>
+				{toolbar}
+			</div>
+
+			{/* Canvas */}
+			<DraggableStage>
+				{
+					scene.layers.map((layer) => {
+						const Component = LayerTypeToComponent[layer.type];
+						if (!Component) return null;
 						return (
 							<Component
-								key={asset.id}
-								asset={asset}
-								selected={selectedAsset === asset.id}
-								onSelected={() => setSelectedAsset(asset.id)}
-								onUpdate={(updatedAsset) => {
-									const assets = new Map(scene.assets.entries());
-									assets.set(updatedAsset.id, updatedAsset);
-									onUpdate({
-										...scene,
-										assets
-									});
-								}}
+								key={layer.id}
+								layer={layer}
+								onUpdate={onLayerUpdate}
+								active={activeLayer === layer.id}
+								setToolbar={setToolbar}
 							/>
 						);
 					})
-			}
-			<TableViewOverlay offset={{ x: 0, y: 0 }} rotation={0} showGrid={true} showBorder={true} />
-		</DraggableStage>
+				}
+				<TableViewOverlay offset={{ x: 0, y: 0 }} rotation={0} showGrid={true} showBorder={true} />
+			</DraggableStage>
+
+			<LayerList
+				scene={scene}
+				activeLayer={activeLayer}
+				setActiveLayer={setActiveLayer}
+				addLayer={addLayer}
+				editActiveLayerName={editActiveLayerName}
+				moveActiveLayer={moveActiveLayer}
+				deleteActiveLayer={deleteActiveLayer}
+			/>
+		</>
 	);
 }
 export default Canvas;

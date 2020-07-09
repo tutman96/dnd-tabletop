@@ -86,6 +86,7 @@ const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
         flex-shrink: 0;
         display: flex;
         flex-direction: column;
+        z-index: 300;
       `}
     >
       <div
