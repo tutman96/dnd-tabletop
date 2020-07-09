@@ -6,6 +6,7 @@ import DraggableStage from './draggableStage';
 import { useTableResolution, useTablePPI } from '../../settings';
 import { Vector2d } from 'konva/types/types';
 import { useTheme } from 'sancho';
+import { deleteAsset } from '../asset';
 
 const TableViewOverlay: React.SFC<{ offset: Vector2d, rotation: number, showBorder: boolean, showGrid: boolean }> = ({ offset, rotation, showGrid, showBorder }) => {
 	const theme = useTheme();
@@ -21,27 +22,15 @@ const TableViewOverlay: React.SFC<{ offset: Vector2d, rotation: number, showBord
 	if (showGrid) {
 		for (let xOffset = 0; xOffset <= tableResolution.width; xOffset += ppi) {
 			lines.push({
-				start: {
-					x: xOffset,
-					y: 0
-				},
-				end: {
-					x: xOffset,
-					y: tableResolution.height
-				}
+				start: { x: xOffset, y: 0 },
+				end: { x: xOffset, y: tableResolution.height }
 			})
 		}
 
 		for (let yOffset = 0; yOffset <= tableResolution.height; yOffset += ppi) {
 			lines.push({
-				start: {
-					x: 0,
-					y: yOffset
-				},
-				end: {
-					x: tableResolution.width,
-					y: yOffset
-				}
+				start: { x: 0, y: yOffset },
+				end: { x: tableResolution.width, y: yOffset }
 			})
 		}
 	}
@@ -81,14 +70,16 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 	const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
 
 	useEffect(() => {
-		function onKeyPress(e: KeyboardEvent) {
-			if ((e.key === 'Delete' || e.key === 'Backspace') && selectedAsset !== null) {
-				const assets = new Map(scene.assets.entries());
-				assets.delete(selectedAsset!);
-				onUpdate({
-					...scene,
-					assets
-				});
+		async function onKeyPress(e: KeyboardEvent) {
+			if (
+				(e.key === 'Delete' || e.key === 'Backspace') &&
+				selectedAsset !== null &&
+				scene.assets.has(selectedAsset)
+			) {
+				const asset = scene.assets.get(selectedAsset)!;
+				scene.assets.delete(selectedAsset);
+				await deleteAsset(asset);
+				onUpdate({ ...scene });
 				setSelectedAsset(null);
 			}
 		}

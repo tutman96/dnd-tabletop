@@ -2,8 +2,9 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Image, Layer } from 'react-konva';
 import Konva from 'konva';
 
-import { IAsset, IAssetComponentProps, useSceneFileDatabase } from "..";
+import { IAsset, IAssetComponentProps } from "..";
 import TransformableAsset from './transformableAsset';
+import { useVideoAssetFile } from '../asset/video';
 
 export interface IVideoAsset extends IAsset {
 }
@@ -13,7 +14,7 @@ const VideoAsset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected })
 	const [videoEl, setVideoEl] = useState<HTMLVideoElement>();
 	const layerRef = useRef<Konva.Layer>();
 
-	const [file] = useSceneFileDatabase().useOneValue(asset.id);
+	const [file] = useVideoAssetFile(asset);
 
 	useEffect(() => {
 		if (file) {

@@ -11,6 +11,8 @@ import { useSettingsDatabase, Settings } from "../settings";
 const { useOneValue } = useSceneDatabase();
 const { useOneValue: useOneSettingValue } = useSettingsDatabase();
 
+export const HEADER_HEIGHT = 56;
+
 function SceneNameHeader({ name, onUpdate: updateName }: { name: string, onUpdate: (name: string) => void }) {
 	const theme = useTheme();
 	const [inEdit, setInEdit] = useState(false);
@@ -131,7 +133,7 @@ const SceneEditor: React.SFC<Props> = () => {
 					box-shadow: ${theme.shadows.sm};
 					width: 100%;
 					box-sizing: border-box;
-					height: 56px;
+					height: ${HEADER_HEIGHT}px;
 					display: flex;
 					align-items: center;
 					justify-content: space-between;
@@ -148,6 +150,7 @@ const SceneEditor: React.SFC<Props> = () => {
 				</div>
 			</div>
 
+			{/* Canvas */}
 			<Canvas scene={scene} onUpdate={updateScene} />
 		</div>
 	);

@@ -55,11 +55,12 @@ const ScenePage: React.SFC<Props> = () => {
         <Route path={[`${routeMatch.path}`, `${routeMatch.path}/:id`]} exact>
           <div
             className={css`
-				    display: flex;
-			  	  flex-direction: row;
-            width: 100%;
-            height: 100vh;
-			    `}>
+              display: flex;
+              flex-direction: row;
+              width: 100%;
+              height: 100vh;
+            `}
+          >
             <SceneList onSceneSelect={onSceneSelect} selectedSceneId={currentSelectedScene!} />
             <SceneEditor />
           </div>
