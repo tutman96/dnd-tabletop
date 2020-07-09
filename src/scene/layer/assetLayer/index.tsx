@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Layer } from "react-konva";
 import ImageAsset from './imageAsset';
 import VideoAsset from './videoAsset';
@@ -7,6 +7,8 @@ import { ILayer, ILayerComponentProps } from '..';
 import Konva from 'konva';
 import { IconFilePlus, IconTrash2 } from 'sancho';
 import ToolbarItem from '../toolbarItem';
+import ToolbarPortal from '../toolbarPortal';
+import Toolbar from '../toolbar';
 
 export interface IAssetComponentProps<T extends IAsset> {
 	asset: T;
@@ -56,57 +58,55 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, se
 		}
 	}, [layerActive, selectedAsset])
 
-	const toolbar = useCallback(() => {
-		return (<>
-			<ToolbarItem
-				icon={<IconFilePlus />}
-				label="Add Asset"
-				onClick={async () => {
-					const assets = await getNewAssets();
-					for (const asset of assets) {
-						layer.assets.set(asset.id, asset);
-					}
-					onUpdate({ ...layer })
-				}}
-			/>
-			<ToolbarItem
-				icon={<IconTrash2 />}
-				label="Delete Asset"
-				disabled={selectedAsset === null}
-				onClick={deleteSelectedAsset}
-				keyboardShortcuts={['Delete', 'Backspace']}
-			/>
-		</>);
-	}, [layer, selectedAsset, onUpdate, deleteSelectedAsset])
-
-	// Set the toolbar items
-	useEffect(() => {
-		if (layerActive) {
-			setToolbar(toolbar)
-		}
-	}, [layerActive, setToolbar, toolbar])
+	const toolbar = useMemo(() => {
+		return (
+			<>
+				<ToolbarItem
+					icon={<IconFilePlus />}
+					label="Add Asset"
+					onClick={async () => {
+						const assets = await getNewAssets();
+						for (const asset of assets) {
+							layer.assets.set(asset.id, asset);
+						}
+						onUpdate({ ...layer })
+					}}
+				/>
+				<ToolbarItem
+					icon={<IconTrash2 />}
+					label="Delete Asset"
+					disabled={selectedAsset === null}
+					onClick={deleteSelectedAsset}
+					keyboardShortcuts={['Delete', 'Backspace']}
+				/>
+			</>
+		);
+	}, [onUpdate, selectedAsset, deleteSelectedAsset]);
 
 	return (
-		<Layer ref={layerRef as any}>
-			{
-				Array.from(layer.assets.values())
-					.map((asset) => {
-						const Component = AssetTypeToComponent[asset.type];
-						return (
-							<Component
-								key={asset.id}
-								asset={asset}
-								selected={layerActive && selectedAsset === asset.id}
-								onSelected={() => setSelectedAsset(asset.id)}
-								onUpdate={(updatedAsset) => {
-									layer.assets.set(updatedAsset.id, updatedAsset);
-									onUpdate({ ...layer });
-								}}
-							/>
-						);
-					})
-			}
-		</Layer>
+		<>
+			{layerActive && <ToolbarPortal>{toolbar}</ToolbarPortal>}
+			<Layer ref={layerRef as any}>
+				{
+					Array.from(layer.assets.values())
+						.map((asset) => {
+							const Component = AssetTypeToComponent[asset.type];
+							return (
+								<Component
+									key={asset.id}
+									asset={asset}
+									selected={layerActive && selectedAsset === asset.id}
+									onSelected={() => layerActive && setSelectedAsset(asset.id)}
+									onUpdate={(updatedAsset) => {
+										layer.assets.set(updatedAsset.id, updatedAsset);
+										onUpdate({ ...layer });
+									}}
+								/>
+							);
+						})
+				}
+			</Layer>
+		</>
 	);
 }
 export default AssetLayer;

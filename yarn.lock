@@ -10447,6 +10447,11 @@ react-side-effect@^2.1.0:
   resolved "https://registry.yarnpkg.com/react-side-effect/-/react-side-effect-2.1.0.tgz#1ce4a8b4445168c487ed24dab886421f74d380d3"
   integrity sha512-IgmcegOSi5SNX+2Snh1vqmF0Vg/CbkycU9XZbOHJlZ6kMzTmi3yc254oB1WCkgA7OQtIAoLmcSFuHTc/tlcqXg==
 
+react-singleton-hook@^3.0.140:
+  version "3.0.140"
+  resolved "https://registry.yarnpkg.com/react-singleton-hook/-/react-singleton-hook-3.0.140.tgz#4cea72986543372d95a9352a78c5feed81a30cbc"
+  integrity sha512-j8pCiQesihBd+Ynt5Jd1gWnojorClevASgja1G4iI9wdSnP/FUHTfhykp75tU9OsbkRUusTONTRS1ghWub12JQ==
+
 react-spring@9.0.0-beta.34, react-spring@^9.0.0-beta.20, react-spring@^9.0.0-beta.31:
   version "9.0.0-beta.34"
   resolved "https://registry.yarnpkg.com/react-spring/-/react-spring-9.0.0-beta.34.tgz#909fdccec45b15f317cabe0d4746e636b60e39ed"
