@@ -4,6 +4,8 @@ import { css } from 'emotion';
 import Konva from 'konva';
 import { Stage } from 'react-konva';
 import { useTheme } from 'sancho';
+import { SCENE_LIST_WIDTH } from '../list';
+import { HEADER_HEIGHT } from '../editor';
 
 const ZOOM_SPEED = 1.1;
 
@@ -22,8 +24,8 @@ const DraggableStage: React.SFC<Props> = ({ children, onClick, draggable }) => {
 			ref={containerRef}
 			className={css`
 				flex-grow: 2;
-				width: calc(100vw - 300px);
-				height: calc(100vh - 56px);
+				width: calc(100vw - ${SCENE_LIST_WIDTH}px);
+				height: calc(100vh - ${HEADER_HEIGHT}px);
 				
 				background-color: ${theme.colors.background.tint2};
 				background-image: linear-gradient(45deg, ${theme.colors.background.tint1} 25%, transparent 25%, transparent 75%, ${theme.colors.background.tint1} 75%, ${theme.colors.background.tint1}),

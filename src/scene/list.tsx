@@ -5,9 +5,10 @@ import { css } from "emotion";
 import { IScene, useSceneDatabase, createNewScene } from ".";
 import { useSettingsDatabase, Settings } from "../settings";
 
-
 const { useAllValues, createItem } = useSceneDatabase();
 const { useOneValue: useOneSettingValue } = useSettingsDatabase();
+
+export const SCENE_LIST_WIDTH = 240;
 
 function LoadingScenes() {
   return <List><ListItem primary={<Skeleton animated />} /></List>
@@ -81,7 +82,7 @@ const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
   return (
     <List
       className={css`
-        width: 240px;
+        width: ${SCENE_LIST_WIDTH}px;
         flex-shrink: 0;
         display: flex;
         flex-direction: column;
