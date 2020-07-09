@@ -1,8 +1,8 @@
 import { v4 } from "uuid";
 
-import { AssetType } from "..";
-import { IImageAsset } from "../canvas/imageAsset";
+import { IImageAsset } from "../layer/assetLayer/imageAsset";
 import { useAssetFileDatabase } from "./storage";
+import { AssetType } from ".";
 
 function getImageSize(file: File) {
 	return new Promise<{ width: number, height: number }>((res) => {

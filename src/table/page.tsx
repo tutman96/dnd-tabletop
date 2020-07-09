@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSettingsDatabase, Settings } from '../settings';
-import { useSceneDatabase, IScene, AssetTypeToComponent } from '../scene';
+import { useSceneDatabase, IScene } from '../scene';
 import { Stage } from 'react-konva';
-import { IVideoAsset } from '../scene/canvas/videoAsset';
-import { IImageAsset } from '../scene/canvas/imageAsset';
+import { IVideoAsset } from '../scene/layer/assetLayer/videoAsset';
+import { IImageAsset } from '../scene/layer/assetLayer/imageAsset';
 import { Global } from '@emotion/core';
 import { Helmet } from 'react-helmet';
 
@@ -47,7 +47,7 @@ const TablePage: React.SFC<Props> = () => {
 				}}
 			/>
 			<Helmet title="D&amp;D Table View" />
-			{tableScene &&
+			{/* {tableScene &&
 				<Stage
 					{...windowSize}
 				>
@@ -65,7 +65,7 @@ const TablePage: React.SFC<Props> = () => {
 							);
 						})}
 				</Stage>
-			}
+			} */}
 		</>
 	)
 }

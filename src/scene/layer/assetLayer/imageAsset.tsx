@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Layer } from 'react-konva';
+import { Image } from 'react-konva';
 
-import { IAsset, IAssetComponentProps } from "..";
-import TransformableAsset from './transformableAsset';
-import { useImageAssetFile } from '../asset/image';
+import TransformableAsset from '../../canvas/transformableAsset';
+import { useImageAssetFile } from '../../asset/image';
+import { IAssetComponentProps } from '.';
+import { IAsset } from '../../asset';
 
 export interface IImageAsset extends IAsset {
 
 }
 
 interface Props extends IAssetComponentProps<IImageAsset> { };
-
 const ImageAsset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected }) => {
 	const [imageEl, setImageEl] = useState<HTMLImageElement>();
 
@@ -31,7 +31,6 @@ const ImageAsset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected })
 	}, [file])
 
 	return (
-		<Layer>
 			<TransformableAsset
 				isSelected={selected}
 				onSelected={onSelected}
@@ -48,7 +47,6 @@ const ImageAsset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected })
 					height={asset.transform.height}
 				/>}
 			</TransformableAsset>
-		</Layer>
 	);
 }
 
