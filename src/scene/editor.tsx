@@ -6,11 +6,10 @@ import { css } from "emotion";
 import { useSceneDatabase, IScene } from ".";
 import Canvas from "./canvas";
 import { useSettingsDatabase, Settings } from "../settings";
+import { useExtendedTheme } from "../theme";
 
 const { useOneValue } = useSceneDatabase();
 const { useOneValue: useOneSettingValue } = useSettingsDatabase();
-
-export const HEADER_HEIGHT = 56;
 
 function SceneNameHeader({ name, onUpdate: updateName }: { name: string, onUpdate: (name: string) => void }) {
 	const theme = useTheme();
@@ -102,7 +101,7 @@ function TableDisplayButton({ scene }: { scene: IScene }) {
 
 type Props = {};
 const SceneEditor: React.SFC<Props> = () => {
-	const theme = useTheme();
+	const theme = useExtendedTheme();
 
 	const match = useRouteMatch<{ id: string }>();
 	const [scene, updateScene] = useOneValue(match.params.id);
@@ -137,7 +136,7 @@ const SceneEditor: React.SFC<Props> = () => {
 					box-shadow: ${theme.shadows.sm};
 					width: 100%;
 					box-sizing: border-box;
-					height: ${HEADER_HEIGHT}px;
+					height: ${theme.headerHeight}px;
 					display: flex;
 					align-items: center;
 					justify-content: space-between;

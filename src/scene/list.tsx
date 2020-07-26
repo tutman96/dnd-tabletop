@@ -4,11 +4,10 @@ import { css } from "emotion";
 
 import { IScene, useSceneDatabase, createNewScene } from ".";
 import { useSettingsDatabase, Settings } from "../settings";
+import { useExtendedTheme } from "../theme";
 
 const { useAllValues, createItem } = useSceneDatabase();
 const { useOneValue: useOneSettingValue } = useSettingsDatabase();
-
-export const SCENE_LIST_WIDTH = 240;
 
 function LoadingScenes() {
   return <List><ListItem primary={<Skeleton animated />} /></List>
@@ -61,7 +60,7 @@ function SceneStatusIcon({ scene }: { scene: IScene }) {
 
 type Props = { onSceneSelect: (scene: IScene) => any, selectedSceneId: string };
 const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
-  const theme = useTheme();
+  const theme = useExtendedTheme();
 
   const allScenes = useAllValues();
   const [searchText, setSearchText] = useState("");
@@ -88,7 +87,7 @@ const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
   return (
     <List
       className={css`
-        width: ${SCENE_LIST_WIDTH}px;
+        width: ${theme.sceneListWidth}px;
         flex-shrink: 0;
         display: flex;
         flex-direction: column;
