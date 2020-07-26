@@ -29,6 +29,9 @@ const TransformableAsset: React.SFC<Props> = ({ rectTransform, onTransform, isSe
 						onSelected();
 						e.cancelBubble = true;
 					}
+					else {
+						e.cancelBubble = false
+					}
 				}}
 				ref={groupRef as any}
 				draggable={isSelected}
