@@ -1,0 +1,28 @@
+name: "Deploy GitHub Pages"
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  deploy:
+    runs-on: ubuntu-16.04
+    strategy:
+      matrix:
+        node_version: 
+          - 12.x
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node_version }}
+        uses: actions/setup-node@v1
+        with:
+          node_version: ${{ matrix.node_version }}
+      - run: npm install 
+      - run: npm run-script build
+      - run: |
+          git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+          npx gh-pages@^3 -u "github-actions-bot <support+actions@github.com>" -d build
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        
