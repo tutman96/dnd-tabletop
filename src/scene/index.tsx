@@ -1,12 +1,17 @@
 import { v4 } from "uuid";
 
 import useGlobalStorage from "../storage";
-import { ILayer, LayerType } from "./layer";
-import { IAssetLayer } from "./layer/assetLayer";
+import { ILayer, LayerType, createNewLayer } from "./layer";
+import { Vector2d } from "konva/types/types";
 
 export interface IScene {
 	id: string;
 	name: string;
+	table: {
+		offset: Vector2d,
+		scale: number,
+		displayGrid: boolean
+	},
 	layers: Array<ILayer>;
 }
 
@@ -16,16 +21,19 @@ export function useSceneDatabase() {
 }
 
 export function createNewScene(): IScene {
+	const defaultLayer = createNewLayer(LayerType.ASSETS);
+	defaultLayer.name = 'Layer 1';
+
 	return {
 		id: v4(),
 		name: 'Untitled',
+		table: {
+			offset: { x: 0, y: 0 },
+			scale: 1,
+			displayGrid: true
+		},
 		layers: [
-			{
-				id: v4(),
-				type: LayerType.ASSETS,
-				name: 'Layer 1',
-				assets: new Map()
-			} as IAssetLayer
+			defaultLayer
 		]
 	};
 }

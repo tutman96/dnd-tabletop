@@ -96,6 +96,15 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 		onUpdate({ ...scene });
 	}
 
+	function updateLayer(layer: ILayer) {
+		const index = scene.layers.findIndex((l) => l.id === layer.id);
+		scene.layers[index] = layer;
+		onUpdate({
+			...scene,
+			layers: [...scene.layers]
+		});
+	}
+
 	function editActiveLayerName(name: string) {
 		const layer = scene.layers.find((l) => l.id === activeLayer);
 		if (!layer) return;
@@ -147,7 +156,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 				{
 					scene.layers.map((layer) => {
 						const Component = LayerTypeToComponent[layer.type];
-						if (!Component) return null;
+						if (!Component || layer.visible === false) return null;
 						return (
 							<Component
 								key={layer.id}
@@ -165,6 +174,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 				scene={scene}
 				activeLayer={activeLayer}
 				setActiveLayer={setActiveLayer}
+				updateLayer={updateLayer}
 				addLayer={addLayer}
 				editActiveLayerName={editActiveLayerName}
 				moveActiveLayer={moveActiveLayer}
