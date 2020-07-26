@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useCallback } from "react";
 import ScenePage from "./scene/page";
 import TablePage from "./table/page";
 import { IconFilm, IconMap } from "sancho";
 import { Redirect } from "react-router-dom";
-import { SIDEBAR_WIDTH } from "./theme";
+import { SIDEBAR_WIDTH, useSceneSidebarOpen } from "./theme";
 
 export interface IRoute {
 	name: string;
@@ -12,6 +12,7 @@ export interface IRoute {
 	main: React.ComponentType<any>;
 	popout?: boolean;
 	exact?: boolean;
+	useOnClick?: () => () => void;
 }
 
 const routes = {
@@ -27,6 +28,12 @@ const routes = {
 		path: '/scenes',
 		sidebarIcon: IconFilm,
 		main: () => <ScenePage />,
+		useOnClick: () => {
+			const [sidebarOpen, setSidebarOpen] = useSceneSidebarOpen()
+			return () => {
+				setSidebarOpen(!sidebarOpen)
+			}
+		}
 	},
 	table: {
 		name: 'Table View',

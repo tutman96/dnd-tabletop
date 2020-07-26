@@ -14,12 +14,25 @@ const SidebarItem: React.SFC<Props> = ({ route }) => {
 		path: route.path,
 		exact: route.exact
 	});
+	const onClick = route.useOnClick ? route.useOnClick() : undefined;
+
+	const inner = (
+		<Tooltip content={route.name} placement="right">
+			<IconButton variant="ghost" color={match ? theme.colors.text.default : theme.colors.text.muted} size="lg" icon={<route.sidebarIcon />} label={route.name} />
+		</Tooltip>
+	);
+
+	if (match) {
+		return (
+			<div onClick={onClick}>
+				{inner}
+			</div>
+		);
+	}
 
 	return (
 		<Link to={route.path} target={route.popout ? '_blank' : undefined}>
-			<Tooltip content={route.name} placement="right">
-				<IconButton variant="ghost" color={match ? theme.colors.text.default : theme.colors.text.muted} size="lg" icon={<route.sidebarIcon />} label={route.name} />
-			</Tooltip>
+			{inner}
 		</Link>
 	)
 }
@@ -43,14 +56,15 @@ const Sidebar: React.SFC = () => {
 				height: 100vh;
 				display: flex;
 				flex-direction: column;
-				background-color: ${theme.colors.background.tint2};
+				background-color: ${theme.colors.background.default};
+				z-index: 300;
 			`}
 		>
 			{Object.keys(routes).map(routeName => {
 				const route = routes[routeName as keyof typeof routes];
 				return <SidebarItem key={routeName} route={route} />
 			})}
-			<div className={css`flex-grow: 1;`}/>
+			<div className={css`flex-grow: 1;`} />
 			<SettingsSidebarItem />
 		</div>
 	)

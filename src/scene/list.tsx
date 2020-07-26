@@ -87,9 +87,9 @@ const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
   return (
     <List
       className={css`
+        display: ${theme.sceneListWidth > 0 ? 'flex' : 'none'};
         width: ${theme.sceneListWidth}px;
         flex-shrink: 0;
-        display: flex;
         flex-direction: column;
         z-index: 300;
       `}
