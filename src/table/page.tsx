@@ -5,6 +5,7 @@ import { Stage } from 'react-konva';
 import { Global } from '@emotion/core';
 import { Helmet } from 'react-helmet';
 import { LayerTypeToComponent } from '../scene/layer';
+import TableViewOverlay from '../scene/canvas/TableViewOverlay';
 
 const { useOneValue } = useSceneDatabase();
 const { useOneValue: useOneSettingValue } = useSettingsDatabase();
@@ -64,6 +65,7 @@ const TablePage: React.SFC<Props> = () => {
 							);
 						})
 					}
+					<TableViewOverlay offset={tableScene.table.offset} rotation={0} showGrid={tableScene.table.displayGrid} showBorder={false} />
 				</Stage>
 			}
 		</>

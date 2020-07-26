@@ -9,6 +9,7 @@ export interface IScene {
 	name: string;
 	table: {
 		offset: Vector2d,
+		rotation: number,
 		scale: number,
 		displayGrid: boolean
 	},
@@ -29,6 +30,7 @@ export function createNewScene(): IScene {
 		name: 'Untitled',
 		table: {
 			offset: { x: 0, y: 0 },
+			rotation: 0,
 			scale: 1,
 			displayGrid: true
 		},
