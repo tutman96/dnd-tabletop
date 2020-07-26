@@ -1,10 +1,10 @@
 import { v4 } from "uuid";
 import LRU from 'lru-cache';
+import { useState, useEffect } from "react";
 
 import { IImageAsset } from "../layer/assetLayer/imageAsset";
 import { useAssetFileDatabase } from "./storage";
 import { AssetType } from ".";
-import { useState, useEffect } from "react";
 
 function getImageSize(file: File) {
 	return new Promise<{ width: number, height: number }>((res) => {
@@ -42,7 +42,7 @@ export async function deleteImageAsset(asset: IImageAsset) {
 
 type CacheEntry = { file: File, image?: HTMLImageElement };
 const imageCache = new LRU<string, CacheEntry | null>({
-	max: 1024 * 1024 * 1024, // 1 MB
+	max: 1024 * 1024 * 20, // 20 MB
 	length: (entry) => (entry ? entry.file.size : 0),
 	maxAge: 60 * 60 * 1000 // 1 hour
 })
