@@ -2,8 +2,8 @@ import React from "react";
 import ScenePage from "./scene/page";
 import TablePage from "./table/page";
 import { IconFilm, IconMap } from "sancho";
-import { SIDEBAR_WIDTH } from "./sidebar";
 import { Redirect } from "react-router-dom";
+import { SIDEBAR_WIDTH } from "./theme";
 
 export interface IRoute {
 	name: string;

@@ -5,8 +5,7 @@ import { useTheme, IconButton, Tooltip } from 'sancho';
 
 import routes, { IRoute } from './routes';
 import SettingsSidebarItem from './settings';
-
-export const SIDEBAR_WIDTH = 48;
+import { useExtendedTheme } from './theme';
 
 type Props = { route: IRoute }
 const SidebarItem: React.SFC<Props> = ({ route }) => {
@@ -26,7 +25,7 @@ const SidebarItem: React.SFC<Props> = ({ route }) => {
 }
 
 const Sidebar: React.SFC = () => {
-	const theme = useTheme();
+	const theme = useExtendedTheme();
 	const location = useLocation();
 
 	const hideSidebar = Object.keys(routes)
@@ -40,7 +39,7 @@ const Sidebar: React.SFC = () => {
 	return (
 		<div
 			className={css`
-				width: ${SIDEBAR_WIDTH}px;
+				width: ${theme.sidebarWidth}px;
 				height: 100vh;
 				display: flex;
 				flex-direction: column;

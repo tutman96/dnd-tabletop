@@ -3,11 +3,9 @@ import useComponentSize from '@rehooks/component-size';
 import { css } from 'emotion';
 import Konva from 'konva';
 import { Stage } from 'react-konva';
-import { useTheme } from 'sancho';
 
-import { SCENE_LIST_WIDTH } from '../list';
-import { HEADER_HEIGHT } from '../editor';
 import { useKeyPress } from '../../utils';
+import { useExtendedTheme } from '../../theme';
 
 const ZOOM_SPEED = 1 / 250;
 
@@ -15,7 +13,7 @@ Konva.dragButtons = [0, 1, 2];
 
 type Props = { draggable?: boolean };
 const DraggableStage: React.SFC<Props> = ({ children, draggable }) => {
-	const theme = useTheme();
+	const theme = useExtendedTheme();
 
 	const containerRef = useRef<HTMLDivElement>(null);
 	const containerSize = useComponentSize(containerRef);
@@ -29,8 +27,8 @@ const DraggableStage: React.SFC<Props> = ({ children, draggable }) => {
 			ref={containerRef}
 			className={css`
 				flex-grow: 2;
-				width: calc(100vw - ${SCENE_LIST_WIDTH + 48}px);
-				height: calc(100vh - ${HEADER_HEIGHT}px);
+				width: calc(100vw - ${theme.sceneListWidth + theme.sidebarWidth}px);
+				height: calc(100vh - ${theme.headerHeight}px);
 				
 				background-color: ${theme.colors.background.tint2};
 				background-image: linear-gradient(45deg, ${theme.colors.background.tint1} 25%, transparent 25%, transparent 75%, ${theme.colors.background.tint1} 75%, ${theme.colors.background.tint1}),
