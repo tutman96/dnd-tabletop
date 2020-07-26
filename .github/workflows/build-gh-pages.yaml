@@ -22,7 +22,7 @@ jobs:
       - run: npm run-script build
       - run: |
           git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
-          npx gh-pages@^3 -u "github-actions-bot <support+actions@github.com>"
+          npx gh-pages@^3 -u "github-actions-bot <support+actions@github.com>" -d build
         env:
           GITHUB_TOKEN: ${{ github.token }}
         
