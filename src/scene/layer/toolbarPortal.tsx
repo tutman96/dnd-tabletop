@@ -26,7 +26,6 @@ export const ToolbarPortalProvider: React.SFC = ({ children }) => {
 	const [, setPortal] = useToolbarPortal()!;
 
 	useEffect(() => {
-		console.log('set portal')
 		setPortal(node.current);
 	}, [node, setPortal]);
 
