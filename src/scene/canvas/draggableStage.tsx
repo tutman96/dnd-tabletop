@@ -9,7 +9,7 @@ import { SCENE_LIST_WIDTH } from '../list';
 import { HEADER_HEIGHT } from '../editor';
 import { useKeyPress } from '../../utils';
 
-const ZOOM_SPEED = 1 / 200;
+const ZOOM_SPEED = 1 / 250;
 
 Konva.dragButtons = [0, 1, 2];
 

@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Image } from 'react-konva';
 
 import { IAsset } from '../../asset';
 import TransformableAsset from '../../canvas/transformableAsset';
-import { useVideoAssetFile } from '../../asset/video';
+import { useVideoAsset } from '../../asset/video';
 import { IAssetComponentProps } from '.';
 
 export interface IVideoAsset extends IAsset {
@@ -11,19 +11,7 @@ export interface IVideoAsset extends IAsset {
 
 interface Props extends IAssetComponentProps<IVideoAsset> { };
 const VideoAsset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected }) => {
-	const [videoEl, setVideoEl] = useState<HTMLVideoElement>();
-	const [file] = useVideoAssetFile(asset);
-
-	useEffect(() => {
-		if (file) {
-			const video = document.createElement('video');
-			video.src = URL.createObjectURL(file);
-			video.muted = true;
-			video.autoplay = true;
-			video.play();
-			setVideoEl(video);
-		}
-	}, [file])
+	const videoEl = useVideoAsset(asset);
 
 	return (
 		<TransformableAsset
