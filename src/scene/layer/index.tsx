@@ -13,6 +13,7 @@ export interface ILayer {
 	id: string
 	type: LayerType
 	name: string
+	visible: boolean
 }
 
 export interface ILayerComponentProps<T extends ILayer> {
@@ -29,7 +30,8 @@ export function createNewLayer(type: LayerType) {
 	const layer: ILayer = {
 		id: v4(),
 		name: 'Untitled',
-		type: type
+		type: type,
+		visible: true
 	};
 	if (type === LayerType.ASSETS) {
 		(layer as IAssetLayer).assets = new Map();

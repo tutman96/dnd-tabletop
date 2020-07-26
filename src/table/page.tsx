@@ -53,7 +53,7 @@ const TablePage: React.SFC<Props> = () => {
 					{
 						tableScene.layers.map((layer) => {
 							const Component = LayerTypeToComponent[layer.type];
-							if (!Component) return null;
+							if (!Component || layer.visible === false) return null;
 							return (
 								<Component
 									key={layer.id}

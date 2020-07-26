@@ -1,6 +1,6 @@
 import { IScene } from "..";
-import { LayerType } from "../layer";
-import { useTheme, Layer, List, ListItem, IconButton, IconTrash2, Popover, MenuList, MenuItem, IconFile, IconCloudDrizzle, IconPlus, Avatar, Text, IconArrowUp, IconArrowDown } from "sancho";
+import { LayerType, ILayer } from "../layer";
+import { useTheme, Layer, List, ListItem, IconButton, IconTrash2, Popover, MenuList, MenuItem, IconFile, IconCloudDrizzle, IconPlus, Text, IconArrowUp, IconArrowDown, IconEye, IconEyeOff } from "sancho";
 import React from "react";
 import { css } from "emotion";
 
@@ -8,16 +8,17 @@ type Props = {
 	scene: IScene,
 	activeLayer: string | null,
 	setActiveLayer: (layer: string) => void,
+	updateLayer: (layer: ILayer) => void,
 	addLayer: (type: LayerType) => void,
 	editActiveLayerName: (name: string) => void, // TODO
 	moveActiveLayer: (direction: "up" | "down") => void;
 	deleteActiveLayer: () => void
 };
-const LayerList: React.SFC<Props> = ({ scene, activeLayer, setActiveLayer, addLayer, moveActiveLayer, deleteActiveLayer }) => {
+const LayerList: React.SFC<Props> = ({ scene, activeLayer, setActiveLayer, updateLayer, addLayer, moveActiveLayer, deleteActiveLayer }) => {
 	const layerIndex = scene.layers.findIndex((l) => l.id === activeLayer);
 	const isActiveLayerTop = layerIndex === scene.layers.length - 1;
 	const isActiveLayerBottom = layerIndex === 0;
-	
+
 	const theme = useTheme();
 	return (
 		<div
@@ -45,7 +46,17 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayer, setActiveLayer, addLa
 							className={css`
 								background-color: ${activeLayer === layer.id ? theme.colors.intent.primary.base : 'initial'} !important;
 							`}
-							contentBefore={<Avatar name={layer.name} />}
+							contentBefore={
+								<IconButton
+									variant="ghost"
+									label={layer.visible ? 'Hide Layer' : 'Show Layer'}
+									onClick={(e) => {
+										updateLayer({ ...layer, visible: !layer.visible })
+										e.preventDefault(); // prevent passing through to the list item
+									}}
+									icon={layer.visible ? <IconEye /> : <IconEyeOff />}
+								/>
+							}
 							primary={layer.name}
 							contentAfter={<Text variant="subtitle">{LayerType[layer.type]}</Text>}
 							onClick={() => setActiveLayer(layer.id)}
@@ -94,7 +105,7 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayer, setActiveLayer, addLa
 						content={
 							<MenuList>
 								<MenuItem contentBefore={<IconFile />} onPress={() => addLayer(LayerType.ASSETS)}>Asset Layer</MenuItem>
-								<MenuItem contentBefore={<IconCloudDrizzle />} onPress={() => addLayer(LayerType.FOG)}>Fog Layer</MenuItem>
+								<MenuItem contentBefore={<IconCloudDrizzle />} onPress={() => addLayer(LayerType.FOG)} disabled={true}>Fog Layer</MenuItem>
 							</MenuList>
 						}
 					>
