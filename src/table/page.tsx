@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useSettingsDatabase, Settings } from '../settings';
+import { useSettingsDatabase, Settings, useTableResolution } from '../settings';
 import { useSceneDatabase, IScene } from '../scene';
 import { Stage } from 'react-konva';
 import { Global } from '@emotion/core';
 import { Helmet } from 'react-helmet';
 import { LayerTypeToComponent } from '../scene/layer';
-import TableViewOverlay from '../scene/canvas/TableViewOverlay';
+import TableViewOverlay, { TableViewLayer } from '../scene/layer/tableView';
 
 const { useOneValue } = useSceneDatabase();
 const { useOneValue: useOneSettingValue } = useSettingsDatabase();
@@ -14,6 +14,7 @@ type Props = {};
 const TablePage: React.SFC<Props> = () => {
 	const [displayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
 	const [tableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
+	const [tableResolution] = useTableResolution();
 
 	const [scene] = useOneValue(displayedScene as string);
 	const [tableScene, setTableScene] = useState<IScene | null>();
@@ -34,6 +35,10 @@ const TablePage: React.SFC<Props> = () => {
 		return () => window.removeEventListener('resize', onResize)
 	}, [])
 
+	if (!tableResolution) {
+    return null;
+  }
+
 	return (
 		<>
 			<Global
@@ -50,6 +55,14 @@ const TablePage: React.SFC<Props> = () => {
 			{tableScene &&
 				<Stage
 					{...windowSize}
+					offsetX={tableScene.table.offset.x}
+					offsetY={tableScene.table.offset.y}
+					// clipFunc={(ctx: CanvasRenderingContext2D) => {
+          //   ctx.beginPath();
+          //   ctx.rect(tableScene.table.offset.x, tableScene.table.offset.y, tableResolution.width, tableResolution.height);
+          //   ctx.rotate(tableScene.table.rotation);
+          //   ctx.closePath();
+          // }}
 				>
 					{
 						tableScene.layers.map((layer) => {
@@ -65,7 +78,16 @@ const TablePage: React.SFC<Props> = () => {
 							);
 						})
 					}
-					<TableViewOverlay offset={tableScene.table.offset} rotation={0} showGrid={tableScene.table.displayGrid} showBorder={false} />
+					<TableViewOverlay
+						layer={{
+							...TableViewLayer,
+							options: tableScene.table
+						}}
+						active={false}
+						onUpdate={() => { }}
+						showBorder={false}
+						showGrid={tableScene.table.displayGrid}
+					/>
 				</Stage>
 			}
 		</>

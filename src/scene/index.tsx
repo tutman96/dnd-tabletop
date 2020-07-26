@@ -4,15 +4,17 @@ import useGlobalStorage from "../storage";
 import { ILayer, LayerType, createNewLayer } from "./layer";
 import { Vector2d } from "konva/types/types";
 
+export interface TableOptions {
+	displayGrid: boolean,
+	offset: Vector2d,
+	rotation: number,
+	scale: number,
+}
+
 export interface IScene {
 	id: string;
 	name: string;
-	table: {
-		offset: Vector2d,
-		rotation: number,
-		scale: number,
-		displayGrid: boolean
-	},
+	table: TableOptions,
 	layers: Array<ILayer>;
 }
 

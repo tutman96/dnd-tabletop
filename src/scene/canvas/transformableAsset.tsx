@@ -3,11 +3,20 @@ import { Group, Transformer } from 'react-konva';
 import Konva from 'konva';
 import { IRect } from 'konva/types/types';
 import { useTheme } from 'sancho';
+import { useKeyPress } from '../../utils';
 
 export type AssetTransform = IRect & { rotation: number };
 
-type Props = { rectTransform: AssetTransform, onTransform: (newRect: AssetTransform) => void, isSelected: boolean, onSelected: () => void };
-const TransformableAsset: React.SFC<Props> = ({ rectTransform, onTransform, isSelected, onSelected, children }) => {
+type Props = {
+	rectTransform: AssetTransform,
+	onTransform: (newRect: AssetTransform) => void,
+	isSelected: boolean,
+	onSelected: () => void,
+	scaleEnabled?: boolean;
+	skewEnabled?: boolean;
+	rotateEnabled?: boolean;
+};
+const TransformableAsset: React.SFC<Props> = ({ rectTransform, onTransform, isSelected, onSelected, children, rotateEnabled, scaleEnabled, skewEnabled }) => {
 	const theme = useTheme();
 
 	const groupRef = useRef<Konva.Group>();
@@ -20,6 +29,8 @@ const TransformableAsset: React.SFC<Props> = ({ rectTransform, onTransform, isSe
 			trRef.current?.getLayer()?.batchDraw();
 		}
 	}, [isSelected]);
+
+	const isShiftPressed = useKeyPress('Shift');
 
 	return (
 		<React.Fragment>
@@ -40,6 +51,15 @@ const TransformableAsset: React.SFC<Props> = ({ rectTransform, onTransform, isSe
 				height={rectTransform.height}
 				width={rectTransform.width}
 				rotation={rectTransform.rotation}
+				onDragStart={e => {
+					if (!(e.evt.buttons === 1 && !isShiftPressed)) { // only allow left click, when shift isn't pressed
+						groupRef.current?.setDraggable(false)
+						e.cancelBubble = false;
+					}
+				}}
+				onMouseUp={() => {
+					groupRef.current?.setDraggable(isSelected) // reset the draggable
+				}}
 				onDragEnd={e => {
 					const node = groupRef.current!;
 					const scaleX = node.scaleX();
@@ -75,6 +95,9 @@ const TransformableAsset: React.SFC<Props> = ({ rectTransform, onTransform, isSe
 			</Group>
 			{isSelected && (
 				<Transformer
+					rotateEnabled={rotateEnabled}
+					resizeEnabled={scaleEnabled}
+					enabledAnchors={skewEnabled === false ? ['top-left', 'top-right', 'bottom-left', 'bottom-right'] : undefined}
 					ref={trRef as any}
 					anchorFill={theme.colors.background.overlay}
 					anchorStroke={theme.colors.palette.blue.light}
