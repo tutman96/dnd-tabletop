@@ -7,7 +7,10 @@ const ToolbarItem: React.SFC<Props> = ({ label, keyboardShortcuts, ...otherProps
 	useEffect(() => {
 		if (keyboardShortcuts && otherProps.onClick) {
 			const onKeyPress = (e: KeyboardEvent) => {
-				if (keyboardShortcuts!.includes(e.key)) otherProps.onClick!(e);
+				if (keyboardShortcuts!.includes(e.key) &&
+					window.document.activeElement?.tagName !== 'INPUT') {
+					otherProps.onClick!(e);
+				}
 			}
 			window.addEventListener('keyup', onKeyPress);
 			return () => window.removeEventListener('keyup', onKeyPress);
