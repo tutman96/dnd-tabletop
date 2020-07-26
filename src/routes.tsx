@@ -3,6 +3,7 @@ import ScenePage from "./scene/page";
 import TablePage from "./table/page";
 import { IconFilm, IconMap } from "sancho";
 import { SIDEBAR_WIDTH } from "./sidebar";
+import { Redirect } from "react-router-dom";
 
 export interface IRoute {
 	name: string;
@@ -18,7 +19,7 @@ const routes = {
 		name: 'Home',
 		path: '/',
 		sidebarIcon: () => <img width={SIDEBAR_WIDTH / 1.5} height={SIDEBAR_WIDTH / 1.5} src="/favicon.png" alt="home icon" />,
-		main: () => <></>,
+		main: () => <Redirect to={routes.scenes.path} />,
 		exact: true,
 	},
 	scenes: {
