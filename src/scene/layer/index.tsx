@@ -6,7 +6,7 @@ import { deleteAsset } from "../asset";
 export enum LayerType {
 	ASSETS,
 	FOG,
-	TABLE_OVERLAY,
+	TABLE_VIEW,
 }
 
 export interface ILayer {
@@ -16,7 +16,7 @@ export interface ILayer {
 	visible: boolean
 }
 
-export interface ILayerComponentProps<T extends ILayer> {
+export interface ILayerComponentProps<T extends ILayer = ILayer> {
 	layer: T;
 	onUpdate: (layer: T) => void;
 	active: boolean;

@@ -1,6 +1,6 @@
 import { IScene } from "..";
 import { LayerType, ILayer } from "../layer";
-import { useTheme, Layer, List, ListItem, IconButton, IconTrash2, Popover, MenuList, MenuItem, IconFile, IconCloudDrizzle, IconPlus, Text, IconArrowUp, IconArrowDown, IconEye, IconEyeOff } from "sancho";
+import { useTheme, Layer, List, ListItem, IconButton, IconTrash2, Popover, MenuList, MenuItem, IconFile, IconCloudDrizzle, IconPlus, Text, IconArrowUp, IconArrowDown, IconEye, IconEyeOff, IconTv } from "sancho";
 import React from "react";
 import { css } from "emotion";
 
@@ -40,6 +40,23 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayer, setActiveLayer, updat
 						overflow: auto;
 					`}
 				>
+					<ListItem
+						className={css`
+								background-color: ${activeLayer === 'TABLE_VIEW' ? theme.colors.intent.primary.base : 'initial'} !important;
+							`}
+						contentBefore={
+							<IconButton
+								variant="ghost"
+								label={'Table View'}
+								icon={<IconTv />}
+								disabled
+							/>
+						}
+						primary={'Table View'}
+						contentAfter={' '}
+						onClick={() => setActiveLayer('TABLE_VIEW')}
+					/>
+
 					{Array.from(scene.layers).reverse().map((layer) => (
 						<ListItem
 							key={layer.id}

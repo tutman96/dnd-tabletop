@@ -6,7 +6,7 @@ import { LayerTypeToComponent, LayerType, ILayer, createNewLayer } from '../laye
 import { deleteLayer } from '../layer';
 import LayerList from './layerList';
 import { ToolbarPortalProvider } from '../layer/toolbarPortal';
-import TableViewOverlay from './TableViewOverlay';
+import TableViewOverlay, { TableViewLayer } from '../layer/tableView';
 
 type Props = { scene: IScene, onUpdate: (scene: IScene) => void };
 const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
@@ -14,6 +14,8 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 
 	// Default selected layer to the first layer
 	useEffect(() => {
+		if (activeLayer === TableViewLayer.id) return;
+
 		if (
 			(activeLayer === null || !scene.layers.some((l) => l.id === activeLayer)) &&
 			scene.layers.length
@@ -106,7 +108,21 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 						);
 					})
 				}
-				<TableViewOverlay offset={scene.table.offset} rotation={0} showGrid={scene.table.displayGrid} showBorder={true} />
+				<TableViewOverlay
+					layer={{
+						...TableViewLayer,
+						options: scene.table
+					}}
+					active={activeLayer === TableViewLayer.id}
+					onUpdate={(layer) => {
+						onUpdate({
+							...scene,
+							table: layer.options
+						})
+					}}
+					showBorder={true}
+					showGrid={true}
+				/>
 			</DraggableStage>
 
 			<LayerList

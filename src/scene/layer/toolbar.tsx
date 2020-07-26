@@ -13,6 +13,9 @@ const Toolbar: React.SFC = ({ children }) => {
 				background-color: ${theme.colors.background.tint1};
 				box-shadow: ${theme.shadows.md};
 				z-index: 100;
+				> span {
+					display: flex;
+				}
 			`}
 		>
 			{children}
