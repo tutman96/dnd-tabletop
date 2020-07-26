@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 import ScenePage from "./scene/page";
 import TablePage from "./table/page";
 import { IconFilm, IconMap } from "sancho";
