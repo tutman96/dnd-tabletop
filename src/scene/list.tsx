@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { List, ListItem, Skeleton, Input, useTheme, IconButton, IconPlusCircle, Button, IconPlus, IconFilm, IconPlay, IconPause } from "sancho";
 import { css } from "emotion";
 
@@ -63,7 +63,8 @@ type Props = { onSceneSelect: (scene: IScene) => any, selectedSceneId: string };
 const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
   const theme = useTheme();
 
-  const allValues = useAllValues();
+  const allScenes = useAllValues();
+  const [searchText, setSearchText] = useState("");
 
   function addNewScene() {
     const scene = createNewScene();
@@ -71,12 +72,17 @@ const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
     onSceneSelect(scene);
   }
 
-  if (!allValues) {
+  if (!allScenes) {
     return <LoadingScenes />
   }
 
-  if (allValues.size === 0) {
+  if (allScenes.size === 0) {
     return <NoScenes onAdd={addNewScene} />
+  }
+
+  let sceneList = Array.from(allScenes.values());
+  if (searchText) {
+    sceneList = sceneList.filter((scene) => scene.name.toLowerCase().includes(searchText.toLowerCase()));
   }
 
   return (
@@ -95,7 +101,7 @@ const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
           padding: ${theme.spaces.sm};
         `}
       >
-        <Input type="search" placeholder="Find a scene..." />
+        <Input type="search" placeholder="Find a scene..." onChange={(e) => setSearchText(e.target.value)} value={searchText} />
         <IconButton icon={<IconPlusCircle />} label="Add Scene" variant="ghost" onClick={addNewScene} />
       </div>
       <div
@@ -103,7 +109,7 @@ const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
           overflow: auto;
         `}
       >
-        {Array.from(allValues.values()).map((scene) => (
+        {sceneList.map((scene) => (
           <ListItem
             primary={scene.name}
             key={scene.id}

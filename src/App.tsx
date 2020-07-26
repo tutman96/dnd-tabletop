@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-	BrowserRouter as Router,
+	HashRouter as Router,
 	Switch,
 	Route,
 	Redirect
@@ -34,7 +34,6 @@ const App: React.SFC = () => {
 								/>
 							);
 						})}
-						<Redirect to={routes.scenes.path} />
 					</Switch>
 				</div>
 			</Router>
