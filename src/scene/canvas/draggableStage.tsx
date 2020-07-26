@@ -4,13 +4,17 @@ import { css } from 'emotion';
 import Konva from 'konva';
 import { Stage } from 'react-konva';
 import { useTheme } from 'sancho';
+
 import { SCENE_LIST_WIDTH } from '../list';
 import { HEADER_HEIGHT } from '../editor';
+import { useKeyPress } from '../../utils';
 
-const ZOOM_SPEED = 1.1;
+const ZOOM_SPEED = 1 / 200;
 
-type Props = { onClick?: () => void, draggable?: boolean };
-const DraggableStage: React.SFC<Props> = ({ children, onClick, draggable }) => {
+Konva.dragButtons = [0, 1, 2];
+
+type Props = { draggable?: boolean };
+const DraggableStage: React.SFC<Props> = ({ children, draggable }) => {
 	const theme = useTheme();
 
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -18,6 +22,7 @@ const DraggableStage: React.SFC<Props> = ({ children, onClick, draggable }) => {
 	const stageRef = useRef<Konva.Stage>();
 
 	const [zoom, setZoom] = useState(1);
+	const isShiftPressed = useKeyPress('Shift');
 
 	return (
 		<div
@@ -39,7 +44,14 @@ const DraggableStage: React.SFC<Props> = ({ children, onClick, draggable }) => {
 				width={containerSize.width}
 				height={containerSize.height}
 				draggable={draggable === undefined ? true : draggable}
-				onClick={onClick}
+				onDragStart={(e) => {
+					if (e.evt.buttons === 1 && !isShiftPressed) { // allow left only when shift is pressed
+						stageRef.current?.setDraggable(false)
+					}
+				}}
+				onMouseUp={() => {
+					stageRef.current?.setDraggable(draggable === undefined ? true : draggable) // reset the draggable
+				}}
 				scale={{ x: zoom, y: zoom }}
 				onWheel={(e) => {
 					e.evt.preventDefault();
@@ -57,8 +69,15 @@ const DraggableStage: React.SFC<Props> = ({ children, onClick, draggable }) => {
 						y: (pointer.y - stage.y()) / oldScale,
 					};
 
+					const deltaY = e.evt.deltaY;
+					if (deltaY === 0) {
+						return;
+					}
+
+					const zoomSpeed = 1 + (Math.abs(deltaY) * ZOOM_SPEED);
+
 					var newZoom =
-						e.evt.deltaY > 0 ? oldScale / ZOOM_SPEED : oldScale * ZOOM_SPEED;
+						e.evt.deltaY > 0 ? oldScale / zoomSpeed : oldScale * zoomSpeed;
 
 					setZoom(newZoom);
 

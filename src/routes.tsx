@@ -18,7 +18,7 @@ const routes = {
 	home: {
 		name: 'Home',
 		path: '/',
-		sidebarIcon: () => <img width={SIDEBAR_WIDTH / 1.5} height={SIDEBAR_WIDTH / 1.5} src="/favicon.png" alt="home icon" />,
+		sidebarIcon: () => <img width={SIDEBAR_WIDTH / 1.5} height={SIDEBAR_WIDTH / 1.5} src="favicon.png" alt="home icon" />,
 		main: () => <Redirect to={routes.scenes.path} />,
 		exact: true,
 	},
