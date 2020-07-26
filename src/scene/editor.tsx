@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouteMatch } from "react-router-dom";
-import { Spinner, Text, useTheme, IconButton, IconPlay, IconRotateCcw, IconRotateCw, IconPause, IconUpload, IconEdit2, IconCheck, Input } from "sancho";
+import { Spinner, Text, useTheme, IconButton, IconPlay, IconPause, IconUpload, IconEdit2, IconCheck, Input } from "sancho";
 import { css } from "emotion";
 
 import { useSceneDatabase, IScene } from ".";
@@ -144,8 +144,9 @@ const SceneEditor: React.SFC<Props> = () => {
 			>
 				<SceneNameHeader name={scene.name} onUpdate={(name) => updateScene({ ...scene, name })} />
 				<div>
-					<IconButton icon={<IconRotateCcw />} variant="ghost" label="Undo" />
-					<IconButton icon={<IconRotateCw />} variant="ghost" label="Redo" />
+					{/* TODO */}
+					{/* <IconButton icon={<IconRotateCcw />} variant="ghost" label="Undo" />
+					<IconButton icon={<IconRotateCw />} variant="ghost" label="Redo" /> */}
 				</div>
 				<div>
 					<TableDisplayButton scene={scene} />
