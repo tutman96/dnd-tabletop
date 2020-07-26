@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Layer } from "react-konva";
-import ImageAsset from './imageAsset';
-import VideoAsset from './videoAsset';
+import AssetComponent from './asset';
 import { IAsset, AssetType, deleteAsset, getNewAssets } from '../../asset';
 import { ILayer, ILayerComponentProps } from '..';
 import Konva from 'konva';
@@ -15,11 +14,6 @@ export interface IAssetComponentProps<T extends IAsset> {
 	selected: boolean;
 	onSelected: () => void;
 }
-
-export const AssetTypeToComponent = {
-	[AssetType.IMAGE]: ImageAsset,
-	[AssetType.VIDEO]: VideoAsset
-} as { [type: string]: React.SFC<IAssetComponentProps<any>> }
 
 export interface IAssetLayer extends ILayer {
 	assets: Map<string, IAsset>
@@ -89,9 +83,8 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive }) 
 				{
 					Array.from(layer.assets.values())
 						.map((asset) => {
-							const Component = AssetTypeToComponent[asset.type];
 							return (
-								<Component
+								<AssetComponent
 									key={asset.id}
 									asset={asset}
 									selected={layerActive && selectedAsset === asset.id}

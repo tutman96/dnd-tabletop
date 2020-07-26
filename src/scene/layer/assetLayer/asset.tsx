@@ -1,18 +1,13 @@
 import React from 'react';
 import { Image } from 'react-konva';
 
+import { IAsset, useAssetElement } from '../../asset';
 import TransformableAsset from '../../canvas/transformableAsset';
-import { useImageAsset } from '../../asset/image';
 import { IAssetComponentProps } from '.';
-import { IAsset } from '../../asset';
 
-export interface IImageAsset extends IAsset {
-
-}
-
-interface Props extends IAssetComponentProps<IImageAsset> { };
-const ImageAsset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected }) => {
-	const imageEl = useImageAsset(asset);
+interface Props extends IAssetComponentProps<IAsset> { };
+const Asset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected }) => {
+	const el = useAssetElement(asset);
 
 	return (
 		<TransformableAsset
@@ -25,8 +20,8 @@ const ImageAsset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected })
 					transform: newRect
 				})
 			}}>
-			{imageEl && <Image
-				image={imageEl}
+			{el && <Image
+				image={el}
 				width={asset.transform.width}
 				height={asset.transform.height}
 			/>}
@@ -34,4 +29,4 @@ const ImageAsset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected })
 	);
 }
 
-export default ImageAsset;
+export default Asset;
