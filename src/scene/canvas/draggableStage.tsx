@@ -3,39 +3,35 @@ import useComponentSize from '@rehooks/component-size';
 import { css } from 'emotion';
 import Konva from 'konva';
 import { Stage } from 'react-konva';
+import { useTheme } from 'sancho';
 
 import { useKeyPress } from '../../utils';
-import { useExtendedTheme } from '../../theme';
 
 const ZOOM_SPEED = 1 / 250;
 
 Konva.dragButtons = [0, 1, 2];
 
-type Props = { draggable?: boolean };
-const DraggableStage: React.SFC<Props> = ({ children, draggable }) => {
-	const theme = useExtendedTheme();
+type Props = { draggable?: boolean, initialZoom?: number, className?: string };
+const DraggableStage: React.SFC<Props> = ({ draggable, initialZoom = 1, className, children }) => {
+	const theme = useTheme();
 
 	const containerRef = useRef<HTMLDivElement>(null);
 	const containerSize = useComponentSize(containerRef);
 	const stageRef = useRef<Konva.Stage>();
 
-	const [zoom, setZoom] = useState(1);
+	const [zoom, setZoom] = useState(initialZoom);
 	const isShiftPressed = useKeyPress('Shift');
 
 	return (
 		<div
 			ref={containerRef}
-			className={css`
-				flex-grow: 2;
-				width: calc(100vw - ${theme.sceneListWidth + theme.sidebarWidth}px);
-				height: calc(100vh - ${theme.headerHeight}px);
-				
+			className={css`				
 				background-color: ${theme.colors.background.tint2};
 				background-image: linear-gradient(45deg, ${theme.colors.background.tint1} 25%, transparent 25%, transparent 75%, ${theme.colors.background.tint1} 75%, ${theme.colors.background.tint1}),
 				linear-gradient(45deg, ${theme.colors.background.tint1} 25%, transparent 25%, transparent 75%, ${theme.colors.background.tint1} 75%, ${theme.colors.background.tint1});
 				background-size: 20px 20px;
 				background-position: 0 0, 10px 10px;
-			`}
+			` + (className ? ` ${className}` : '')}
 		>
 			<Stage
 				ref={stageRef as any}

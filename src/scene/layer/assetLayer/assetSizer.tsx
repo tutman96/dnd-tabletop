@@ -6,6 +6,7 @@ import { css } from "emotion";
 import ToolbarItem from '../toolbarItem';
 import AdvancedAssetSizer from './advancedAssetSizer';
 import { AssetTransform } from '../../canvas/transformableAsset';
+import VisualAssetSizer from './visualAssetSizer';
 
 export function calculateCalibratedTransform(asset: IAsset, screenPPI: number): AssetTransform {
   if (!asset.calibration) {
@@ -56,6 +57,7 @@ const AssetSizer: React.SFC<Props> = ({ asset, onUpdate }) => {
           title="Asset Calibration"
         >
           <div className={css`padding: ${theme.spaces.lg};`}>
+            <VisualAssetSizer asset={{ ...asset, calibration }} onUpdate={setCalibration} />
             <AdvancedAssetSizer calibration={calibration} onUpdate={setCalibration} />
 
             <div

@@ -15,8 +15,9 @@ type Props = {
 	scaleEnabled?: boolean;
 	skewEnabled?: boolean;
 	rotateEnabled?: boolean;
+	strokeEnabled?: boolean;
 };
-const TransformableAsset: React.SFC<Props> = ({ rectTransform, onTransform, isSelected, onSelected, children, rotateEnabled, scaleEnabled, skewEnabled }) => {
+const TransformableAsset: React.SFC<Props> = ({ rectTransform, onTransform, isSelected, onSelected, children, rotateEnabled, scaleEnabled, skewEnabled, strokeEnabled }) => {
 	const theme = useTheme();
 
 	const groupRef = useRef<Konva.Group>();
@@ -99,6 +100,7 @@ const TransformableAsset: React.SFC<Props> = ({ rectTransform, onTransform, isSe
 					resizeEnabled={scaleEnabled}
 					enabledAnchors={skewEnabled === false ? ['top-left', 'top-right', 'bottom-left', 'bottom-right'] : undefined}
 					ref={trRef as any}
+					borderStrokeWidth={strokeEnabled === false ? 0 : undefined}
 					anchorFill={theme.colors.background.overlay}
 					anchorStroke={theme.colors.palette.blue.light}
 					rotationSnaps={[0, 45, 90, 135, 180, 225, 270, 315]}

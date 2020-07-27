@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { css } from 'emotion';
 
 import { IScene } from '..';
 import DraggableStage from './draggableStage';
@@ -7,9 +8,11 @@ import { deleteLayer } from '../layer';
 import LayerList from './layerList';
 import { ToolbarPortalProvider } from '../layer/toolbarPortal';
 import TableViewOverlay, { TableViewLayer } from '../layer/tableView';
+import { useExtendedTheme } from '../../theme';
 
 type Props = { scene: IScene, onUpdate: (scene: IScene) => void };
 const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
+	const theme = useExtendedTheme();
 	const [activeLayer, setActiveLayer] = useState<string | null>(null);
 
 	// Default selected layer to the first layer
@@ -93,7 +96,13 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 	return (
 		<ToolbarPortalProvider>
 			{/* Canvas */}
-			<DraggableStage>
+			<DraggableStage
+				className={css`
+					flex-grow: 2;
+					width: calc(100vw - ${theme.sceneListWidth + theme.sidebarWidth}px);
+					height: calc(100vh - ${theme.headerHeight}px);
+				`}
+			>
 				{
 					scene.layers.map((layer) => {
 						const Component = LayerTypeToComponent[layer.type];

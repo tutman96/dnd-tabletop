@@ -103,12 +103,25 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
         listening={active}
       >
         {lines.map((line, i) => (
-          <Line
-            key={i}
-            points={[line.start.x, line.start.y, line.end.x, line.end.y]}
-            stroke={theme.colors.palette.gray.light}
-            dash={[1, 1]}
-            strokeWidth={1} />
+          <>
+            <Line
+              key={`l${i}`}
+              points={[line.start.x, line.start.y, line.end.x, line.end.y]}
+              stroke={theme.colors.palette.gray.light}
+              dash={[1, 1]}
+              strokeWidth={1}
+              strokeScaleEnabled={false}
+            />
+            <Line
+              key={`d${i}`}
+              points={[line.start.x, line.start.y, line.end.x, line.end.y]}
+              stroke={theme.colors.palette.gray.dark}
+              dash={[1, 1]}
+              dashOffset={1}
+              strokeWidth={1}
+              strokeScaleEnabled={false}
+            />
+          </>
         ))}
       </Group>
 
@@ -118,7 +131,6 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
           isSelected={active}
           onSelected={() => { }}
           onTransform={(rect) => {
-            console.log({ rect })
             onUpdate({
               ...layer,
               options: {
