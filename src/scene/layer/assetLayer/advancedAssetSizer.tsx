@@ -21,10 +21,7 @@ const AdvancedAssetSizer: React.SFC<{ calibration: IAssetCalibration; onUpdate: 
   const [ppiLocked, setPPILocked] = useState(calibration.ppiX === calibration.ppiY);
   useEffect(() => {
     if (ppiLocked && calibration.ppiX !== calibration.ppiY) {
-      onUpdate({
-        ...calibration,
-        ppiY: calibration.ppiX
-      })
+      setPPILocked(false);
     }
   }, [calibration, onUpdate, ppiLocked])
 
@@ -49,7 +46,15 @@ const AdvancedAssetSizer: React.SFC<{ calibration: IAssetCalibration; onUpdate: 
               variant="ghost"
               label={ppiLocked ? 'Unlock PPI' : 'Lock PPI'}
               icon={ppiLocked ? <IconLock /> : <IconUnlock />}
-              onClick={() => setPPILocked(!ppiLocked)}
+              onClick={() => {
+                if (calibration.ppiX !== calibration.ppiY) {
+                  onUpdate({
+                    ...calibration,
+                    ppiY: calibration.ppiX
+                  })
+                }
+                setPPILocked(!ppiLocked)
+              }}
             />
           </div>
           <Input
