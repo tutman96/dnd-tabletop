@@ -1,13 +1,15 @@
-import React, { useMemo } from 'react';
-import { Layer, Rect, Line, Group } from 'react-konva';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { useTheme, IconCrosshair, Check } from 'sancho';
-import { useTableResolution, useTablePPI } from '../../settings';
+import Konva from 'konva';
+import { Layer, Rect, Line, Group } from 'react-konva';
 import { Vector2d } from 'konva/types/types';
+
+import { useTableResolution, useTablePPI } from '../../settings';
 import { TableOptions } from '..';
 import { ILayerComponentProps, ILayer, LayerType } from '.';
-import TransformableAsset from '../canvas/transformableAsset';
 import ToolbarItem from './toolbarItem';
 import ToolbarPortal from './toolbarPortal';
+import { useKeyPress } from '../../utils';
 
 export const TableViewLayer = {
   id: 'TABLE_VIEW',
@@ -26,10 +28,17 @@ interface Props extends ILayerComponentProps<ITableViewLayer> {
 }
 
 const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGrid, onUpdate }) => {
-  const options = layer.options;
   const theme = useTheme();
   const [tableResolution] = useTableResolution();
   const ppi = useTablePPI();
+
+  const [localOptions, setLocalOptions] = useState(layer.options);
+
+  useEffect(() => {
+    setLocalOptions(layer.options);
+  }, [layer.options, setLocalOptions])
+
+  const groupRef = useRef<Konva.Group>();
 
   const toolbar = useMemo(() => {
     return (
@@ -41,7 +50,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
             onUpdate({
               ...layer,
               options: {
-                ...options,
+                ...localOptions,
                 offset: { x: 0, y: 0 },
                 rotation: 0,
                 scale: 1
@@ -49,18 +58,20 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
             })
           }}
         />
-        <Check label="Display Grid" checked={options.displayGrid} onChange={(e) => {
+        <Check label="Display Grid" checked={localOptions.displayGrid} onChange={(e) => {
           onUpdate({
             ...layer,
             options: {
-              ...options,
+              ...localOptions,
               displayGrid: e.target.checked
             }
           })
         }} />
       </>
     );
-  }, [layer, options, onUpdate]);
+  }, [layer, localOptions, onUpdate]);
+
+  const isShiftPressed = useKeyPress('Shift');
 
   if (!tableResolution || ppi === null) {
     return null;
@@ -73,19 +84,19 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
 
   // Only generate the grid within the table display to save on the number of lines needed.
   if (showGrid) {
-    const startX = Math.floor(options.offset.x / ppi) * ppi;
-    for (let xOffset = startX; xOffset <= options.offset.x + tableResolution.width; xOffset += ppi) {
+    const startX = Math.floor(localOptions.offset.x / ppi) * ppi;
+    for (let xOffset = startX; xOffset <= localOptions.offset.x + tableResolution.width; xOffset += ppi) {
       lines.push({
-        start: { x: xOffset, y: options.offset.y },
-        end: { x: xOffset, y: options.offset.y + tableResolution.height }
+        start: { x: xOffset, y: localOptions.offset.y },
+        end: { x: xOffset, y: localOptions.offset.y + tableResolution.height }
       });
     }
 
-    const startY = Math.floor(options.offset.y / ppi) * ppi;
-    for (let yOffset = startY; yOffset <= options.offset.y + tableResolution.height; yOffset += ppi) {
+    const startY = Math.floor(localOptions.offset.y / ppi) * ppi;
+    for (let yOffset = startY; yOffset <= localOptions.offset.y + tableResolution.height; yOffset += ppi) {
       lines.push({
-        start: { x: options.offset.x, y: yOffset },
-        end: { x: options.offset.x + tableResolution.width, y: yOffset }
+        start: { x: localOptions.offset.x, y: yOffset },
+        end: { x: localOptions.offset.x + tableResolution.width, y: yOffset }
       });
     }
   }
@@ -96,14 +107,14 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
       <Group
         clipFunc={(ctx: CanvasRenderingContext2D) => {
           ctx.beginPath();
-          ctx.rect(options.offset.x, options.offset.y, width, height);
-          ctx.rotate(options.rotation);
+          ctx.rect(localOptions.offset.x, localOptions.offset.y, width, height);
+          ctx.rotate(localOptions.rotation);
           ctx.closePath();
         }}
         listening={active}
       >
         {lines.map((line, i) => (
-          <>
+          <React.Fragment key={i}>
             <Line
               key={`l${i}`}
               points={[line.start.x, line.start.y, line.end.x, line.end.y]}
@@ -121,39 +132,61 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
               strokeWidth={1}
               strokeScaleEnabled={false}
             />
-          </>
+          </React.Fragment>
         ))}
       </Group>
 
       {(showBorder || active) ?
-        <TransformableAsset
-          rectTransform={{ ...options.offset, rotation: options.rotation, width, height }}
-          isSelected={active}
-          onSelected={() => { }}
-          onTransform={(rect) => {
-            onUpdate({
-              ...layer,
-              options: {
-                ...options,
-                offset: { x: rect.x, y: rect.y },
-                rotation: rect.rotation,
-                scale: 1 // TODO
-              }
-            })
-          }}
-          rotateEnabled={false}
-          skewEnabled={false}
-          scaleEnabled={false}
-        >
-          <Rect
+        <>
+          <Group
+            ref={groupRef as any}
+            draggable={active}
+            x={localOptions.offset.x}
+            y={localOptions.offset.y}
             width={width}
             height={height}
-            stroke={theme.colors.palette.gray.light}
-            dash={[10, 10]}
-            strokeWidth={5}
-            listening={active}
-          />
-        </TransformableAsset>
+            rotation={localOptions.rotation}
+            onMouseDown={e => {
+              if (!(e.evt.buttons === 1 && !isShiftPressed)) { // only allow left click, when shift isn't pressed
+                groupRef.current?.setDraggable(false)
+              }
+              else {
+                groupRef.current?.setDraggable(active)
+              }
+            }}
+            onMouseUp={() => {
+              groupRef.current?.setDraggable(active) // reset the draggable
+            }}
+            onDragMove={e => {
+              const node = groupRef.current!;
+              const rotation = node.rotation();
+              setLocalOptions({
+                offset: {
+                  x: e.target.x(),
+                  y: e.target.y(),
+                },
+                rotation,
+                displayGrid: localOptions.displayGrid,
+                scale: localOptions.scale
+              });
+            }}
+            onDragEnd={() => {
+              onUpdate({
+                ...layer,
+                options: localOptions
+              })
+            }}
+          >
+            <Rect
+              width={width}
+              height={height}
+              stroke={active ? theme.colors.palette.blue.base : theme.colors.palette.gray.light}
+              dash={[10, 10]}
+              strokeWidth={5}
+              listening={active}
+            />
+          </Group>
+        </>
         : null
       }
     </Layer>

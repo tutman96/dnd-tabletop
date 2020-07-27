@@ -48,6 +48,17 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive }) 
 		return () => { anim.stop() }
 	}, [layerRef, layer])
 
+	useEffect(() => {
+		if (!layerRef.current?.parent) return;
+		const parent = layerRef.current.parent;
+
+		function onParentClick() {
+			setSelectedAssetId(null);
+		}
+		parent.on('click.konva', onParentClick);
+		return () => { parent.off('click.konva', onParentClick) }
+	}, [layerRef, setSelectedAssetId])
+
 	// Reset selected asset when active layer changes
 	useEffect(() => {
 		if (!layerActive && selectedAssetId !== null) {
@@ -105,7 +116,9 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive }) 
 	return (
 		<>
 			{layerActive && <ToolbarPortal>{toolbar}</ToolbarPortal>}
-			<Layer ref={layerRef as any}>
+			<Layer
+				ref={layerRef as any}
+			>
 				{
 					Array.from(layer.assets.values())
 						.map((asset) => {

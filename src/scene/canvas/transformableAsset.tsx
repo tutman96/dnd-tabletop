@@ -26,7 +26,7 @@ const TransformableAsset: React.SFC<Props> = ({ rectTransform, onTransform, isSe
 	useEffect(() => {
 		if (isSelected) {
 			// we need to attach transformer manually
-			trRef.current?.setNode(groupRef.current);
+			trRef.current?.setNodes([groupRef.current!]);
 			trRef.current?.getLayer()?.batchDraw();
 		}
 	}, [isSelected]);
@@ -36,15 +36,6 @@ const TransformableAsset: React.SFC<Props> = ({ rectTransform, onTransform, isSe
 	return (
 		<React.Fragment>
 			<Group
-				onClick={(e) => {
-					if (e.evt.button === 0) {
-						onSelected();
-						e.cancelBubble = true;
-					}
-					else {
-						e.cancelBubble = false
-					}
-				}}
 				ref={groupRef as any}
 				draggable={isSelected}
 				x={rectTransform.x}
@@ -52,14 +43,26 @@ const TransformableAsset: React.SFC<Props> = ({ rectTransform, onTransform, isSe
 				height={rectTransform.height}
 				width={rectTransform.width}
 				rotation={rectTransform.rotation}
-				onDragStart={e => {
+				onMouseDown={e => {
 					if (!(e.evt.buttons === 1 && !isShiftPressed)) { // only allow left click, when shift isn't pressed
 						groupRef.current?.setDraggable(false)
-						e.cancelBubble = false;
+					}
+					else {
+						groupRef.current?.setDraggable(isSelected)
 					}
 				}}
-				onMouseUp={() => {
+				onMouseUp={e => {
 					groupRef.current?.setDraggable(isSelected) // reset the draggable
+					if (e.evt.button === 0) {
+						e.cancelBubble = true;
+						onSelected();
+					}
+				}}
+				onClick={e => {
+					if (e.evt.button === 0) {
+						e.cancelBubble = true;
+						onSelected();
+					}
 				}}
 				onDragEnd={e => {
 					const node = groupRef.current!;

@@ -38,9 +38,12 @@ const DraggableStage: React.SFC<Props> = ({ draggable, initialZoom = 1, classNam
 				width={containerSize.width}
 				height={containerSize.height}
 				draggable={draggable === undefined ? true : draggable}
-				onDragStart={(e) => {
+				onMouseDown={(e) => {
 					if (e.evt.buttons === 1 && !isShiftPressed) { // allow left only when shift is pressed
 						stageRef.current?.setDraggable(false)
+					}
+					else {
+						stageRef.current?.setDraggable(draggable === undefined ? true : draggable)
 					}
 				}}
 				onMouseUp={() => {
