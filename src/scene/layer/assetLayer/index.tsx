@@ -4,9 +4,12 @@ import AssetComponent from './asset';
 import { IAsset, AssetType, deleteAsset, getNewAssets } from '../../asset';
 import { ILayer, ILayerComponentProps } from '..';
 import Konva from 'konva';
-import { IconFilePlus, IconTrash2 } from 'sancho';
+import { IconFilePlus, IconTrash2, IconRotateCcw } from 'sancho';
 import ToolbarItem from '../toolbarItem';
 import ToolbarPortal from '../toolbarPortal';
+import AssetSizer, { calculateCalibratedTransform } from './assetSizer';
+import { css } from 'emotion';
+import { useTablePPI } from '../../../settings';
 
 export interface IAssetComponentProps<T extends IAsset> {
 	asset: T;
@@ -21,18 +24,19 @@ export interface IAssetLayer extends ILayer {
 
 interface Props extends ILayerComponentProps<IAssetLayer> { }
 const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive }) => {
-	const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
+	const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
 	const layerRef = useRef<Konva.Layer>();
+	const tablePPI = useTablePPI();
 
 	const deleteSelectedAsset = useCallback(async () => {
-		if (selectedAsset && layer.assets.has(selectedAsset)) {
-			const asset = layer.assets.get(selectedAsset)!;
-			layer.assets.delete(selectedAsset);
+		if (selectedAssetId && layer.assets.has(selectedAssetId)) {
+			const asset = layer.assets.get(selectedAssetId)!;
+			layer.assets.delete(selectedAssetId);
 			await deleteAsset(asset);
 			onUpdate({ ...layer });
-			setSelectedAsset(null);
+			setSelectedAssetId(null);
 		}
-	}, [selectedAsset, layer, onUpdate, setSelectedAsset])
+	}, [selectedAssetId, layer, onUpdate, setSelectedAssetId])
 
 	// Animate the layer if there are any video assets
 	useEffect(() => {
@@ -46,12 +50,13 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive }) 
 
 	// Reset selected asset when active layer changes
 	useEffect(() => {
-		if (!layerActive && selectedAsset !== null) {
-			setSelectedAsset(null);
+		if (!layerActive && selectedAssetId !== null) {
+			setSelectedAssetId(null);
 		}
-	}, [layerActive, selectedAsset])
+	}, [layerActive, selectedAssetId])
 
 	const toolbar = useMemo(() => {
+		const selectedAsset = Array.from(layer.assets.values()).find((a) => a.id === selectedAssetId);
 		return (
 			<>
 				<ToolbarItem
@@ -65,16 +70,37 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive }) 
 						onUpdate({ ...layer })
 					}}
 				/>
+				<AssetSizer
+					asset={selectedAsset}
+					onUpdate={(asset) => {
+						layer.assets.set(asset.id, asset);
+						onUpdate({ ...layer });
+					}}
+				/>
+				<ToolbarItem
+					icon={<IconRotateCcw />}
+					label="Reset Asset Size"
+					disabled={!selectedAsset || !selectedAsset.calibration || !tablePPI}
+					onClick={() => {
+						selectedAsset!.transform = calculateCalibratedTransform(selectedAsset!, tablePPI!);
+						console.log(selectedAsset!.transform);
+						layer.assets.set(selectedAsset!.id, selectedAsset!);
+						onUpdate({
+							...layer
+						})
+					}}
+				/>
+				<div className={css`flex-grow: 2;`} />
 				<ToolbarItem
 					icon={<IconTrash2 />}
 					label="Delete Asset"
-					disabled={selectedAsset === null}
+					disabled={selectedAssetId === null}
 					onClick={deleteSelectedAsset}
 					keyboardShortcuts={['Delete', 'Backspace']}
 				/>
 			</>
 		);
-	}, [layer, selectedAsset, onUpdate, deleteSelectedAsset]);
+	}, [layer, tablePPI, selectedAssetId, onUpdate, deleteSelectedAsset]);
 
 	return (
 		<>
@@ -87,8 +113,8 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive }) 
 								<AssetComponent
 									key={asset.id}
 									asset={asset}
-									selected={layerActive && selectedAsset === asset.id}
-									onSelected={() => layerActive && setSelectedAsset(asset.id)}
+									selected={layerActive && selectedAssetId === asset.id}
+									onSelected={() => layerActive && setSelectedAssetId(asset.id)}
 									onUpdate={(updatedAsset) => {
 										layer.assets.set(updatedAsset.id, updatedAsset);
 										onUpdate({ ...layer });

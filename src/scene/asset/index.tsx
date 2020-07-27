@@ -13,9 +13,19 @@ export enum AssetType {
 	VIDEO
 }
 
+export interface IAssetCalibration {
+	xOffset: number;
+	yOffset: number;
+	ppiX: number;
+	ppiY: number;
+}
+
 export interface IAsset {
 	id: string;
+	size: { width: number, height: number };
 	transform: AssetTransform;
+	overrideCalibration?: boolean;
+	calibration?: IAssetCalibration
 	type: AssetType;
 }
 
@@ -56,21 +66,25 @@ export async function createAsset(file: File) {
 		}
 	} as IAsset;
 
+	let res: { width: number, height: number };
 	if (file.type.indexOf('image') === 0) {
-		const res = await getImageSize(file);
-		asset.transform.width = res.width;
-		asset.transform.height = res.height;
+		res = await getImageSize(file);
 		asset.type = AssetType.IMAGE;
 	}
 	else if (file.type.indexOf('video') === 0) {
-		const res = await getVideoSize(file)
-		asset.transform.width = res.width;
-		asset.transform.height = res.height;
+		res = await getVideoSize(file)
 		asset.type = AssetType.VIDEO;
 	}
 	else {
 		throw new Error('Unknown file type');
 	}
+
+	asset.size = {
+		width: res.width,
+		height: res.height
+	}
+	asset.transform.width = res.width;
+	asset.transform.height = res.height;
 
 	await fileStorage.setItem(asset.id, file);
 	return asset;
