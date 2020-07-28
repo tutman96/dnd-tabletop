@@ -1,15 +1,16 @@
 import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { useTheme, IconCrosshair, Check } from 'sancho';
 import Konva from 'konva';
-import { Layer, Rect, Line, Group } from 'react-konva';
+import { Layer, Rect, Line, Group, Transformer } from 'react-konva';
 import { Vector2d } from 'konva/types/types';
 
-import { useTableResolution, useTablePPI } from '../../settings';
-import { TableOptions } from '..';
-import { ILayerComponentProps, ILayer, LayerType } from '.';
-import ToolbarItem from './toolbarItem';
-import ToolbarPortal from './toolbarPortal';
-import { useKeyPress } from '../../utils';
+import { useTableResolution, useTablePPI } from '../../../settings';
+import { TableOptions } from '../..';
+import { ILayerComponentProps, ILayer, LayerType } from '..';
+import ToolbarItem from '../toolbarItem';
+import ToolbarPortal from '../toolbarPortal';
+import { useKeyPress } from '../../../utils';
+import ZoomToolbarItem from './zoomToolbarItem';
 
 export const TableViewLayer = {
   id: 'TABLE_VIEW',
@@ -39,6 +40,15 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
   }, [layer.options, setLocalOptions])
 
   const groupRef = useRef<Konva.Group>();
+  const trRef = useRef<Konva.Transformer>();
+
+  useEffect(() => {
+    if (active) {
+      // we need to attach transformer manually
+      trRef.current?.setNodes([groupRef.current!]);
+      trRef.current?.getLayer()?.batchDraw();
+    }
+  }, [active]);
 
   const toolbar = useMemo(() => {
     return (
@@ -67,6 +77,16 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
             }
           })
         }} />
+        <ZoomToolbarItem
+          zoom={layer.options.scale}
+          onUpdate={(zoom) => {
+            layer.options = {
+              ...layer.options,
+              scale: zoom
+            }
+            onUpdate(layer);
+          }}
+        />
       </>
     );
   }, [layer, onUpdate]);
@@ -80,24 +100,24 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
       return null;
     }
 
-    const width = tableResolution.width;
-    const height = tableResolution.height;
+    const width = tableResolution.width / localOptions.scale;
+    const height = tableResolution.height / localOptions.scale;
 
     const l = new Array<{ start: Vector2d; end: Vector2d; }>();
     if (showGrid) {
       const startX = Math.floor(localOptions.offset.x / ppi) * ppi;
-      for (let xOffset = startX; xOffset <= localOptions.offset.x + tableResolution.width; xOffset += ppi) {
+      for (let xOffset = startX; xOffset <= localOptions.offset.x + width; xOffset += ppi) {
         l.push({
           start: { x: xOffset, y: localOptions.offset.y },
-          end: { x: xOffset, y: localOptions.offset.y + tableResolution.height }
+          end: { x: xOffset, y: localOptions.offset.y + height }
         });
       }
 
       const startY = Math.floor(localOptions.offset.y / ppi) * ppi;
-      for (let yOffset = startY; yOffset <= localOptions.offset.y + tableResolution.height; yOffset += ppi) {
+      for (let yOffset = startY; yOffset <= localOptions.offset.y + height; yOffset += ppi) {
         l.push({
           start: { x: localOptions.offset.x, y: yOffset },
-          end: { x: localOptions.offset.x + tableResolution.width, y: yOffset }
+          end: { x: localOptions.offset.x + width, y: yOffset }
         });
       }
     }
@@ -134,7 +154,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
         ))}
       </Group>
     );
-  }, [showGrid, localOptions.offset.x, localOptions.offset.y, localOptions.rotation, tableResolution, ppi, theme])
+  }, [showGrid, localOptions.offset.x, localOptions.offset.y, localOptions.rotation, localOptions.scale, tableResolution, ppi, theme])
 
   if (!tableResolution || ppi === null) {
     return null;
@@ -156,6 +176,8 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
             y={localOptions.offset.y}
             width={width}
             height={height}
+            scaleX={1 / localOptions.scale}
+            scaleY={1 / localOptions.scale}
             rotation={localOptions.rotation}
             onMouseDown={e => {
               if (!(e.evt.buttons === 1 && !isShiftPressed)) { // only allow left click, when shift isn't pressed
@@ -185,6 +207,22 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
               layer.options = { ...localOptions };
               onUpdate(layer)
             }}
+            onTransform={() => {
+              const node = groupRef.current!;
+              const scale = 1 / node.scaleX();
+              setLocalOptions({
+                ...localOptions,
+                offset: {
+                  x: node.x(),
+                  y: node.y(),
+                },
+                scale
+              });
+            }}
+            onTransformEnd={() => {
+              layer.options = { ...localOptions };
+              onUpdate(layer);
+            }}
           >
             <Rect
               width={width}
@@ -195,6 +233,17 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
               listening={active}
             />
           </Group>
+          {active && (
+            <Transformer
+              rotateEnabled={false}
+              resizeEnabled={true}
+              enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
+              ref={trRef as any}
+              borderStrokeWidth={0}
+              anchorFill={theme.colors.background.overlay}
+              anchorStroke={theme.colors.palette.blue.light}
+            />
+          )}
         </>
         : null
       }

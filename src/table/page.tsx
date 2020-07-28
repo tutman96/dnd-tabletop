@@ -57,6 +57,8 @@ const TablePage: React.SFC<Props> = () => {
 					{...windowSize}
 					offsetX={tableScene.table.offset.x}
 					offsetY={tableScene.table.offset.y}
+					scaleX={tableScene.table.scale}
+					scaleY={tableScene.table.scale}
 					// clipFunc={(ctx: CanvasRenderingContext2D) => {
           //   ctx.beginPath();
           //   ctx.rect(tableScene.table.offset.x, tableScene.table.offset.y, tableResolution.width, tableResolution.height);
