@@ -118,10 +118,11 @@ const ScreenSizeSettings: React.SFC = () => {
           <Input
             type="number"
             min={1}
+            max={200}
             value={tableSize}
             onChange={(e) => {
               const value = Number(e.target.value);
-              if (!isNaN(value)) {
+              if (!isNaN(value) && value <= 200 && value > 1) {
                 setTableSize(value)
               }
             }}

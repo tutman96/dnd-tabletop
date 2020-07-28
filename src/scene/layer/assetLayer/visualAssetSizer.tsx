@@ -15,7 +15,6 @@ const RESIZE_SQUARES = 3;
 const VisualAssetSizer: React.SFC<{ asset: IAsset; onUpdate: (calibration: IAssetCalibration) => void; }> = ({ asset, onUpdate }) => {
   const theme = useExtendedTheme();
   const tablePPI = useTablePPI();
-  console.log({ tablePPI })
 
   if (!tablePPI || !asset.calibration) {
     return null;
