@@ -13,19 +13,19 @@ import { useExtendedTheme } from '../../theme';
 type Props = { scene: IScene, onUpdate: (scene: IScene) => void };
 const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 	const theme = useExtendedTheme();
-	const [activeLayer, setActiveLayer] = useState<string | null>(null);
+	const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
 
 	// Default selected layer to the first layer
 	useEffect(() => {
-		if (activeLayer === TableViewLayer.id) return;
+		if (activeLayerId === TableViewLayer.id) return;
 
 		if (
-			(activeLayer === null || !scene.layers.some((l) => l.id === activeLayer)) &&
+			(activeLayerId === null || !scene.layers.some((l) => l.id === activeLayerId)) &&
 			scene.layers.length
 		) {
-			setActiveLayer(scene.layers[0].id);
+			setActiveLayerId(scene.layers[0].id);
 		}
-	}, [activeLayer, scene])
+	}, [activeLayerId, scene])
 
 	const onLayerUpdate = useCallback((updatedLayer: ILayer) => {
 		const i = scene.layers.findIndex((l) => l.id === updatedLayer.id);
@@ -50,7 +50,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 	}
 
 	function editActiveLayerName(name: string) {
-		const layer = scene.layers.find((l) => l.id === activeLayer);
+		const layer = scene.layers.find((l) => l.id === activeLayerId);
 		if (!layer) return;
 
 		layer.name = name;
@@ -61,7 +61,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 	}
 
 	function moveActiveLayer(direction: 'up' | 'down') {
-		const layerIndex = scene.layers.findIndex((l) => l.id === activeLayer);
+		const layerIndex = scene.layers.findIndex((l) => l.id === activeLayerId);
 		if (layerIndex !== -1) {
 			const swapIndex = direction === 'up' ? layerIndex + 1 : layerIndex - 1;
 			if (swapIndex > scene.layers.length - 1 || swapIndex < 0) {
@@ -82,14 +82,14 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 	}
 
 	async function deleteActiveLayer() {
-		const layer = scene.layers.find((l) => l.id === activeLayer);
+		const layer = scene.layers.find((l) => l.id === activeLayerId);
 		if (layer) {
 			const newScene = await deleteLayer(scene, layer);
 			onUpdate({
 				...newScene,
 				layers: [...newScene.layers]
 			});
-			setActiveLayer(null);
+			setActiveLayerId(null);
 		}
 	}
 
@@ -113,7 +113,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 									key={layer.id}
 									layer={layer}
 									onUpdate={onLayerUpdate}
-									active={activeLayer === layer.id}
+									active={activeLayerId === layer.id}
 								/>
 							);
 						})
@@ -123,7 +123,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 							...TableViewLayer,
 							options: scene.table
 						}}
-						active={activeLayer === TableViewLayer.id}
+						active={activeLayerId === TableViewLayer.id}
 						onUpdate={(layer) => {
 							onUpdate({
 								...scene,
@@ -138,8 +138,8 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 
 			<LayerList
 				scene={scene}
-				activeLayer={activeLayer}
-				setActiveLayer={setActiveLayer}
+				activeLayerId={activeLayerId}
+				setActiveLayer={setActiveLayerId}
 				updateLayer={updateLayer}
 				addLayer={addLayer}
 				editActiveLayerName={editActiveLayerName}

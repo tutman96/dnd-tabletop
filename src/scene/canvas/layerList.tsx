@@ -4,10 +4,11 @@ import { useTheme, Layer, List, ListItem, IconButton, IconTrash2, Popover, MenuL
 import React from "react";
 import { css } from "emotion";
 import { TableViewLayer } from "../layer/tableView";
+import EditLayerButton from "./editLayerButton";
 
 type Props = {
 	scene: IScene,
-	activeLayer: string | null,
+	activeLayerId: string | null,
 	setActiveLayer: (layer: string) => void,
 	updateLayer: (layer: ILayer) => void,
 	addLayer: (type: LayerType) => void,
@@ -15,10 +16,11 @@ type Props = {
 	moveActiveLayer: (direction: "up" | "down") => void;
 	deleteActiveLayer: () => void
 };
-const LayerList: React.SFC<Props> = ({ scene, activeLayer, setActiveLayer, updateLayer, addLayer, moveActiveLayer, deleteActiveLayer }) => {
-	const layerIndex = scene.layers.findIndex((l) => l.id === activeLayer);
+const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, updateLayer, addLayer, moveActiveLayer, deleteActiveLayer }) => {
+	const layerIndex = scene.layers.findIndex((l) => l.id === activeLayerId);
 	const isActiveLayerTop = layerIndex === scene.layers.length - 1;
 	const isActiveLayerBottom = layerIndex === 0;
+	const activeLayer = scene.layers.find((l) => l.id === activeLayerId);
 
 	const theme = useTheme();
 	return (
@@ -43,7 +45,7 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayer, setActiveLayer, updat
 				>
 					<ListItem
 						className={css`
-								background-color: ${activeLayer === TableViewLayer.id ? theme.colors.intent.primary.base : 'initial'} !important;
+								background-color: ${activeLayerId === TableViewLayer.id ? theme.colors.intent.primary.base : 'initial'} !important;
 							`}
 						contentBefore={
 							<IconButton
@@ -62,7 +64,7 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayer, setActiveLayer, updat
 						<ListItem
 							key={layer.id}
 							className={css`
-								background-color: ${activeLayer === layer.id ? theme.colors.intent.primary.base : 'initial'} !important;
+								background-color: ${activeLayer === layer ? theme.colors.intent.primary.base : 'initial'} !important;
 							`}
 							contentBefore={
 								<IconButton
@@ -92,28 +94,39 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayer, setActiveLayer, updat
 					{/* Delete Layer */}
 					<IconButton
 						variant="ghost"
-						disabled={activeLayer === null}
+						disabled={!activeLayer || activeLayerId === TableViewLayer.id}
 						color={theme.colors.intent.danger.base}
 						icon={<IconTrash2 />}
 						label="Delete Layer"
 						onClick={deleteActiveLayer}
 					/>
 
-					{/* Move Layer */}
 					<div>
+
+
+						{/* Move Layer Up */}
 						<IconButton
 							variant="ghost"
-							disabled={activeLayer === null || activeLayer === TableViewLayer.id || isActiveLayerTop}
+							disabled={activeLayerId === null || activeLayerId === TableViewLayer.id || isActiveLayerTop}
 							icon={<IconArrowUp />}
 							label="Layer Up"
 							onClick={() => moveActiveLayer('up')}
 						/>
+
+
+						{/* Move Layer Down */}
 						<IconButton
 							variant="ghost"
-							disabled={activeLayer === null || activeLayer === TableViewLayer.id || isActiveLayerBottom}
+							disabled={activeLayerId === null || activeLayerId === TableViewLayer.id || isActiveLayerBottom}
 							icon={<IconArrowDown />}
 							label="Layer Down"
 							onClick={() => moveActiveLayer('down')}
+						/>
+
+
+						<EditLayerButton
+							layer={activeLayer}
+							onUpdate={updateLayer}
 						/>
 					</div>
 
