@@ -67,6 +67,9 @@ const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
 
   function addNewScene() {
     const scene = createNewScene();
+    if (allScenes) {
+      scene.name = `Scene ${allScenes.size + 1}`;
+    }
     createItem(scene.id, scene);
     onSceneSelect(scene);
   }
