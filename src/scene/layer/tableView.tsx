@@ -50,7 +50,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
             onUpdate({
               ...layer,
               options: {
-                ...localOptions,
+                ...layer.options,
                 offset: { x: 0, y: 0 },
                 rotation: 0,
                 scale: 1
@@ -58,52 +58,51 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
             })
           }}
         />
-        <Check label="Display Grid" checked={localOptions.displayGrid} onChange={(e) => {
+        <Check label="Display Grid" checked={layer.options.displayGrid} onChange={(e) => {
           onUpdate({
             ...layer,
             options: {
-              ...localOptions,
+              ...layer.options,
               displayGrid: e.target.checked
             }
           })
         }} />
       </>
     );
-  }, [layer, localOptions, onUpdate]);
+  }, [layer, onUpdate]);
 
   const isShiftPressed = useKeyPress('Shift');
 
-  if (!tableResolution || ppi === null) {
-    return null;
-  }
 
-  const width = tableResolution.width;
-  const height = tableResolution.height;
-
-  const lines = new Array<{ start: Vector2d; end: Vector2d; }>();
-
-  // Only generate the grid within the table display to save on the number of lines needed.
-  if (showGrid) {
-    const startX = Math.floor(localOptions.offset.x / ppi) * ppi;
-    for (let xOffset = startX; xOffset <= localOptions.offset.x + tableResolution.width; xOffset += ppi) {
-      lines.push({
-        start: { x: xOffset, y: localOptions.offset.y },
-        end: { x: xOffset, y: localOptions.offset.y + tableResolution.height }
-      });
+  // Only recalculate the line components when the position/size changes
+  const lines = useMemo(() => {
+    if (!tableResolution || !ppi) {
+      return null;
     }
 
-    const startY = Math.floor(localOptions.offset.y / ppi) * ppi;
-    for (let yOffset = startY; yOffset <= localOptions.offset.y + tableResolution.height; yOffset += ppi) {
-      lines.push({
-        start: { x: localOptions.offset.x, y: yOffset },
-        end: { x: localOptions.offset.x + tableResolution.width, y: yOffset }
-      });
-    }
-  }
+    const width = tableResolution.width;
+    const height = tableResolution.height;
 
-  return (
-    <Layer>
-      {active && <ToolbarPortal>{toolbar}</ToolbarPortal>}
+    const l = new Array<{ start: Vector2d; end: Vector2d; }>();
+    if (showGrid) {
+      const startX = Math.floor(localOptions.offset.x / ppi) * ppi;
+      for (let xOffset = startX; xOffset <= localOptions.offset.x + tableResolution.width; xOffset += ppi) {
+        l.push({
+          start: { x: xOffset, y: localOptions.offset.y },
+          end: { x: xOffset, y: localOptions.offset.y + tableResolution.height }
+        });
+      }
+
+      const startY = Math.floor(localOptions.offset.y / ppi) * ppi;
+      for (let yOffset = startY; yOffset <= localOptions.offset.y + tableResolution.height; yOffset += ppi) {
+        l.push({
+          start: { x: localOptions.offset.x, y: yOffset },
+          end: { x: localOptions.offset.x + tableResolution.width, y: yOffset }
+        });
+      }
+    }
+
+    return (
       <Group
         clipFunc={(ctx: CanvasRenderingContext2D) => {
           ctx.beginPath();
@@ -111,9 +110,8 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
           ctx.rotate(localOptions.rotation);
           ctx.closePath();
         }}
-        listening={active}
       >
-        {lines.map((line, i) => (
+        {l.map((line, i) => (
           <React.Fragment key={i}>
             <Line
               key={`l${i}`}
@@ -135,7 +133,20 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
           </React.Fragment>
         ))}
       </Group>
+    );
+  }, [showGrid, localOptions.offset.x, localOptions.offset.y, localOptions.rotation, tableResolution, ppi, theme])
 
+  if (!tableResolution || ppi === null) {
+    return null;
+  }
+
+  const width = tableResolution.width;
+  const height = tableResolution.height;
+
+  return (
+    <Layer>
+      {active && <ToolbarPortal>{toolbar}</ToolbarPortal>}
+      {lines}
       {(showBorder || active) ?
         <>
           <Group
@@ -171,10 +182,8 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
               });
             }}
             onDragEnd={() => {
-              onUpdate({
-                ...layer,
-                options: localOptions
-              })
+              layer.options = { ...localOptions };
+              onUpdate(layer)
             }}
           >
             <Rect

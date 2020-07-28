@@ -12,10 +12,14 @@ const ToolbarPortal: React.SFC = ({ children }) => {
 	useEffect(() => {
 		if (portal) {
 			ReactDOM.render(<DarkMode>{children}</DarkMode>, portal);
-			return () => ReactDOM.unmountComponentAtNode(portal);
 		}
-		return () => { }
 	}, [children, portal])
+
+	useEffect(() => {
+		if (portal) {
+			return () => { ReactDOM.unmountComponentAtNode(portal) };
+		}
+	}, [portal])
 
 	return null;
 }

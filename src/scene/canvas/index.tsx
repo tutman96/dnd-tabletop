@@ -94,45 +94,47 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 	}
 
 	return (
-		<ToolbarPortalProvider>
-			{/* Canvas */}
-			<DraggableStage
-				className={css`
+		<>
+			<ToolbarPortalProvider>
+				{/* Canvas */}
+				<DraggableStage
+					className={css`
 					flex-grow: 2;
 					width: calc(100vw - ${theme.sceneListWidth + theme.sidebarWidth}px);
 					height: calc(100vh - ${theme.headerHeight}px);
 				`}
-			>
-				{
-					scene.layers.map((layer) => {
-						const Component = LayerTypeToComponent[layer.type];
-						if (!Component || layer.visible === false) return null;
-						return (
-							<Component
-								key={layer.id}
-								layer={layer}
-								onUpdate={onLayerUpdate}
-								active={activeLayer === layer.id}
-							/>
-						);
-					})
-				}
-				<TableViewOverlay
-					layer={{
-						...TableViewLayer,
-						options: scene.table
-					}}
-					active={activeLayer === TableViewLayer.id}
-					onUpdate={(layer) => {
-						onUpdate({
-							...scene,
-							table: layer.options
+				>
+					{
+						scene.layers.map((layer) => {
+							const Component = LayerTypeToComponent[layer.type];
+							if (!Component || layer.visible === false) return null;
+							return (
+								<Component
+									key={layer.id}
+									layer={layer}
+									onUpdate={onLayerUpdate}
+									active={activeLayer === layer.id}
+								/>
+							);
 						})
-					}}
-					showBorder={true}
-					showGrid={true}
-				/>
-			</DraggableStage>
+					}
+					<TableViewOverlay
+						layer={{
+							...TableViewLayer,
+							options: scene.table
+						}}
+						active={activeLayer === TableViewLayer.id}
+						onUpdate={(layer) => {
+							onUpdate({
+								...scene,
+								table: layer.options
+							})
+						}}
+						showBorder={true}
+						showGrid={true}
+					/>
+				</DraggableStage>
+			</ToolbarPortalProvider>
 
 			<LayerList
 				scene={scene}
@@ -144,7 +146,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 				moveActiveLayer={moveActiveLayer}
 				deleteActiveLayer={deleteActiveLayer}
 			/>
-		</ToolbarPortalProvider>
+		</>
 	);
 }
 export default Canvas;
