@@ -4,19 +4,12 @@ import AssetComponent from './asset';
 import { IAsset, AssetType, deleteAsset, getNewAssets } from '../../asset';
 import { ILayer, ILayerComponentProps } from '..';
 import Konva from 'konva';
-import { IconFilePlus, IconTrash2, IconRotateCcw } from 'sancho';
+import { IconFilePlus, IconTrash2, IconRotateCcw, Check } from 'sancho';
 import ToolbarItem from '../toolbarItem';
 import ToolbarPortal from '../toolbarPortal';
 import AssetSizer, { calculateCalibratedTransform } from './assetSizer';
 import { css } from 'emotion';
 import { useTablePPI } from '../../../settings';
-
-export interface IAssetComponentProps<T extends IAsset> {
-	asset: T;
-	onUpdate: (asset: T) => void;
-	selected: boolean;
-	onSelected: () => void;
-}
 
 export interface IAssetLayer extends ILayer {
 	assets: Map<string, IAsset>
@@ -94,13 +87,18 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive }) 
 					disabled={!selectedAsset || !selectedAsset.calibration || !tablePPI}
 					onClick={() => {
 						selectedAsset!.transform = calculateCalibratedTransform(selectedAsset!, tablePPI!);
-						console.log(selectedAsset!.transform);
 						layer.assets.set(selectedAsset!.id, selectedAsset!);
 						onUpdate({
 							...layer
 						})
 					}}
 				/>
+				<Check label="Snap to Grid" disabled={!selectedAsset} checked={!!selectedAsset?.snapToGrid} onChange={(e) => {
+					selectedAsset!.snapToGrid = e.target.checked;
+          onUpdate({
+            ...layer
+          })
+        }} />
 				<div className={css`flex-grow: 2;`} />
 				<ToolbarItem
 					icon={<IconTrash2 />}

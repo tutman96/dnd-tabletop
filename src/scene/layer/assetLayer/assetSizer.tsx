@@ -13,7 +13,6 @@ export function calculateCalibratedTransform(asset: IAsset, screenPPI: number): 
     return asset.transform;
   }
 
-  console.log(asset);
   return {
     ...asset.transform,
     width: (asset.size.width / asset.calibration.ppiX) * screenPPI,
@@ -67,7 +66,10 @@ const AssetSizer: React.SFC<Props> = ({ asset, onUpdate }) => {
                 justify-content: flex-end;
               `}
             >
-              <Button variant="ghost" intent="primary" onClick={() => onUpdate({ ...asset, calibration })}>Save</Button>
+              <Button variant="ghost" intent="primary" onClick={() => {
+                onUpdate({ ...asset, calibration })
+                setShowModal(false);
+              }}>Save</Button>
             </div>
           </div>
         </Dialog>

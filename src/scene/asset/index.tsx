@@ -27,6 +27,7 @@ export interface IAsset {
 	overrideCalibration?: boolean;
 	calibration?: IAssetCalibration
 	type: AssetType;
+	snapToGrid?: boolean
 }
 
 export function getNewAssets() {
