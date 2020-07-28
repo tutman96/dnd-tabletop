@@ -3,6 +3,7 @@ import { LayerType, ILayer } from "../layer";
 import { useTheme, Layer, List, ListItem, IconButton, IconTrash2, Popover, MenuList, MenuItem, IconFile, IconCloudDrizzle, IconPlus, Text, IconArrowUp, IconArrowDown, IconEye, IconEyeOff, IconTv } from "sancho";
 import React from "react";
 import { css } from "emotion";
+import { TableViewLayer } from "../layer/tableView";
 
 type Props = {
 	scene: IScene,
@@ -42,7 +43,7 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayer, setActiveLayer, updat
 				>
 					<ListItem
 						className={css`
-								background-color: ${activeLayer === 'TABLE_VIEW' ? theme.colors.intent.primary.base : 'initial'} !important;
+								background-color: ${activeLayer === TableViewLayer.id ? theme.colors.intent.primary.base : 'initial'} !important;
 							`}
 						contentBefore={
 							<IconButton
@@ -54,7 +55,7 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayer, setActiveLayer, updat
 						}
 						primary={'Table View'}
 						contentAfter={' '}
-						onClick={() => setActiveLayer('TABLE_VIEW')}
+						onClick={() => setActiveLayer(TableViewLayer.id)}
 					/>
 
 					{Array.from(scene.layers).reverse().map((layer) => (
@@ -102,14 +103,14 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayer, setActiveLayer, updat
 					<div>
 						<IconButton
 							variant="ghost"
-							disabled={activeLayer === null || isActiveLayerTop}
+							disabled={activeLayer === null || activeLayer === TableViewLayer.id || isActiveLayerTop}
 							icon={<IconArrowUp />}
 							label="Layer Up"
 							onClick={() => moveActiveLayer('up')}
 						/>
 						<IconButton
 							variant="ghost"
-							disabled={activeLayer === null || isActiveLayerBottom}
+							disabled={activeLayer === null || activeLayer === TableViewLayer.id || isActiveLayerBottom}
 							icon={<IconArrowDown />}
 							label="Layer Down"
 							onClick={() => moveActiveLayer('down')}
