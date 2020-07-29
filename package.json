@@ -8,7 +8,7 @@
     "@emotion/css": "^10.0.27",
     "@rehooks/component-size": "^1.0.3",
     "emotion": "^10.0.27",
-    "konva": "^6.0.0",
+    "konva": "^7.0.3",
     "lru-cache": "^6.0.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",

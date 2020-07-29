@@ -164,7 +164,9 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
   const height = tableResolution.height;
 
   return (
-    <Layer>
+    <Layer
+      listening={active}
+    >
       {active && <ToolbarPortal>{toolbar}</ToolbarPortal>}
       {lines}
       {(showBorder || active) ?

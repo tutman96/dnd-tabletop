@@ -73,6 +73,7 @@ const TablePage: React.SFC<Props> = () => {
 							return (
 								<Component
 									key={layer.id}
+									isTable={true}
 									layer={layer}
 									onUpdate={() => { }}
 									active={false}
@@ -85,6 +86,7 @@ const TablePage: React.SFC<Props> = () => {
 							...TableViewLayer,
 							options: tableScene.table
 						}}
+						isTable={true}
 						active={false}
 						onUpdate={() => { }}
 						showBorder={false}

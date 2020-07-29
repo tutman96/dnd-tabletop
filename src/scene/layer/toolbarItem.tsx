@@ -18,7 +18,7 @@ const ToolbarItem: React.SFC<Props> = ({ label, keyboardShortcuts, ...otherProps
 	}, [keyboardShortcuts, otherProps.onClick])
 
 	return (
-		<Tooltip content={label} placement="bottom">
+		<Tooltip content={label + (keyboardShortcuts && keyboardShortcuts.length ? ` (${keyboardShortcuts[0]})` : '')} placement="bottom">
 			<IconButton
 				variant="ghost"
 				label={label}
