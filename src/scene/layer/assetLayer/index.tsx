@@ -116,6 +116,7 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive }) 
 			{layerActive && <ToolbarPortal>{toolbar}</ToolbarPortal>}
 			<Layer
 				ref={layerRef as any}
+				listening={layerActive}
 			>
 				{
 					Array.from(layer.assets.values())

@@ -112,6 +112,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 								<Component
 									key={layer.id}
 									layer={layer}
+									isTable={false}
 									onUpdate={onLayerUpdate}
 									active={activeLayerId === layer.id}
 								/>
@@ -123,6 +124,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 							...TableViewLayer,
 							options: scene.table
 						}}
+						isTable={false}
 						active={activeLayerId === TableViewLayer.id}
 						onUpdate={(layer) => {
 							onUpdate({

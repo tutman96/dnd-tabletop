@@ -2,6 +2,7 @@ import AssetLayer, { IAssetLayer } from "./assetLayer";
 import { v4 } from "uuid";
 import { IScene } from "..";
 import { deleteAsset } from "../asset";
+import FogLayer, { IFogLayer } from "./fogLayer";
 
 export enum LayerType {
 	ASSETS,
@@ -18,12 +19,14 @@ export interface ILayer {
 
 export interface ILayerComponentProps<T extends ILayer = ILayer> {
 	layer: T;
+	isTable: boolean;
 	onUpdate: (layer: T) => void;
 	active: boolean;
 }
 
 export const LayerTypeToComponent = {
 	[LayerType.ASSETS]: AssetLayer,
+	[LayerType.FOG]: FogLayer
 } as { [type: string]: React.SFC<ILayerComponentProps<any>> }
 
 export function createNewLayer(type: LayerType) {
@@ -35,6 +38,12 @@ export function createNewLayer(type: LayerType) {
 	};
 	if (type === LayerType.ASSETS) {
 		(layer as IAssetLayer).assets = new Map();
+	}
+	else if (type === LayerType.FOG) {
+		(layer as IFogLayer).obstructionPolygons = [];
+		(layer as IFogLayer).lightSources = [];
+		(layer as IFogLayer).fogPolygons = [];
+		(layer as IFogLayer).fogClearPolygons = [];
 	}
 	return layer;
 }

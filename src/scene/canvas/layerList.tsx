@@ -136,7 +136,7 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, upd
 						content={
 							<MenuList>
 								<MenuItem contentBefore={<IconFile />} onPress={() => addLayer(LayerType.ASSETS)}>Asset Layer</MenuItem>
-								<MenuItem contentBefore={<IconCloudDrizzle />} onPress={() => addLayer(LayerType.FOG)} disabled={true}>Fog Layer</MenuItem>
+								<MenuItem contentBefore={<IconCloudDrizzle />} onPress={() => addLayer(LayerType.FOG)}>Fog Layer (beta)</MenuItem>
 							</MenuList>
 						}
 					>
