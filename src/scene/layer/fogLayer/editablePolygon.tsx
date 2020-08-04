@@ -1,14 +1,18 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { KonvaNodeEvents, Line, Group, Shape } from 'react-konva';
 import { useTheme } from 'sancho';
 import Konva from 'konva';
 
-import { IPolygon } from './rayCaster';
 import { Vector2d } from 'konva/types/types';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useKeyPress } from '../../../utils';
 
-const Anchor: React.SFC<{ position: Vector2d, onMove: (position: Vector2d, e:any) => void }> = ({ position, onMove }) => {
+const Anchor: React.SFC<{
+  firstAnchor: boolean,
+  position: Vector2d,
+  onMove: (position: Vector2d, e: KonvaEventObject<DragEvent>) => void,
+  onMoveEnd: () => void
+}> = ({ firstAnchor, position, onMove, onMoveEnd }) => {
   const theme = useTheme();
   return (
     <Shape
@@ -25,14 +29,27 @@ const Anchor: React.SFC<{ position: Vector2d, onMove: (position: Vector2d, e:any
         context.fillStrokeShape(shape);
       }}
       onDragMove={e => {
-        onMove({ x: e.target.x(), y: e.target.y() },e);
+        onMove({ x: e.target.x(), y: e.target.y() }, e);
         e.cancelBubble = true;
       }}
+      onDragEnd={e => onMoveEnd()}
       stroke={theme.colors.palette.blue.base}
-      strokeWidth={1}
+      strokeWidth={2}
       strokeScaleEnabled={false}
+      fill={firstAnchor ? theme.colors.palette.blue.base : undefined}
     />
   )
+}
+
+export enum PolygonType {
+  FOG,
+  FOG_CLEAR
+}
+
+export interface IPolygon {
+  type: PolygonType,
+  verticies: Array<Vector2d>
+  visibleOnTable: boolean;
 }
 
 interface Props {
@@ -40,20 +57,25 @@ interface Props {
   onUpdate: (polygon: IPolygon) => void
 
   adding: boolean
-  onAdded: () => void
 
   selectable: boolean
   selected: boolean
   onSelected?: () => void
 }
-const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & KonvaNodeEvents> = ({ polygon, onUpdate, adding, onAdded, selectable, selected, onSelected, ...lineProps }) => {
+const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & KonvaNodeEvents> = ({ polygon, onUpdate, adding, selectable, selected, onSelected, ...lineProps }) => {
   const theme = useTheme();
   const groupRef = useRef<Konva.Group>();
 
-  const groupX = polygon.verticies.reduce((min, v) => Math.min(min, v.x), Number.MAX_VALUE);
-  const groupY = polygon.verticies.reduce((min, v) => Math.min(min, v.y), Number.MAX_VALUE);
+  const [localVerticies, setLocalVerticies] = useState<Array<Vector2d>>(polygon.verticies);
 
-  const relativeKonvaCoordinates = polygon.verticies
+  useEffect(() => {
+    setLocalVerticies(polygon.verticies);
+  }, [polygon.verticies])
+
+  const groupX = localVerticies.reduce((min, v) => Math.min(min, v.x), Number.MAX_VALUE);
+  const groupY = localVerticies.reduce((min, v) => Math.min(min, v.y), Number.MAX_VALUE);
+
+  const relativeKonvaCoordinates = localVerticies
     .map((v) => [v.x - groupX, v.y - groupY])
     .flat();
 
@@ -72,10 +94,7 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
         var pos = groupRef.current.getStage()!.getPointerPosition()!;
         var relPos = transform.point(pos);
 
-        polygon.verticies = [
-          ...polygon.verticies,
-          relPos
-        ];
+        polygon.verticies = [...localVerticies, relPos];
         onUpdate(polygon);
       }
 
@@ -85,18 +104,9 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
         stage.container().style.cursor = 'default';
       };
     }
-  }, [groupRef, adding, polygon, onUpdate])
+  }, [groupRef, adding, localVerticies, onUpdate, polygon])
 
   const isShiftPressed = useKeyPress('Shift');
-
-  const isEscapePressed = useKeyPress('Escape');
-  const isEnterPressed = useKeyPress('Enter');
-  const shouldEndAdd = isEnterPressed || isEscapePressed;
-  useEffect(() => {
-    if (adding && shouldEndAdd) {
-      onAdded();
-    }
-  }, [adding, shouldEndAdd, onAdded])
 
   return (
     <Group
@@ -104,6 +114,7 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
       draggable={selected && !adding}
       x={groupX}
       y={groupY}
+      listening={selectable}
       onMouseDown={e => {
         if (!(e.evt.buttons === 1 && !isShiftPressed)) { // only allow left click, when shift isn't pressed
           groupRef.current?.setDraggable(false)
@@ -129,39 +140,56 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
         const offsetX = newX - groupX;
         const offsetY = newY - groupY;
 
-        polygon.verticies = polygon.verticies.map((v) => ({ x: v.x + offsetX, y: v.y + offsetY }))
+        setLocalVerticies(localVerticies.map((v) => ({ x: v.x + offsetX, y: v.y + offsetY })));
+      }}
+      onDragEnd={() => {
+        polygon.verticies = localVerticies;
         onUpdate(polygon);
       }}
     >
       <Line
         closed={true}
         stroke={selected ? theme.colors.palette.blue.base : undefined}
-        strokeWidth={selected ? 1 : undefined}
+        strokeWidth={selected ? 3 : undefined}
         strokeScaleEnabled={selected ? false : undefined}
         {...lineProps}
         points={relativeKonvaCoordinates}
         shadowEnabled={true}
       />
       {selected && (
-        polygon.verticies.map((v, i) => (
-          <Anchor
-            key={i}
-            position={{ x: v.x - groupX, y: v.y - groupY }}
-            onMove={(newPos,e) => {
-              const v2 = { x: newPos.x + groupX, y: newPos.y + groupY };
-              polygon.verticies[i] = v2;
-
-              const groupX2 = polygon.verticies.reduce((min, v) => Math.min(min, v.x), Number.MAX_VALUE);
-              const groupY2 = polygon.verticies.reduce((min, v) => Math.min(min, v.y), Number.MAX_VALUE);
-
-              const newRelative = { x: v2.x - groupX2, y: v2.y - groupY2 };
-              e.target.x(newRelative.x)
-              e.target.y(newRelative.y)
-
-              onUpdate(polygon)
-            }}
+        <>
+          <Line
+            closed={true}
+            stroke={theme.colors.palette.blue.base}
+            strokeWidth={2}
+            strokeScaleEnabled={false}
+            points={relativeKonvaCoordinates}
           />
-        ))
+          {localVerticies.map((v, i) => (
+            <Anchor
+              key={i}
+              position={{ x: v.x - groupX, y: v.y - groupY }}
+              onMove={(newPos, e) => {
+                const v2 = { x: newPos.x + groupX, y: newPos.y + groupY };
+                localVerticies[i] = v2;
+
+                const groupX2 = localVerticies.reduce((min, v) => Math.min(min, v.x), Number.MAX_VALUE);
+                const groupY2 = localVerticies.reduce((min, v) => Math.min(min, v.y), Number.MAX_VALUE);
+
+                const newRelative = { x: v2.x - groupX2, y: v2.y - groupY2 };
+                e.target.x(newRelative.x)
+                e.target.y(newRelative.y)
+
+                setLocalVerticies([...localVerticies])
+              }}
+              onMoveEnd={() => {
+                polygon.verticies = localVerticies;
+                onUpdate(polygon);
+              }}
+              firstAnchor={adding && i === 0}
+            />
+          ))}
+        </>
       )}
     </Group>
   );
