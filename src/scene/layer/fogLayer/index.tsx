@@ -6,11 +6,11 @@ import { IconCloud, IconCloudOff, useTheme, IconTrash2, IconEye, IconEyeOff } fr
 
 import { ILayerComponentProps, ILayer } from '..';
 import ToolbarPortal from '../toolbarPortal';
-import { IPolygon } from './rayCaster';
 import ToolbarItem from '../toolbarItem';
-import EditablePolygon from './editablePolygon';
+import EditablePolygon, { IPolygon, PolygonType } from './editablePolygon';
 import { useTablePPI } from '../../../settings';
 import { css } from 'emotion';
+import { useKeyPress } from '../../../utils';
 
 export interface ILightSource {
   position: Vector2d
@@ -29,31 +29,15 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
   const layerRef = useRef<Konva.Layer>();
   const tablePPI = useTablePPI();
 
-  const [localLayer, setLocalLayer] = useState(layer);
   const [addingPolygon, setAddingPolygon] = useState<IPolygon | null>(null)
   const [selectedPolygon, setSelectedPolygon] = useState<IPolygon | null>(null)
 
-  const setLocalLayerThrottled = useCallback((value: IFogLayer) => {
-    const timer = requestAnimationFrame(() => setLocalLayer(value));
-    return () => cancelAnimationFrame(timer);
-  }, [setLocalLayer])
-
   useEffect(() => {
-    setLocalLayerThrottled(layer);
-  }, [layer, setLocalLayerThrottled])
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (layer !== localLayer) {
-        onUpdate(localLayer);
-      }
-    }, 100)
-    return () => clearTimeout(timeout);
-  }, [localLayer, layer, onUpdate])
-
-  useEffect(() => {
-    setSelectedPolygon(null);
-    setAddingPolygon(null);
+    if (!active) {
+      console.log('not active');
+      setSelectedPolygon(null);
+      setAddingPolygon(null);
+    }
   }, [active, setSelectedPolygon, setAddingPolygon])
 
   useEffect(() => {
@@ -61,6 +45,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
     const stage = layerRef.current.parent;
 
     function onParentClick() {
+      console.log('parent clicked');
       setSelectedPolygon(null);
     }
     stage.on('click.konva', onParentClick);
@@ -77,12 +62,13 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
           onClick={() => {
             const poly = {
               verticies: [],
+              type: PolygonType.FOG,
               visibleOnTable: true
             } as IPolygon;
-            localLayer.fogPolygons.push(poly)
+            layer.fogPolygons.push(poly)
             setSelectedPolygon(poly);
             setAddingPolygon(poly);
-            setLocalLayerThrottled(localLayer);
+            onUpdate(layer);
           }}
         />
         <ToolbarItem
@@ -92,23 +78,24 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
           onClick={() => {
             const poly = {
               verticies: [],
+              type: PolygonType.FOG_CLEAR,
               visibleOnTable: true
             } as IPolygon;
-            localLayer.fogClearPolygons.push(poly)
+            layer.fogClearPolygons.push(poly)
             setSelectedPolygon(poly);
             setAddingPolygon(poly);
-            setLocalLayerThrottled(localLayer);
+            onUpdate(layer);
           }}
         />
         <ToolbarItem
-          label="Add Fog Clear"
+          label={selectedPolygon && selectedPolygon.visibleOnTable ? 'Hide on Table' : 'Show on Table'}
           disabled={!selectedPolygon}
           icon={selectedPolygon && selectedPolygon.visibleOnTable ? <IconEye /> : <IconEyeOff />}
           keyboardShortcuts={['d']}
           onClick={() => {
             if (!selectedPolygon) return;
             selectedPolygon.visibleOnTable = !selectedPolygon.visibleOnTable;
-            setLocalLayer({ ...localLayer })
+            onUpdate({ ...layer })
           }}
         />
         <div className={css`flex-grow: 2;`} />
@@ -119,52 +106,76 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
           onClick={() => {
             if (!selectedPolygon) return;
 
-            const fogPolygonIndex = localLayer.fogPolygons.indexOf(selectedPolygon);
+            const fogPolygonIndex = layer.fogPolygons.indexOf(selectedPolygon);
             if (fogPolygonIndex !== -1) {
-              localLayer.fogPolygons.splice(fogPolygonIndex, 1);
-              localLayer.fogPolygons = [...localLayer.fogPolygons];
+              layer.fogPolygons.splice(fogPolygonIndex, 1);
+              layer.fogPolygons = [...layer.fogPolygons];
             }
 
-            const fogClearPolygonIndex = localLayer.fogClearPolygons.indexOf(selectedPolygon);
+            const fogClearPolygonIndex = layer.fogClearPolygons.indexOf(selectedPolygon);
             if (fogClearPolygonIndex !== -1) {
-              localLayer.fogClearPolygons.splice(fogClearPolygonIndex, 1);
-              localLayer.fogClearPolygons = [...localLayer.fogClearPolygons];
+              layer.fogClearPolygons.splice(fogClearPolygonIndex, 1);
+              layer.fogClearPolygons = [...layer.fogClearPolygons];
             }
 
-            setLocalLayer({ ...localLayer })
+            onUpdate({ ...layer })
             setSelectedPolygon(null);
           }}
           keyboardShortcuts={['Delete', 'Backspace']}
         />
       </>
     );
-  }, [selectedPolygon, localLayer, setLocalLayerThrottled]);
+  }, [selectedPolygon, layer, onUpdate]);
 
   useEffect(() => {
-    if (isTable) {
-      if (layerRef.current) {
-        console.time('batchDraw');
-        layerRef.current!.getLayer().batchDraw();
-        layerRef.current.cache({ pixelRatio: Math.min(tablePPI ? 0.002 * tablePPI : 0.1, 0.4), imageSmoothingEnabled: false });
-        console.timeEnd('batchDraw');
-      }
+    if (isTable && layerRef.current && tablePPI) {
+      layerRef.current.canvas._canvas.className = css`
+        filter: blur(${tablePPI / 10}px);
+      `;
     }
-  }, [layerRef, isTable, localLayer, tablePPI]);
+  }, [layerRef, isTable, tablePPI]);
+
+  const onPolygonAdded = useCallback(() => {
+    console.log('editablePolygon onAdded');
+    if (addingPolygon?.verticies && addingPolygon.verticies.length < 3) {
+      console.log('removing polygon because < 3 verticies');
+      const collection = addingPolygon.type === PolygonType.FOG ? layer.fogPolygons : layer.fogClearPolygons;
+      const i = collection.indexOf(addingPolygon);
+      collection.splice(i, 1);
+    }
+    
+    setAddingPolygon(null);
+    setSelectedPolygon(null);
+    onUpdate({ ...layer });
+  }, [setAddingPolygon, layer, onUpdate, addingPolygon])
+
+  const isEscapePressed = useKeyPress('Escape');
+  const isEnterPressed = useKeyPress('Enter');
+  const shouldEndAdd = isEnterPressed || isEscapePressed;
+  useEffect(() => {
+    if (addingPolygon && shouldEndAdd) {
+      onPolygonAdded();
+    }
+  }, [addingPolygon, shouldEndAdd, onPolygonAdded])
+
+  const onPolygonUpdated = useCallback(() => {
+    onUpdate({ ...layer });
+  }, [onUpdate, layer])
 
   return (
     <Layer
       ref={layerRef as any}
       listening={active}
-      filters={isTable ? [Konva.Filters.Blur] : undefined}
-      blurRadius={isTable ? 2 : undefined}
       sceneFunc={console.log}
     >
       {active && <ToolbarPortal>{toolbar}</ToolbarPortal>}
 
-      {localLayer.fogPolygons.map((fogPoly, i) => {
+      {layer.fogPolygons.map((fogPoly, i) => {
+        fogPoly.type = PolygonType.FOG;
+        if (isTable && !fogPoly.visibleOnTable) return null;
+
         const selected = selectedPolygon === fogPoly;
         const adding = addingPolygon === fogPoly;
-        if (isTable && !fogPoly.visibleOnTable) return null;
         return (
           <EditablePolygon
             key={`f${i}`}
@@ -175,33 +186,22 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
 
             selectable={!addingPolygon}
             selected={selected}
-            onSelected={() => {
-              setSelectedPolygon(fogPoly);
-            }}
+            onSelected={() => setSelectedPolygon(fogPoly)}
 
             adding={adding}
-            onAdded={() => {
-              if (addingPolygon?.verticies && addingPolygon.verticies.length < 3) {
-                const i = localLayer.fogPolygons.indexOf(addingPolygon);
-                localLayer.fogPolygons.splice(i, 1);
-              }
-              setAddingPolygon(null);
-              setSelectedPolygon(null);
-              onUpdate({ ...localLayer })
-            }}
 
-            onUpdate={(newPoly) => {
-              localLayer.fogPolygons[i] = newPoly;
-              setLocalLayerThrottled({ ...localLayer });
-            }}
+            onUpdate={onPolygonUpdated}
           />
         )
       })}
 
-      {localLayer.fogClearPolygons?.map((fogPoly, i) => {
+      {layer.fogClearPolygons?.map((fogPoly, i) => {
+        fogPoly.type = PolygonType.FOG_CLEAR;
+        if (isTable && !fogPoly.visibleOnTable) return null;
+
         const selected = selectedPolygon === fogPoly;
         const adding = addingPolygon === fogPoly;
-        if (isTable && !fogPoly.visibleOnTable) return null;
+
         return (
           <EditablePolygon
             key={`cf${i}`}
@@ -213,25 +213,11 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
 
             selectable={!addingPolygon}
             selected={selected}
-            onSelected={() => {
-              setSelectedPolygon(fogPoly);
-            }}
+            onSelected={() => setSelectedPolygon(fogPoly)}
 
             adding={adding}
-            onAdded={() => {
-              if (addingPolygon?.verticies && addingPolygon.verticies.length < 3) {
-                const i = localLayer.fogClearPolygons.indexOf(addingPolygon);
-                localLayer.fogClearPolygons.splice(i, 1);
-              }
-              setAddingPolygon(null);
-              setSelectedPolygon(null);
-              setLocalLayer({ ...localLayer })
-            }}
 
-            onUpdate={(newPoly) => {
-              localLayer.fogClearPolygons[i] = newPoly;
-              setLocalLayerThrottled({ ...localLayer });
-            }}
+            onUpdate={onPolygonUpdated}
           />
         )
       })}

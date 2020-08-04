@@ -16,7 +16,7 @@ export interface IAssetLayer extends ILayer {
 }
 
 interface Props extends ILayerComponentProps<IAssetLayer> { }
-const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive }) => {
+const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, isTable }) => {
 	const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
 	const layerRef = useRef<Konva.Layer>();
 	const tablePPI = useTablePPI();
@@ -36,10 +36,16 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive }) 
 		if (!layerRef.current) return;
 		if (!Array.from(layer.assets.values()).some((asset) => asset.type === AssetType.VIDEO)) return;
 
-		const anim = new Konva.Animation(() => { }, layerRef.current);
+		let previousUpdate = Date.now();
+		const anim = new Konva.Animation(() => {
+			const now = Date.now();
+			// 10 FPS cap on DM display
+			if (!isTable && now - previousUpdate < 100) return false;
+			else previousUpdate = now;
+		}, layerRef.current);
 		anim.start();
 		return () => { anim.stop() }
-	}, [layerRef, layer])
+	}, [layerRef, layer, isTable])
 
 	useEffect(() => {
 		if (!layerRef.current?.parent) return;
@@ -95,10 +101,10 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive }) 
 				/>
 				<Check label="Snap to Grid" disabled={!selectedAsset} checked={!!selectedAsset?.snapToGrid} onChange={(e) => {
 					selectedAsset!.snapToGrid = e.target.checked;
-          onUpdate({
-            ...layer
-          })
-        }} />
+					onUpdate({
+						...layer
+					})
+				}} />
 				<div className={css`flex-grow: 2;`} />
 				<ToolbarItem
 					icon={<IconTrash2 />}
