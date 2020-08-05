@@ -30,6 +30,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
 
   const [addingPolygon, setAddingPolygon] = useState<IPolygon | null>(null)
   const [selectedPolygon, setSelectedPolygon] = useState<IPolygon | null>(null)
+  const [selectedLight, setSelectedLight] = useState<ILightSource | null>(null)
 
   const collections = {
     [PolygonType.FOG]: layer.fogPolygons,
@@ -41,8 +42,9 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
     if (!active) {
       setSelectedPolygon(null);
       setAddingPolygon(null);
+      setSelectedLight(null)
     }
-  }, [active, setSelectedPolygon, setAddingPolygon])
+  }, [active, setSelectedPolygon, setAddingPolygon, setSelectedLight])
 
   useEffect(() => {
     if (!layerRef.current?.parent || addingPolygon) return;
@@ -50,12 +52,13 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
 
     function onParentClick(e: KonvaEventObject<MouseEvent>) {
       if (e.evt.button === 0) {
+        setSelectedLight(null);
         setSelectedPolygon(null);
       }
     }
     stage.on('click', onParentClick);
     return () => { stage.off('click', onParentClick) }
-  }, [layerRef, addingPolygon, setSelectedPolygon])
+  }, [layerRef, addingPolygon, setSelectedPolygon, setSelectedLight])
 
   const toolbar = useMemo(() => {
     return (
@@ -72,6 +75,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
             } as IPolygon;
             setSelectedPolygon(poly);
             setAddingPolygon(poly);
+            setSelectedLight(null);
           }}
         />
         <ToolbarItem
@@ -86,6 +90,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
             } as IPolygon;
             setSelectedPolygon(poly);
             setAddingPolygon(poly);
+            setSelectedLight(null);
           }}
         />
         <ToolbarItem
@@ -96,6 +101,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
               position: { x: 0, y: 0 }
             } as ILightSource;
             layer.lightSources.push(light);
+            setSelectedLight(light);
             onUpdate({ ...layer });
           }}
         />
@@ -110,6 +116,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
             } as IPolygon;
             setSelectedPolygon(poly);
             setAddingPolygon(poly);
+            setSelectedLight(null);
           }}
         />
         <ToolbarItem
@@ -126,25 +133,35 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
         <div className={css`flex-grow: 2;`} />
         <ToolbarItem
           icon={<IconTrash2 />}
-          label="Delete Asset"
-          disabled={selectedPolygon === null}
+          label="Delete"
+          disabled={selectedPolygon === null && selectedLight === null}
           onClick={() => {
-            if (!selectedPolygon) return;
-            const collection = collections[selectedPolygon.type];
+            if (selectedPolygon) {
+              const collection = collections[selectedPolygon.type];
 
-            const fogPolygonIndex = collection.indexOf(selectedPolygon);
-            if (fogPolygonIndex !== -1) {
-              collection.splice(fogPolygonIndex, 1);
+              const polygonIndex = collection.indexOf(selectedPolygon);
+              if (polygonIndex !== -1) {
+                collection.splice(polygonIndex, 1);
+              }
+
+              onUpdate({ ...layer });
+              setSelectedPolygon(null);
             }
+            else if (selectedLight) {
+              const index = layer.lightSources.indexOf(selectedLight);
+              if (index !== -1) {
+                layer.lightSources.splice(index, 1);
+              } 
 
-            onUpdate({ ...layer })
-            setSelectedPolygon(null);
+              onUpdate({...layer});
+              setSelectedLight(null);
+            }
           }}
           keyboardShortcuts={['Delete', 'Backspace']}
         />
       </>
     );
-  }, [selectedPolygon, layer, onUpdate, collections]);
+  }, [selectedPolygon, selectedLight, layer, onUpdate, collections]);
 
   useEffect(() => {
     if (isTable && layerRef.current && tablePPI) {
@@ -215,7 +232,8 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
         case PolygonType.LIGHT_OBSTRUCTION:
           return {
             stroke: active ? (poly.visibleOnTable ? theme.colors.palette.violet.dark : theme.colors.palette.violet.lightest) : undefined,
-            strokeWidth: active ? 5 : undefined,
+            strokeWidth: active ? 10 : undefined,
+            hitStrokeWidth: 20,
             strokeScaleEnabled: false,
             closed: false
           }
@@ -252,7 +270,10 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
 
             selectable={!addingPolygon}
             selected={selected}
-            onSelected={() => setSelectedPolygon(poly)}
+            onSelected={() => {
+              setSelectedPolygon(poly)
+              setSelectedLight(null);
+            }}
 
             adding={false}
 
@@ -271,6 +292,11 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
           onUpdate={(light) => {
             layer.lightSources[i] = light;
             onUpdate({ ...layer });
+          }}
+          selected={selectedLight === light}
+          onSelected={() => {
+            setSelectedLight(light)
+            setSelectedPolygon(null);
           }}
         />
       ))}
