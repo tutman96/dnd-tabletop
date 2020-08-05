@@ -40,8 +40,6 @@ export function createNewLayer(type: LayerType) {
 		(layer as IAssetLayer).assets = new Map();
 	}
 	else if (type === LayerType.FOG) {
-		(layer as IFogLayer).obstructionPolygons = [];
-		(layer as IFogLayer).lightSources = [];
 		(layer as IFogLayer).fogPolygons = [];
 		(layer as IFogLayer).fogClearPolygons = [];
 	}
