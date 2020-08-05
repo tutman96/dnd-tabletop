@@ -6,6 +6,7 @@ import { useTheme } from 'sancho';
 import { getVisibilityPolygon } from './rayCastingUtils';
 import { useCurrentScene } from '../../canvas';
 import { useTableResolution, useTablePPI } from '../../../settings';
+import { LineConfig } from 'konva/types/shapes/Line';
 
 export interface ILightSource {
   position: Vector2d
@@ -35,8 +36,36 @@ function useScreenPolygon(): IPolygon {
   };
 }
 
-type Props = { light: ILightSource, displayIcon: boolean, obstructionPolygons: Array<IPolygon>, onUpdate: (light: ILightSource) => void, isTable: boolean };
-const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructionPolygons, onUpdate, isTable }) => {
+const VisibilityPolygon: React.SFC<{ position: Vector2d, obstructionPolygons: Array<IPolygon> } & Partial<LineConfig>> = ({ position, obstructionPolygons, ...lineOptions }) => {
+  const screenPolygon = useScreenPolygon();
+
+  const obstructionWithScreen = [...obstructionPolygons.filter((p) => p.visibleOnTable), screenPolygon];
+  const visibilityPolygon = getVisibilityPolygon(position, obstructionWithScreen);
+
+  const visibilityLinePoints = visibilityPolygon.verticies
+    .map((v) => [v.x, v.y]).flat();
+
+  return (
+    <Line
+      {...lineOptions}
+      points={visibilityLinePoints}
+      listening={false}
+    />
+  )
+}
+
+const fillGradientColorStops = [0, 'white', 0.45, 'white', 0.55, 'rgba(255,255,255,0.5)', 1, 'transparent'];
+
+type Props = {
+  light: ILightSource,
+  displayIcon: boolean,
+  obstructionPolygons: Array<IPolygon>,
+  onUpdate: (light: ILightSource) => void,
+  isTable: boolean,
+  selected: boolean,
+  onSelected: () => void,
+};
+const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructionPolygons, onUpdate, isTable, selected, onSelected }) => {
   const theme = useTheme();
   const ppi = useTablePPI();
 
@@ -46,34 +75,28 @@ const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructio
     setLocalPosition(light.position);
   }, [light.position, setLocalPosition])
 
-  const obstructionWithScreen = [...obstructionPolygons.filter((p) => p.visibleOnTable), useScreenPolygon()];
-
-  const visibilityPolygon = getVisibilityPolygon(localPosition, obstructionWithScreen);
-  const visibilityLinePoints = visibilityPolygon.verticies
-    .map((v) => [v.x, v.y]).flat();
-
   if (!ppi) return null;
 
   return (
     <>
-      <Line
-        closed={true}
+      <VisibilityPolygon
+        position={localPosition}
+        obstructionPolygons={obstructionPolygons}
 
+        closed={true}
         fillRadialGradientStartPoint={localPosition}
         fillRadialGradientEndPoint={localPosition}
         fillRadialGradientStartRadius={0}
         fillRadialGradientEndRadius={ppi * (40 / 5)} // TODO: make configurable
-        fillRadialGradientColorStops={[0, 'white', 0.45, 'white', 0.55, 'rgba(255,255,255,0.5)', 1, 'transparent']}
+        fillRadialGradientColorStops={fillGradientColorStops}
         opacity={isTable ? 1 : 0.5}
         globalCompositeOperation="destination-out"
-        points={visibilityLinePoints}
-        listening={false}
       />
       {displayIcon && (
         <Shape
           x={light.position.x}
           y={light.position.y}
-          draggable={true}
+          draggable={selected}
           sceneFunc={(context, shape) => {
             // custom scene function for rendering an "absolute" radius circle
             const absoluteScale = shape.getAbsoluteScale();
@@ -90,12 +113,21 @@ const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructio
             })
           }}
           onDragEnd={e => {
-            onUpdate({
-              ...light,
-              position: { x: e.target.x(), y: e.target.y() }
-            });
+            light.position = { x: e.target.x(), y: e.target.y() };
+            onUpdate(light);
           }}
-          fill={theme.colors.palette.yellow.lightest}
+          onClick={(e) => {
+            if (e.evt.button === 0) {
+              e.cancelBubble = true;
+              onSelected();
+            }
+          }}
+          fill={theme.colors.palette.violet.lightest}
+          strokeEnabled={selected}
+          stroke={selected ? theme.colors.palette.blue.base : undefined}
+          strokeWidth={5}
+          strokeScaleEnabled={false}
+          dash={[2, 2]}
         />
       )}
     </>
