@@ -104,9 +104,10 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
             setSelectedLight(light);
             onUpdate({ ...layer });
           }}
+          keyboardShortcuts={['e']}
         />
         <ToolbarItem
-          label="Add Light Obstruction"
+          label="Add Wall"
           icon={<IconZapOff />}
           onClick={() => {
             const poly = {
@@ -118,6 +119,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
             setAddingPolygon(poly);
             setSelectedLight(null);
           }}
+          keyboardShortcuts={['w']}
         />
         <ToolbarItem
           label={selectedPolygon && selectedPolygon.visibleOnTable ? 'Hide on Table' : 'Show on Table'}
