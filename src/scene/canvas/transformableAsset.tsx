@@ -49,12 +49,6 @@ const TransformableAsset: React.SFC<Props> = ({
 				height={rectTransform.height}
 				width={rectTransform.width}
 				rotation={rectTransform.rotation}
-				onMouseUp={e => {
-					if (e.evt.button === 0) {
-						e.cancelBubble = true;
-						onSelected();
-					}
-				}}
 				onClick={e => {
 					if (e.evt.button === 0) {
 						e.cancelBubble = true;

@@ -5,6 +5,7 @@ import Konva from 'konva';
 
 import { Vector2d } from 'konva/types/types';
 import { KonvaEventObject } from 'konva/types/Node';
+import { useKeyPress } from '../../utils';
 
 const Anchor: React.SFC<{
   firstAnchor: boolean,
@@ -56,12 +57,13 @@ interface Props {
   onUpdate: (polygon: IPolygon) => void
 
   adding: boolean
+  onAdded?: () => void
 
   selectable: boolean
   selected: boolean
   onSelected?: () => void
 }
-const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & KonvaNodeEvents> = ({ polygon, onUpdate, adding, selectable, selected, onSelected, ...lineProps }) => {
+const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & KonvaNodeEvents> = ({ polygon, onUpdate, adding, onAdded, selectable, selected, onSelected, ...lineProps }) => {
   const theme = useTheme();
   const groupRef = useRef<Konva.Group>();
 
@@ -105,6 +107,15 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
     }
   }, [groupRef, adding, localVerticies, onUpdate, polygon])
 
+  const isEscapePressed = useKeyPress('Escape');
+  const isEnterPressed = useKeyPress('Enter');
+  const shouldEndAdd = isEnterPressed || isEscapePressed;
+  useEffect(() => {
+    if (adding && shouldEndAdd && onAdded) {
+      onAdded();
+    }
+  }, [adding, shouldEndAdd, onAdded])
+
   return (
     <Group
       ref={groupRef as any}
@@ -112,12 +123,6 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
       x={groupX}
       y={groupY}
       listening={selectable}
-      onMouseUp={e => {
-        if (e.evt.button === 0 && onSelected && selectable) {
-          e.cancelBubble = true;
-          onSelected();
-        }
-      }}
       onClick={e => {
         if (e.evt.button === 0 && onSelected && selectable) {
           e.cancelBubble = true;

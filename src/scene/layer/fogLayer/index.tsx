@@ -1,25 +1,17 @@
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { Layer } from 'react-konva';
-import { Vector2d } from 'konva/types/types';
 import Konva from 'konva';
 import { IconCloud, IconCloudOff, useTheme, IconTrash2, IconEye, IconEyeOff } from 'sancho';
 
 import { ILayerComponentProps, ILayer } from '..';
 import ToolbarPortal from '../toolbarPortal';
 import ToolbarItem from '../toolbarItem';
-import EditablePolygon, { IPolygon, PolygonType } from './editablePolygon';
+import EditablePolygon, { IPolygon, PolygonType } from '../editablePolygon';
 import { useTablePPI } from '../../../settings';
 import { css } from 'emotion';
-import { useKeyPress } from '../../../utils';
 import { KonvaEventObject } from 'konva/types/Node';
 
-export interface ILightSource {
-  position: Vector2d
-}
-
 export interface IFogLayer extends ILayer {
-  obstructionPolygons: Array<IPolygon>;
-  lightSources: Array<ILightSource>;
   fogPolygons: Array<IPolygon>;
   fogClearPolygons: Array<IPolygon>;
 }
@@ -35,7 +27,6 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
 
   useEffect(() => {
     if (!active) {
-      console.log('not active');
       setSelectedPolygon(null);
       setAddingPolygon(null);
     }
@@ -68,10 +59,8 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
               type: PolygonType.FOG,
               visibleOnTable: true
             } as IPolygon;
-            layer.fogPolygons.push(poly)
             setSelectedPolygon(poly);
             setAddingPolygon(poly);
-            onUpdate(layer);
           }}
         />
         <ToolbarItem
@@ -84,10 +73,8 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
               type: PolygonType.FOG_CLEAR,
               visibleOnTable: true
             } as IPolygon;
-            layer.fogClearPolygons.push(poly)
             setSelectedPolygon(poly);
             setAddingPolygon(poly);
-            onUpdate(layer);
           }}
         />
         <ToolbarItem
@@ -139,31 +126,43 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
   }, [layerRef, isTable, tablePPI]);
 
   const onPolygonAdded = useCallback(() => {
-    console.log('editablePolygon onAdded');
-    if (addingPolygon?.verticies && addingPolygon.verticies.length < 3) {
-      console.log('removing polygon because < 3 verticies');
+    if (addingPolygon) {
       const collection = addingPolygon.type === PolygonType.FOG ? layer.fogPolygons : layer.fogClearPolygons;
-      const i = collection.indexOf(addingPolygon);
-      collection.splice(i, 1);
-    }
 
-    setAddingPolygon(null);
-    setSelectedPolygon(null);
-    onUpdate({ ...layer });
+      if (addingPolygon?.verticies && addingPolygon.verticies.length < 3) {
+        console.log('removing polygon because < 3 verticies');
+        const i = collection.indexOf(addingPolygon);
+        collection.splice(i, 1);
+      }
+
+      setAddingPolygon(null);
+      setSelectedPolygon(null);
+      collection.push(addingPolygon);
+
+      onUpdate({ ...layer });
+    }
   }, [setAddingPolygon, layer, onUpdate, addingPolygon])
-
-  const isEscapePressed = useKeyPress('Escape');
-  const isEnterPressed = useKeyPress('Enter');
-  const shouldEndAdd = isEnterPressed || isEscapePressed;
-  useEffect(() => {
-    if (addingPolygon && shouldEndAdd) {
-      onPolygonAdded();
-    }
-  }, [addingPolygon, shouldEndAdd, onPolygonAdded])
 
   const onPolygonUpdated = useCallback(() => {
     onUpdate({ ...layer });
   }, [onUpdate, layer])
+
+  const getPolygonStyle = useCallback((poly: IPolygon) => {
+    let opacity = isTable ? 1 : 0.6;
+    let fill = isTable ? 'black' : theme.colors.palette.gray.dark;
+
+    if (poly.type === PolygonType.FOG_CLEAR) {
+      opacity = isTable ? 1 : (poly.visibleOnTable ? 0.3 : 0.6);
+      fill = isTable ? 'black' : theme.colors.palette.gray.lightest;
+    }
+
+    return { opacity, fill };
+  }, [isTable, theme])
+
+  const allPolygons = [
+    ...layer.fogPolygons.map((l) => { l.type = PolygonType.FOG; return l }),
+    ...layer.fogClearPolygons.map((l) => { l.type = PolygonType.FOG_CLEAR; return l })
+  ];
 
   return (
     <Layer
@@ -173,57 +172,57 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
     >
       {active && <ToolbarPortal>{toolbar}</ToolbarPortal>}
 
-      {layer.fogPolygons.map((fogPoly, i) => {
-        fogPoly.type = PolygonType.FOG;
-        if (isTable && !fogPoly.visibleOnTable) return null;
+      {allPolygons.map((poly, i) => {
+        if (isTable && !poly.visibleOnTable) return null;
 
-        const selected = selectedPolygon === fogPoly;
-        const adding = addingPolygon === fogPoly;
+        const { opacity, fill } = getPolygonStyle(poly);
+
+        const selected = selectedPolygon === poly;
         return (
           <EditablePolygon
-            key={`f${i}`}
-            polygon={fogPoly}
+            key={i}
+            polygon={poly}
 
-            opacity={isTable ? 1 : 0.6}
-            fill={isTable ? 'black' : theme.colors.palette.gray.dark}
+            opacity={opacity}
+            fill={fill}
+            globalCompositeOperation={
+              poly.type === PolygonType.FOG_CLEAR ?
+                (isTable ? "destination-out" : 'source-over') :
+                undefined
+            }
 
             selectable={!addingPolygon}
             selected={selected}
-            onSelected={() => setSelectedPolygon(fogPoly)}
+            onSelected={() => setSelectedPolygon(poly)}
 
-            adding={adding}
+            adding={false}
 
             onUpdate={onPolygonUpdated}
           />
         )
       })}
 
-      {layer.fogClearPolygons?.map((fogPoly, i) => {
-        fogPoly.type = PolygonType.FOG_CLEAR;
-        if (isTable && !fogPoly.visibleOnTable) return null;
-
-        const selected = selectedPolygon === fogPoly;
-        const adding = addingPolygon === fogPoly;
+      {addingPolygon && (() => {
+        const { opacity, fill } = getPolygonStyle(addingPolygon);
 
         return (
           <EditablePolygon
-            key={`cf${i}`}
-            polygon={fogPoly}
+            key="adding"
+            polygon={addingPolygon}
 
-            opacity={isTable ? 1 : (fogPoly.visibleOnTable ? 0.3 : 0.6)}
-            fill={isTable ? 'black' : theme.colors.palette.gray.lightest}
-            globalCompositeOperation={isTable ? "destination-out" : 'source-over'}
+            opacity={opacity}
+            fill={fill}
 
-            selectable={!addingPolygon}
-            selected={selected}
-            onSelected={() => setSelectedPolygon(fogPoly)}
+            selectable={false}
+            selected={true}
 
-            adding={adding}
+            adding={true}
+            onAdded={onPolygonAdded}
 
             onUpdate={onPolygonUpdated}
           />
-        )
-      })}
+        );
+      })()}
     </Layer>
   );
 }
