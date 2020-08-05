@@ -178,29 +178,50 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
   }, [onUpdate, layer])
 
   const getPolygonStyle = useCallback((poly: IPolygon): Partial<LineConfig> => {
-    switch (poly.type) {
-      case PolygonType.FOG:
-        return {
-          opacity: isTable ? 1 : 0.6,
-          fill: isTable ? 'black' : theme.colors.palette.gray.dark,
-          closed: true
-        }
-      case PolygonType.FOG_CLEAR:
-        return {
-          opacity: isTable ? 1 : (poly.visibleOnTable ? 0.3 : 0.6),
-          fill: isTable ? 'black' : theme.colors.palette.gray.lightest,
-          closed: true
-        };
-      case PolygonType.LIGHT_OBSTRUCTION:
-        return {
-          opacity: 1,
-          stroke: isTable ? undefined : poly.visibleOnTable ? theme.colors.palette.violet.dark : theme.colors.palette.violet.lightest,
-          strokeWidth: isTable ? undefined : 5,
-          strokeScaleEnabled: false,
-          closed: false
-        }
+    if (isTable) {
+      switch (poly.type) {
+        case PolygonType.FOG:
+          return {
+            fill: 'black',
+            closed: true
+          }
+        case PolygonType.FOG_CLEAR:
+          return {
+            fill: 'black',
+            globalCompositeOperation: "destination-out",
+            closed: true
+          };
+        case PolygonType.LIGHT_OBSTRUCTION:
+          return {
+            closed: false
+          }
+      }
     }
-  }, [isTable, theme])
+    else {
+      switch (poly.type) {
+        case PolygonType.FOG:
+          return {
+            opacity: active ? 0.6 : 0.4,
+            fill: theme.colors.palette.gray.dark,
+            closed: true
+          }
+        case PolygonType.FOG_CLEAR:
+          return {
+            opacity: poly.visibleOnTable ? (active ? 0.3 : 1) : 0.6,
+            fill: theme.colors.palette.gray.lightest,
+            globalCompositeOperation: active ? undefined : "destination-out",
+            closed: true
+          };
+        case PolygonType.LIGHT_OBSTRUCTION:
+          return {
+            stroke: active ? (poly.visibleOnTable ? theme.colors.palette.violet.dark : theme.colors.palette.violet.lightest) : undefined,
+            strokeWidth: active ? 5 : undefined,
+            strokeScaleEnabled: false,
+            closed: false
+          }
+      }
+    }
+  }, [isTable, active, theme])
 
   const allPolygons = [
     ...layer.fogPolygons.map((l) => { l.type = PolygonType.FOG; return l }),
@@ -228,11 +249,6 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
             polygon={poly}
 
             {...style}
-            globalCompositeOperation={
-              poly.type === PolygonType.FOG_CLEAR ?
-                (isTable ? "destination-out" : 'source-over') :
-                undefined
-            }
 
             selectable={!addingPolygon}
             selected={selected}
