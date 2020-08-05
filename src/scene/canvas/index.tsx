@@ -1,14 +1,20 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { css } from 'emotion';
 
 import { IScene } from '..';
 import DraggableStage from './draggableStage';
-import { LayerTypeToComponent, LayerType, ILayer, createNewLayer } from '../layer';
+import { LayerTypeToComponent, ILayer, createNewLayer } from '../layer';
+import LayerType from "../layer/layerType";
 import { deleteLayer } from '../layer';
 import LayerList from './layerList';
 import { ToolbarPortalProvider } from '../layer/toolbarPortal';
 import TableViewOverlay, { TableViewLayer } from '../layer/tableView';
 import { useExtendedTheme } from '../../theme';
+
+export const CurrentSceneContext = React.createContext<IScene | null>(null);
+export function useCurrentScene() {
+	return useContext(CurrentSceneContext);
+}
 
 type Props = { scene: IScene, onUpdate: (scene: IScene) => void };
 const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
@@ -96,7 +102,6 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 	return (
 		<>
 			<ToolbarPortalProvider>
-				{/* Canvas */}
 				<DraggableStage
 					className={css`
 					flex-grow: 2;
@@ -104,6 +109,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 					height: calc(100vh - ${theme.headerHeight}px);
 				`}
 				>
+					<CurrentSceneContext.Provider value={scene}>
 					{
 						scene.layers.map((layer) => {
 							const Component = LayerTypeToComponent[layer.type];
@@ -135,6 +141,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 						showBorder={true}
 						showGrid={true}
 					/>
+					</CurrentSceneContext.Provider>
 				</DraggableStage>
 			</ToolbarPortalProvider>
 

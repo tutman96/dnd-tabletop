@@ -6,6 +6,7 @@ import { Global } from '@emotion/core';
 import { Helmet } from 'react-helmet';
 import { LayerTypeToComponent } from '../scene/layer';
 import TableViewOverlay, { TableViewLayer } from '../scene/layer/tableView';
+import { CurrentSceneContext } from '../scene/canvas';
 
 const { useOneValue } = useSceneDatabase();
 const { useOneValue: useOneSettingValue } = useSettingsDatabase();
@@ -36,8 +37,8 @@ const TablePage: React.SFC<Props> = () => {
 	}, [])
 
 	if (!tableResolution) {
-    return null;
-  }
+		return null;
+	}
 
 	return (
 		<>
@@ -59,39 +60,41 @@ const TablePage: React.SFC<Props> = () => {
 					offsetY={tableScene.table.offset.y}
 					scaleX={tableScene.table.scale}
 					scaleY={tableScene.table.scale}
-					// clipFunc={(ctx: CanvasRenderingContext2D) => {
-          //   ctx.beginPath();
-          //   ctx.rect(tableScene.table.offset.x, tableScene.table.offset.y, tableResolution.width, tableResolution.height);
-          //   ctx.rotate(tableScene.table.rotation);
-          //   ctx.closePath();
-          // }}
+				// clipFunc={(ctx: CanvasRenderingContext2D) => {
+				//   ctx.beginPath();
+				//   ctx.rect(tableScene.table.offset.x, tableScene.table.offset.y, tableResolution.width, tableResolution.height);
+				//   ctx.rotate(tableScene.table.rotation);
+				//   ctx.closePath();
+				// }}
 				>
-					{
-						tableScene.layers.map((layer) => {
-							const Component = LayerTypeToComponent[layer.type];
-							if (!Component || layer.visible === false) return null;
-							return (
-								<Component
-									key={layer.id}
-									isTable={true}
-									layer={layer}
-									onUpdate={() => { }}
-									active={false}
-								/>
-							);
-						})
-					}
-					<TableViewOverlay
-						layer={{
-							...TableViewLayer,
-							options: tableScene.table
-						}}
-						isTable={true}
-						active={false}
-						onUpdate={() => { }}
-						showBorder={false}
-						showGrid={tableScene.table.displayGrid}
-					/>
+					<CurrentSceneContext.Provider value={tableScene}>
+						{
+							tableScene.layers.map((layer) => {
+								const Component = LayerTypeToComponent[layer.type];
+								if (!Component || layer.visible === false) return null;
+								return (
+									<Component
+										key={layer.id}
+										isTable={true}
+										layer={layer}
+										onUpdate={() => { }}
+										active={false}
+									/>
+								);
+							})
+						}
+						<TableViewOverlay
+							layer={{
+								...TableViewLayer,
+								options: tableScene.table
+							}}
+							isTable={true}
+							active={false}
+							onUpdate={() => { }}
+							showBorder={false}
+							showGrid={tableScene.table.displayGrid}
+						/>
+					</CurrentSceneContext.Provider>
 				</Stage>
 			}
 		</>

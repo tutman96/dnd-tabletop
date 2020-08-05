@@ -1,14 +1,11 @@
-import AssetLayer, { IAssetLayer } from "./assetLayer";
 import { v4 } from "uuid";
+
 import { IScene } from "..";
 import { deleteAsset } from "../asset";
-import FogLayer, { IFogLayer } from "./fogLayer";
 
-export enum LayerType {
-	ASSETS,
-	FOG,
-	TABLE_VIEW,
-}
+import AssetLayer, { IAssetLayer } from "./assetLayer";
+import FogLayer, { IFogLayer } from "./fogLayer";
+import LayerType from "./layerType";
 
 export interface ILayer {
 	id: string
@@ -40,6 +37,8 @@ export function createNewLayer(type: LayerType) {
 		(layer as IAssetLayer).assets = new Map();
 	}
 	else if (type === LayerType.FOG) {
+		(layer as IFogLayer).lightSources = [];
+		(layer as IFogLayer).obstructionPolygons = [];
 		(layer as IFogLayer).fogPolygons = [];
 		(layer as IFogLayer).fogClearPolygons = [];
 	}

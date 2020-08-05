@@ -1,7 +1,8 @@
 import { v4 } from "uuid";
 
 import useGlobalStorage from "../storage";
-import { ILayer, LayerType, createNewLayer } from "./layer";
+import { ILayer, createNewLayer } from "./layer";
+import LayerType from "./layer/layerType";
 import { Vector2d } from "konva/types/types";
 
 export interface TableOptions {

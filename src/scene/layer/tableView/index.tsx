@@ -6,7 +6,8 @@ import { Vector2d } from 'konva/types/types';
 
 import { useTableResolution, useTablePPI } from '../../../settings';
 import { TableOptions } from '../..';
-import { ILayerComponentProps, ILayer, LayerType } from '..';
+import { ILayerComponentProps, ILayer } from '..';
+import LayerType from "../layerType";
 import ToolbarItem from '../toolbarItem';
 import ToolbarPortal from '../toolbarPortal';
 import { useKeyPress } from '../../../utils';
