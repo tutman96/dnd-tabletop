@@ -54,7 +54,7 @@ const VisibilityPolygon: React.SFC<{ position: Vector2d, obstructionPolygons: Ar
   )
 }
 
-const fillGradientColorStops = [0, 'white', 0.45, 'white', 0.55, 'rgba(255,255,255,0.5)', 1, 'transparent'];
+const fillGradientColorStops = [0, 'rgba(255,255,255,0.90)', 0.10, 'rgba(255,255,255,0.70)', 0.40, 'rgba(255,255,255,0.40)', 0.60, 'rgba(255,255,255,0.10)', 1, 'transparent'];
 
 type Props = {
   light: ILightSource,
@@ -67,7 +67,7 @@ type Props = {
 };
 const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructionPolygons, onUpdate, isTable, selected, onSelected }) => {
   const theme = useTheme();
-  const ppi = useTablePPI();
+  const ppi = useTablePPI() || 86;
 
   const [localPosition, setLocalPosition] = useState(light.position);
 
@@ -75,7 +75,6 @@ const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructio
     setLocalPosition(light.position);
   }, [light.position, setLocalPosition])
 
-  if (!ppi) return null;
 
   return (
     <>
