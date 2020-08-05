@@ -10,6 +10,7 @@ import EditablePolygon, { IPolygon, PolygonType } from '../editablePolygon';
 import { useTablePPI } from '../../../settings';
 import { css } from 'emotion';
 import { KonvaEventObject } from 'konva/types/Node';
+import ToolbarSlider from '../toolbarSlider';
 
 export interface IFogLayer extends ILayer {
   fogPolygons: Array<IPolygon>;
@@ -57,7 +58,8 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
             const poly = {
               verticies: [],
               type: PolygonType.FOG,
-              visibleOnTable: true
+              visibleOnTable: true,
+              opacity: 1,
             } as IPolygon;
             setSelectedPolygon(poly);
             setAddingPolygon(poly);
@@ -71,7 +73,8 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
             const poly = {
               verticies: [],
               type: PolygonType.FOG_CLEAR,
-              visibleOnTable: true
+              visibleOnTable: true,
+              opacity: 1,
             } as IPolygon;
             setSelectedPolygon(poly);
             setAddingPolygon(poly);
@@ -85,6 +88,20 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
           onClick={() => {
             if (!selectedPolygon) return;
             selectedPolygon.visibleOnTable = !selectedPolygon.visibleOnTable;
+            onUpdate({ ...layer })
+          }}
+        />
+        <ToolbarSlider
+          label="Opacity"
+          value={selectedPolygon ? selectedPolygon.opacity : 1}
+          disabled={!selectedPolygon}
+          min={0}
+          max={1}
+          step={0.01}
+          onChange={(e) => {
+            if (!selectedPolygon) return;
+            selectedPolygon!.opacity = +e.target.value;
+            // TODO: Add debounce
             onUpdate({ ...layer })
           }}
         />
@@ -148,11 +165,22 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
   }, [onUpdate, layer])
 
   const getPolygonStyle = useCallback((poly: IPolygon) => {
-    let opacity = isTable ? 1 : 0.6;
+    let opacity: number;
+    if (isTable) {
+      opacity = poly.opacity;
+    } else {
+      // set a range with a max of 0.6 and a min of 0.3
+      opacity = 0.3 + 0.3 * poly.opacity
+    }
     let fill = isTable ? 'black' : theme.colors.palette.gray.dark;
 
     if (poly.type === PolygonType.FOG_CLEAR) {
-      opacity = isTable ? 1 : (poly.visibleOnTable ? 0.3 : 0.6);
+      if (isTable) {
+        opacity = poly.opacity;
+      } else {
+        // set a range with a max of 0.6 and a min of 0.3
+        opacity = (poly.visibleOnTable ? 0.15 : 0.3) + 0.3 * poly.opacity
+      }
       fill = isTable ? 'black' : theme.colors.palette.gray.lightest;
     }
 

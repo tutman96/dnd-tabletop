@@ -50,6 +50,7 @@ export interface IPolygon {
   type: PolygonType,
   verticies: Array<Vector2d>
   visibleOnTable: boolean;
+  opacity: number;
 }
 
 interface Props {
