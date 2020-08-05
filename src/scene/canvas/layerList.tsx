@@ -47,14 +47,16 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, upd
 				>
 					<ListItem
 						className={css`
-								background-color: ${activeLayerId === TableViewLayer.id ? theme.colors.intent.primary.base : 'initial'} !important;
-							`}
+							background-color: ${activeLayerId === TableViewLayer.id ? theme.colors.intent.primary.base : 'initial'} !important;
+							padding: ${theme.spaces.sm} !important;
+						`}
 						contentBefore={
 							<IconButton
 								variant="ghost"
 								label={'Table View'}
 								icon={<IconTv />}
 								disabled
+								size="sm"
 							/>
 						}
 						primary={'Table View'}
@@ -67,6 +69,7 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, upd
 							key={layer.id}
 							className={css`
 								background-color: ${activeLayer === layer ? theme.colors.intent.primary.base : 'initial'} !important;
+								padding: ${theme.spaces.sm} !important;
 							`}
 							contentBefore={
 								<IconButton
@@ -77,6 +80,7 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, upd
 										e.preventDefault(); // prevent passing through to the list item
 									}}
 									icon={layer.visible ? <IconEye /> : <IconEyeOff />}
+									size="sm"
 								/>
 							}
 							primary={layer.name}
