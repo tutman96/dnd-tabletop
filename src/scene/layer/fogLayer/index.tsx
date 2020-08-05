@@ -11,6 +11,7 @@ import EditablePolygon, { IPolygon, PolygonType } from './editablePolygon';
 import { useTablePPI } from '../../../settings';
 import { css } from 'emotion';
 import { useKeyPress } from '../../../utils';
+import { KonvaEventObject } from 'konva/types/Node';
 
 export interface ILightSource {
   position: Vector2d
@@ -44,12 +45,14 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
     if (!layerRef.current?.parent || addingPolygon) return;
     const stage = layerRef.current.parent;
 
-    function onParentClick() {
-      console.log('parent clicked');
-      setSelectedPolygon(null);
+    function onParentClick(e: KonvaEventObject<MouseEvent>) {
+      console.log(e.evt.button)
+      if (e.evt.button === 0) {
+        setSelectedPolygon(null);
+      }
     }
-    stage.on('click.konva', onParentClick);
-    return () => { stage.off('click.konva', onParentClick) }
+    stage.on('click', onParentClick);
+    return () => { stage.off('click', onParentClick) }
   }, [layerRef, addingPolygon, setSelectedPolygon])
 
   const toolbar = useMemo(() => {
@@ -143,7 +146,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
       const i = collection.indexOf(addingPolygon);
       collection.splice(i, 1);
     }
-    
+
     setAddingPolygon(null);
     setSelectedPolygon(null);
     onUpdate({ ...layer });

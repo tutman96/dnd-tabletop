@@ -5,14 +5,13 @@ import Konva from 'konva';
 import { Stage } from 'react-konva';
 import { useTheme } from 'sancho';
 
-import { useKeyPress } from '../../utils';
-
 const ZOOM_SPEED = 1 / 250;
+const PAN_SPEED = 1 / 1;
 
-Konva.dragButtons = [0, 1, 2];
+Konva.dragButtons = [0];
 
-type Props = { draggable?: boolean, initialZoom?: number, className?: string };
-const DraggableStage: React.SFC<Props> = ({ draggable, initialZoom = 1, className, children }) => {
+type Props = { initialZoom?: number, className?: string };
+const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, className, children }) => {
 	const theme = useTheme();
 
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -20,7 +19,6 @@ const DraggableStage: React.SFC<Props> = ({ draggable, initialZoom = 1, classNam
 	const stageRef = useRef<Konva.Stage>();
 
 	const [zoom, setZoom] = useState(initialZoom);
-	const isShiftPressed = useKeyPress('Shift');
 
 	return (
 		<div
@@ -37,50 +35,46 @@ const DraggableStage: React.SFC<Props> = ({ draggable, initialZoom = 1, classNam
 				ref={stageRef as any}
 				width={containerSize.width}
 				height={containerSize.height}
-				draggable={draggable === undefined ? true : draggable}
-				onMouseDown={(e) => {
-					if (e.evt.buttons === 1 && !isShiftPressed) { // allow left only when shift is pressed
-						stageRef.current?.setDraggable(false)
-					}
-					else {
-						stageRef.current?.setDraggable(draggable === undefined ? true : draggable)
-					}
-				}}
-				onMouseUp={() => {
-					stageRef.current?.setDraggable(draggable === undefined ? true : draggable) // reset the draggable
-				}}
 				scale={{ x: zoom, y: zoom }}
 				onWheel={(e) => {
 					e.evt.preventDefault();
-					const oldScale = zoom;
+
+					let deltaX = -e.evt.deltaX;
+					let deltaY = -e.evt.deltaY;
+					let deltaZ = 0;
+
+					if (e.evt.ctrlKey) {
+						deltaZ = deltaY;
+						deltaY = 0;
+					}
+
+					const oldZoom = zoom;
 
 					const stage = stageRef.current!;
-					const pointer = stage.getPointerPosition();
+					const pointerPosition = stage.getPointerPosition();
 
-					if (!pointer) {
+					if (!pointerPosition) {
 						return;
 					}
 
-					var mousePointTo = {
-						x: (pointer.x - stage.x()) / oldScale,
-						y: (pointer.y - stage.y()) / oldScale,
+					const mousePointTo = {
+						x: (pointerPosition.x - stage.x()) / oldZoom,
+						y: (pointerPosition.y - stage.y()) / oldZoom,
 					};
 
-					const deltaY = e.evt.deltaY;
-					if (deltaY === 0) {
+					if (deltaX === 0 && deltaY === 0 && deltaZ === 0) {
 						return;
 					}
 
-					const zoomSpeed = 1 + (Math.abs(deltaY) * ZOOM_SPEED);
-
-					var newZoom =
-						e.evt.deltaY > 0 ? oldScale / zoomSpeed : oldScale * zoomSpeed;
-
+					const zoomSpeed = 1 + (Math.abs(deltaZ) * ZOOM_SPEED);
+					const newZoom = deltaZ < 0 ? oldZoom / zoomSpeed : oldZoom * zoomSpeed;
 					setZoom(newZoom);
 
 					var newPos = {
-						x: pointer.x - mousePointTo.x * newZoom,
-						y: pointer.y - mousePointTo.y * newZoom,
+						// x: (pointerPosition.x - mousePointTo.x + (deltaX * PAN_SPEED)) * newZoom,
+						// y: (pointerPosition.y - mousePointTo.y + (deltaY * PAN_SPEED)) * newZoom,
+						x: pointerPosition.x - mousePointTo.x * newZoom + deltaX * PAN_SPEED,
+						y: pointerPosition.y - mousePointTo.y * newZoom + deltaY * PAN_SPEED,
 					};
 					stage.position(newPos);
 					stage.batchDraw();

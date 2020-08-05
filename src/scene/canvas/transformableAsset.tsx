@@ -3,7 +3,6 @@ import { Group, Transformer } from 'react-konva';
 import Konva from 'konva';
 import { IRect } from 'konva/types/types';
 import { useTheme } from 'sancho';
-import { useKeyPress } from '../../utils';
 import { useTablePPI } from '../../settings';
 
 export type AssetTransform = IRect & { rotation: number };
@@ -40,8 +39,6 @@ const TransformableAsset: React.SFC<Props> = ({
 		}
 	}, [isSelected]);
 
-	const isShiftPressed = useKeyPress('Shift');
-
 	return (
 		<React.Fragment>
 			<Group
@@ -52,16 +49,7 @@ const TransformableAsset: React.SFC<Props> = ({
 				height={rectTransform.height}
 				width={rectTransform.width}
 				rotation={rectTransform.rotation}
-				onMouseDown={e => {
-					if (!(e.evt.buttons === 1 && !isShiftPressed)) { // only allow left click, when shift isn't pressed
-						groupRef.current?.setDraggable(false)
-					}
-					else {
-						groupRef.current?.setDraggable(isSelected)
-					}
-				}}
 				onMouseUp={e => {
-					groupRef.current?.setDraggable(isSelected) // reset the draggable
 					if (e.evt.button === 0) {
 						e.cancelBubble = true;
 						onSelected();
