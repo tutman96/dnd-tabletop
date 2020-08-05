@@ -5,7 +5,6 @@ import Konva from 'konva';
 
 import { Vector2d } from 'konva/types/types';
 import { KonvaEventObject } from 'konva/types/Node';
-import { useKeyPress } from '../../../utils';
 
 const Anchor: React.SFC<{
   firstAnchor: boolean,
@@ -22,7 +21,7 @@ const Anchor: React.SFC<{
       sceneFunc={(context, shape) => {
         // custom scene function for rendering an "absolute" radius circle
         const absoluteScale = shape.getAbsoluteScale();
-        const radius = 5 / absoluteScale.x;
+        const radius = 7 / absoluteScale.x;
         context.beginPath();
         context.ellipse(0, 0, radius, radius, 0, 0, Math.PI * 2, false);
         context.closePath();
@@ -34,7 +33,7 @@ const Anchor: React.SFC<{
       }}
       onDragEnd={e => onMoveEnd()}
       stroke={theme.colors.palette.blue.base}
-      strokeWidth={2}
+      strokeWidth={3}
       strokeScaleEnabled={false}
       fill={firstAnchor ? theme.colors.palette.blue.base : undefined}
     />
@@ -106,8 +105,6 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
     }
   }, [groupRef, adding, localVerticies, onUpdate, polygon])
 
-  const isShiftPressed = useKeyPress('Shift');
-
   return (
     <Group
       ref={groupRef as any}
@@ -115,13 +112,7 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
       x={groupX}
       y={groupY}
       listening={selectable}
-      onMouseDown={e => {
-        if (!(e.evt.buttons === 1 && !isShiftPressed)) { // only allow left click, when shift isn't pressed
-          groupRef.current?.setDraggable(false)
-        }
-      }}
       onMouseUp={e => {
-        groupRef.current?.setDraggable(selected) // reset the draggable
         if (e.evt.button === 0 && onSelected && selectable) {
           e.cancelBubble = true;
           onSelected();
@@ -149,19 +140,16 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
     >
       <Line
         closed={true}
-        stroke={selected ? theme.colors.palette.blue.base : undefined}
-        strokeWidth={selected ? 3 : undefined}
-        strokeScaleEnabled={selected ? false : undefined}
         {...lineProps}
         points={relativeKonvaCoordinates}
-        shadowEnabled={true}
       />
       {selected && (
         <>
           <Line
             closed={true}
             stroke={theme.colors.palette.blue.base}
-            strokeWidth={2}
+            strokeWidth={3}
+            dash={[4, 4]}
             strokeScaleEnabled={false}
             points={relativeKonvaCoordinates}
           />
