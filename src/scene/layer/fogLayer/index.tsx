@@ -1,17 +1,23 @@
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { Layer } from 'react-konva';
 import Konva from 'konva';
-import { IconCloud, IconCloudOff, useTheme, IconTrash2, IconEye, IconEyeOff } from 'sancho';
+import { IconCloud, IconCloudOff, useTheme, IconTrash2, IconEye, IconEyeOff, IconZapOff, IconZap } from 'sancho';
+import { css } from 'emotion';
+import { KonvaEventObject } from 'konva/types/Node';
 
 import { ILayerComponentProps, ILayer } from '..';
 import ToolbarPortal from '../toolbarPortal';
 import ToolbarItem from '../toolbarItem';
 import EditablePolygon, { IPolygon, PolygonType } from '../editablePolygon';
 import { useTablePPI } from '../../../settings';
-import { css } from 'emotion';
-import { KonvaEventObject } from 'konva/types/Node';
+import RayCastRevealPolygon, { ILightSource } from './rayCastRevealPolygon';
+import { LineConfig } from 'konva/types/shapes/Line';
+
+const BLUR_RADIUS = 1 / 20;
 
 export interface IFogLayer extends ILayer {
+  lightSources: Array<ILightSource>;
+  obstructionPolygons: Array<IPolygon>;
   fogPolygons: Array<IPolygon>;
   fogClearPolygons: Array<IPolygon>;
 }
@@ -25,6 +31,12 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
   const [addingPolygon, setAddingPolygon] = useState<IPolygon | null>(null)
   const [selectedPolygon, setSelectedPolygon] = useState<IPolygon | null>(null)
 
+  const collections = {
+    [PolygonType.FOG]: layer.fogPolygons,
+    [PolygonType.FOG_CLEAR]: layer.fogClearPolygons,
+    [PolygonType.LIGHT_OBSTRUCTION]: layer.obstructionPolygons
+  };
+
   useEffect(() => {
     if (!active) {
       setSelectedPolygon(null);
@@ -37,7 +49,6 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
     const stage = layerRef.current.parent;
 
     function onParentClick(e: KonvaEventObject<MouseEvent>) {
-      console.log(e.evt.button)
       if (e.evt.button === 0) {
         setSelectedPolygon(null);
       }
@@ -78,6 +89,30 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
           }}
         />
         <ToolbarItem
+          label="Add Light"
+          icon={<IconZap />}
+          onClick={() => {
+            const light = {
+              position: { x: 0, y: 0 }
+            } as ILightSource;
+            layer.lightSources.push(light);
+            onUpdate({ ...layer });
+          }}
+        />
+        <ToolbarItem
+          label="Add Light Obstruction"
+          icon={<IconZapOff />}
+          onClick={() => {
+            const poly = {
+              verticies: [],
+              type: PolygonType.LIGHT_OBSTRUCTION,
+              visibleOnTable: true
+            } as IPolygon;
+            setSelectedPolygon(poly);
+            setAddingPolygon(poly);
+          }}
+        />
+        <ToolbarItem
           label={selectedPolygon && selectedPolygon.visibleOnTable ? 'Hide on Table' : 'Show on Table'}
           disabled={!selectedPolygon}
           icon={selectedPolygon && selectedPolygon.visibleOnTable ? <IconEye /> : <IconEyeOff />}
@@ -95,17 +130,11 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
           disabled={selectedPolygon === null}
           onClick={() => {
             if (!selectedPolygon) return;
+            const collection = collections[selectedPolygon.type];
 
-            const fogPolygonIndex = layer.fogPolygons.indexOf(selectedPolygon);
+            const fogPolygonIndex = collection.indexOf(selectedPolygon);
             if (fogPolygonIndex !== -1) {
-              layer.fogPolygons.splice(fogPolygonIndex, 1);
-              layer.fogPolygons = [...layer.fogPolygons];
-            }
-
-            const fogClearPolygonIndex = layer.fogClearPolygons.indexOf(selectedPolygon);
-            if (fogClearPolygonIndex !== -1) {
-              layer.fogClearPolygons.splice(fogClearPolygonIndex, 1);
-              layer.fogClearPolygons = [...layer.fogClearPolygons];
+              collection.splice(fogPolygonIndex, 1);
             }
 
             onUpdate({ ...layer })
@@ -115,24 +144,25 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
         />
       </>
     );
-  }, [selectedPolygon, layer, onUpdate]);
+  }, [selectedPolygon, layer, onUpdate, collections]);
 
   useEffect(() => {
     if (isTable && layerRef.current && tablePPI) {
       layerRef.current.canvas._canvas.className = css`
-        filter: blur(${tablePPI / 10}px);
+        filter: blur(${tablePPI * BLUR_RADIUS}px);
       `;
     }
   }, [layerRef, isTable, tablePPI]);
 
   const onPolygonAdded = useCallback(() => {
     if (addingPolygon) {
-      const collection = addingPolygon.type === PolygonType.FOG ? layer.fogPolygons : layer.fogClearPolygons;
+      const collection = collections[addingPolygon.type];
 
-      if (addingPolygon?.verticies && addingPolygon.verticies.length < 3) {
+      if (addingPolygon.type !== PolygonType.LIGHT_OBSTRUCTION && addingPolygon?.verticies && addingPolygon.verticies.length < 3) {
         console.log('removing polygon because < 3 verticies');
-        const i = collection.indexOf(addingPolygon);
-        collection.splice(i, 1);
+        setAddingPolygon(null);
+        setSelectedPolygon(null);
+        return;
       }
 
       setAddingPolygon(null);
@@ -141,27 +171,41 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
 
       onUpdate({ ...layer });
     }
-  }, [setAddingPolygon, layer, onUpdate, addingPolygon])
+  }, [setAddingPolygon, layer, onUpdate, addingPolygon, collections])
 
   const onPolygonUpdated = useCallback(() => {
     onUpdate({ ...layer });
   }, [onUpdate, layer])
 
-  const getPolygonStyle = useCallback((poly: IPolygon) => {
-    let opacity = isTable ? 1 : 0.6;
-    let fill = isTable ? 'black' : theme.colors.palette.gray.dark;
-
-    if (poly.type === PolygonType.FOG_CLEAR) {
-      opacity = isTable ? 1 : (poly.visibleOnTable ? 0.3 : 0.6);
-      fill = isTable ? 'black' : theme.colors.palette.gray.lightest;
+  const getPolygonStyle = useCallback((poly: IPolygon): Partial<LineConfig> => {
+    switch (poly.type) {
+      case PolygonType.FOG:
+        return {
+          opacity: isTable ? 1 : 0.6,
+          fill: isTable ? 'black' : theme.colors.palette.gray.dark,
+          closed: true
+        }
+      case PolygonType.FOG_CLEAR:
+        return {
+          opacity: isTable ? 1 : (poly.visibleOnTable ? 0.3 : 0.6),
+          fill: isTable ? 'black' : theme.colors.palette.gray.lightest,
+          closed: true
+        };
+      case PolygonType.LIGHT_OBSTRUCTION:
+        return {
+          opacity: 1,
+          stroke: isTable ? undefined : poly.visibleOnTable ? theme.colors.palette.violet.dark : theme.colors.palette.violet.lightest,
+          strokeWidth: isTable ? undefined : 5,
+          strokeScaleEnabled: false,
+          closed: false
+        }
     }
-
-    return { opacity, fill };
   }, [isTable, theme])
 
   const allPolygons = [
     ...layer.fogPolygons.map((l) => { l.type = PolygonType.FOG; return l }),
-    ...layer.fogClearPolygons.map((l) => { l.type = PolygonType.FOG_CLEAR; return l })
+    ...layer.fogClearPolygons.map((l) => { l.type = PolygonType.FOG_CLEAR; return l }),
+    ...layer.obstructionPolygons.map((l) => { l.type = PolygonType.LIGHT_OBSTRUCTION; return l }),
   ];
 
   return (
@@ -175,7 +219,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
       {allPolygons.map((poly, i) => {
         if (isTable && !poly.visibleOnTable) return null;
 
-        const { opacity, fill } = getPolygonStyle(poly);
+        const style = getPolygonStyle(poly);
 
         const selected = selectedPolygon === poly;
         return (
@@ -183,8 +227,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
             key={i}
             polygon={poly}
 
-            opacity={opacity}
-            fill={fill}
+            {...style}
             globalCompositeOperation={
               poly.type === PolygonType.FOG_CLEAR ?
                 (isTable ? "destination-out" : 'source-over') :
@@ -202,16 +245,29 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
         )
       })}
 
+      {layer.lightSources.map((light, i) => (
+        <RayCastRevealPolygon
+          key={`rcr${i}`}
+          light={light}
+          displayIcon={!isTable}
+          isTable={isTable}
+          obstructionPolygons={layer.obstructionPolygons}
+          onUpdate={(light) => {
+            layer.lightSources[i] = light;
+            onUpdate({ ...layer });
+          }}
+        />
+      ))}
+
       {addingPolygon && (() => {
-        const { opacity, fill } = getPolygonStyle(addingPolygon);
+        const style = getPolygonStyle(addingPolygon);
 
         return (
           <EditablePolygon
             key="adding"
             polygon={addingPolygon}
 
-            opacity={opacity}
-            fill={fill}
+            {...style}
 
             selectable={false}
             selected={true}

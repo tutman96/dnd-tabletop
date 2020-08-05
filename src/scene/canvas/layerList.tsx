@@ -1,8 +1,10 @@
-import { IScene } from "..";
-import { LayerType, ILayer } from "../layer";
-import { useTheme, Layer, List, ListItem, IconButton, IconTrash2, Popover, MenuList, MenuItem, IconFile, IconCloudDrizzle, IconPlus, Text, IconArrowUp, IconArrowDown, IconEye, IconEyeOff, IconTv } from "sancho";
 import React from "react";
+import { useTheme, Layer, List, ListItem, IconButton, IconTrash2, Popover, MenuList, MenuItem, IconFile, IconCloudDrizzle, IconPlus, Text, IconArrowUp, IconArrowDown, IconEye, IconEyeOff, IconTv } from "sancho";
 import { css } from "emotion";
+
+import { IScene } from "..";
+import { ILayer } from "../layer";
+import LayerType from "../layer/layerType";
 import { TableViewLayer } from "../layer/tableView";
 import EditLayerButton from "./editLayerButton";
 

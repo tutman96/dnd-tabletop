@@ -43,7 +43,8 @@ const Anchor: React.SFC<{
 
 export enum PolygonType {
   FOG,
-  FOG_CLEAR
+  FOG_CLEAR,
+  LIGHT_OBSTRUCTION
 }
 
 export interface IPolygon {
@@ -144,14 +145,13 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
       }}
     >
       <Line
-        closed={true}
         {...lineProps}
         points={relativeKonvaCoordinates}
       />
       {selected && (
         <>
           <Line
-            closed={true}
+            closed={lineProps.closed}
             stroke={theme.colors.palette.blue.base}
             strokeWidth={3}
             dash={[4, 4]}
