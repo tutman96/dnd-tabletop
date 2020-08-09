@@ -20,18 +20,11 @@ const Anchor: React.SFC<{
       x={position.x}
       y={position.y}
       ref={shapeRef as any}
-      draggable={true}
       onMouseDown={(e) => {
-        if (e.evt.button !== 0) {
-          shapeRef.current?.setDraggable(false)
-        }
-        else {
-          shapeRef.current?.setDraggable(true)
+        if (e.evt.button === 0) {
+          shapeRef.current?.startDrag(e);
         }
       }}
-      onMouseUp={() => {
-        shapeRef.current?.setDraggable(true) // reset the draggable
-      }}      
       sceneFunc={(context, shape) => {
         // custom scene function for rendering an "absolute" radius circle
         const absoluteScale = shape.getAbsoluteScale();
@@ -133,7 +126,6 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
   return (
     <Group
       ref={groupRef as any}
-      draggable={selected && !adding}
       x={groupX}
       y={groupY}
       listening={selectable}
@@ -141,6 +133,11 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
         if (e.evt.button === 0 && onSelected && selectable) {
           e.cancelBubble = true;
           onSelected();
+        }
+      }}
+      onMouseDown={(e) => {
+        if (e.evt.button === 0 && selected && !adding) {
+          groupRef.current?.startDrag(e);
         }
       }}
       onDragMove={e => {

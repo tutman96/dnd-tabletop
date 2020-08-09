@@ -97,19 +97,12 @@ const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructio
         <Shape
           x={light.position.x}
           y={light.position.y}
-          draggable={selected}
           ref={iconRef as any}
           onMouseDown={(e) => {
-            if (e.evt.button !== 0) {
-              iconRef.current?.setDraggable(false)
-            }
-            else {
-              iconRef.current?.setDraggable(selected)
+            if (e.evt.button === 0 && selected) {
+              iconRef.current?.startDrag(e)
             }
           }}
-          onMouseUp={() => {
-            iconRef.current?.setDraggable(selected) // reset the draggable
-          }}          
           sceneFunc={(context, shape) => {
             // custom scene function for rendering an "absolute" radius circle
             const absoluteScale = shape.getAbsoluteScale();

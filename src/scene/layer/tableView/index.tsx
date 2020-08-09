@@ -10,7 +10,6 @@ import { ILayerComponentProps, ILayer } from '..';
 import LayerType from "../layerType";
 import ToolbarItem from '../toolbarItem';
 import ToolbarPortal from '../toolbarPortal';
-import { useKeyPress } from '../../../utils';
 import ZoomToolbarItem from './zoomToolbarItem';
 
 export const TableViewLayer = {
@@ -92,9 +91,6 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
     );
   }, [layer, onUpdate]);
 
-  const isShiftPressed = useKeyPress('Shift');
-
-
   // Only recalculate the line components when the position/size changes
   const lines = useMemo(() => {
     if (!tableResolution || !ppi) {
@@ -174,7 +170,6 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
         <>
           <Group
             ref={groupRef as any}
-            draggable={active}
             x={localOptions.offset.x}
             y={localOptions.offset.y}
             width={width}
@@ -183,15 +178,9 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
             scaleY={1 / localOptions.scale}
             rotation={localOptions.rotation}
             onMouseDown={e => {
-              if (!(e.evt.buttons === 1 && !isShiftPressed)) { // only allow left click, when shift isn't pressed
-                groupRef.current?.setDraggable(false)
+              if (e.evt.button === 0 && active) {
+                groupRef.current?.startDrag(e)
               }
-              else {
-                groupRef.current?.setDraggable(active)
-              }
-            }}
-            onMouseUp={() => {
-              groupRef.current?.setDraggable(active) // reset the draggable
             }}
             onDragMove={e => {
               const node = groupRef.current!;
