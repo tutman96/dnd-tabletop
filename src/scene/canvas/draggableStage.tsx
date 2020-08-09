@@ -8,10 +8,10 @@ import { useTheme } from 'sancho';
 const ZOOM_SPEED = 1 / 250;
 const PAN_SPEED = 1 / 1;
 
-Konva.dragButtons = [0];
+Konva.dragButtons = [0, 1, 2];
 
-type Props = { initialZoom?: number, className?: string };
-const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, className, children }) => {
+type Props = { draggable?: boolean, initialZoom?: number, className?: string };
+const DraggableStage: React.SFC<Props> = ({ draggable, initialZoom = 1, className, children }) => {
 	const theme = useTheme();
 
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -36,6 +36,18 @@ const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, className, children
 				width={containerSize.width}
 				height={containerSize.height}
 				scale={{ x: zoom, y: zoom }}
+				draggable={draggable === undefined ? true : draggable}
+				onMouseDown={(e) => {
+					if (e.evt.button === 0) {
+						stageRef.current?.setDraggable(false)
+					}
+					else {
+						stageRef.current?.setDraggable(draggable === undefined ? true : draggable)
+					}
+				}}
+				onMouseUp={() => {
+					stageRef.current?.setDraggable(draggable === undefined ? true : draggable) // reset the draggable
+				}}
 				onWheel={(e) => {
 					e.evt.preventDefault();
 
