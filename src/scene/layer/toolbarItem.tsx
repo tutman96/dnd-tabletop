@@ -1,8 +1,12 @@
-import { IconButtonProps, IconButton, Tooltip } from "sancho";
-import React, { useEffect, MouseEvent } from "react";
+import { Button, ButtonProps } from "sancho";
+import React, { useEffect, MouseEvent, ReactNode } from "react";
 
-type Props = IconButtonProps & { keyboardShortcuts?: string[], onClick?: (e: MouseEvent<HTMLButtonElement> | KeyboardEvent) => void };
-const ToolbarItem: React.SFC<Props> = ({ label, keyboardShortcuts, ...otherProps }) => {
+const SHORTCUT_ICON_MAPPING = {
+	'Delete': '\u232B'
+} as { [key: string]: string };
+
+type Props = Partial<ButtonProps> & { keyboardShortcuts?: string[], label: string, icon: ReactNode, onClick?: (e: MouseEvent<HTMLButtonElement> | KeyboardEvent) => void };
+const ToolbarItem: React.SFC<Props> = ({ label, icon, keyboardShortcuts, ...otherProps }) => {
 
 	useEffect(() => {
 		if (keyboardShortcuts && otherProps.onClick) {
@@ -18,13 +22,9 @@ const ToolbarItem: React.SFC<Props> = ({ label, keyboardShortcuts, ...otherProps
 	}, [keyboardShortcuts, otherProps.onClick])
 
 	return (
-		<Tooltip content={label + (keyboardShortcuts && keyboardShortcuts.length ? ` (${keyboardShortcuts[0]})` : '')} placement="bottom">
-			<IconButton
-				variant="ghost"
-				label={label}
-				{...otherProps}
-			/>
-		</Tooltip>
+		<Button {...otherProps} variant="ghost" iconBefore={icon} size="md">
+			{label + (keyboardShortcuts && keyboardShortcuts.length ? ` (${SHORTCUT_ICON_MAPPING[keyboardShortcuts[0]] || keyboardShortcuts[0]})` : '')}
+		</Button>
 	)
 }
 export default ToolbarItem;
