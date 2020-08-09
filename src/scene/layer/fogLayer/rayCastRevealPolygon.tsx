@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { IPolygon, PolygonType } from "../editablePolygon";
 import { Vector2d } from 'konva/types/types';
 import { Shape, Line } from 'react-konva';
@@ -7,6 +7,7 @@ import { getVisibilityPolygon } from './rayCastingUtils';
 import { useCurrentScene } from '../../canvas';
 import { useTableResolution, useTablePPI } from '../../../settings';
 import { LineConfig } from 'konva/types/shapes/Line';
+import Konva from 'konva';
 
 export interface ILightSource {
   position: Vector2d
@@ -68,6 +69,7 @@ type Props = {
 const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructionPolygons, onUpdate, isTable, selected, onSelected }) => {
   const theme = useTheme();
   const ppi = useTablePPI() || 86;
+  const iconRef = useRef<Konva.Shape>();
 
   const [localPosition, setLocalPosition] = useState(light.position);
 
@@ -96,6 +98,18 @@ const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructio
           x={light.position.x}
           y={light.position.y}
           draggable={selected}
+          ref={iconRef as any}
+          onMouseDown={(e) => {
+            if (e.evt.button !== 0) {
+              iconRef.current?.setDraggable(false)
+            }
+            else {
+              iconRef.current?.setDraggable(selected)
+            }
+          }}
+          onMouseUp={() => {
+            iconRef.current?.setDraggable(selected) // reset the draggable
+          }}          
           sceneFunc={(context, shape) => {
             // custom scene function for rendering an "absolute" radius circle
             const absoluteScale = shape.getAbsoluteScale();

@@ -14,11 +14,24 @@ const Anchor: React.SFC<{
   onMoveEnd: () => void
 }> = ({ firstAnchor, position, onMove, onMoveEnd }) => {
   const theme = useTheme();
+  const shapeRef = useRef<Konva.Shape>();
   return (
     <Shape
       x={position.x}
       y={position.y}
+      ref={shapeRef as any}
       draggable={true}
+      onMouseDown={(e) => {
+        if (e.evt.button !== 0) {
+          shapeRef.current?.setDraggable(false)
+        }
+        else {
+          shapeRef.current?.setDraggable(true)
+        }
+      }}
+      onMouseUp={() => {
+        shapeRef.current?.setDraggable(true) // reset the draggable
+      }}      
       sceneFunc={(context, shape) => {
         // custom scene function for rendering an "absolute" radius circle
         const absoluteScale = shape.getAbsoluteScale();
