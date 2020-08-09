@@ -153,9 +153,9 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
               const index = layer.lightSources.indexOf(selectedLight);
               if (index !== -1) {
                 layer.lightSources.splice(index, 1);
-              } 
+              }
 
-              onUpdate({...layer});
+              onUpdate({ ...layer });
               setSelectedLight(null);
             }
           }}
@@ -220,25 +220,23 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
       switch (poly.type) {
         case PolygonType.FOG:
           return {
-            opacity: poly.visibleOnTable ? (active ? 0.6 : 0.4) : 0.3,
+            opacity: poly.visibleOnTable ? (active ? 0.7 : 0.4) : 0.3,
             fill: 'black',
             closed: true
           }
         case PolygonType.FOG_CLEAR:
           return {
             opacity: poly.visibleOnTable ? (active ? 0.3 : 1) : 0.6,
-            fill: theme.colors.palette.gray.lightest,
+            fill: theme.colors.palette.violet.lightest,
             globalCompositeOperation: active ? undefined : "destination-out",
-            stroke: theme.colors.palette.gray.lightest,
-            strokeWidth: 5,
-            strokeScaleEnabled: false,
             closed: true
           };
         case PolygonType.LIGHT_OBSTRUCTION:
           return {
-            stroke: active ? (poly.visibleOnTable ? theme.colors.palette.violet.dark : theme.colors.palette.violet.lightest) : undefined,
+            stroke: active ? (poly.visibleOnTable ? theme.colors.palette.violet.base : theme.colors.palette.violet.lightest) : undefined,
             strokeWidth: active ? 10 : undefined,
             hitStrokeWidth: 20,
+            lineCap: "round",
             strokeScaleEnabled: false,
             closed: false
           }
@@ -256,7 +254,6 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
     <Layer
       ref={layerRef as any}
       listening={active}
-      sceneFunc={console.log}
     >
       {active && <ToolbarPortal>{toolbar}</ToolbarPortal>}
 

@@ -23,6 +23,7 @@ const Anchor: React.SFC<{
       onMouseDown={(e) => {
         if (e.evt.button === 0) {
           shapeRef.current?.startDrag(e);
+          e.cancelBubble = true;
         }
       }}
       sceneFunc={(context, shape) => {
