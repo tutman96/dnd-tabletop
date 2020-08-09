@@ -220,8 +220,8 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
       switch (poly.type) {
         case PolygonType.FOG:
           return {
-            opacity: active ? 0.6 : 0.4,
-            fill: theme.colors.palette.gray.dark,
+            opacity: poly.visibleOnTable ? (active ? 0.6 : 0.4) : 0.3,
+            fill: 'black',
             closed: true
           }
         case PolygonType.FOG_CLEAR:
@@ -229,6 +229,9 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
             opacity: poly.visibleOnTable ? (active ? 0.3 : 1) : 0.6,
             fill: theme.colors.palette.gray.lightest,
             globalCompositeOperation: active ? undefined : "destination-out",
+            stroke: theme.colors.palette.gray.lightest,
+            strokeWidth: 5,
+            strokeScaleEnabled: false,
             closed: true
           };
         case PolygonType.LIGHT_OBSTRUCTION:
