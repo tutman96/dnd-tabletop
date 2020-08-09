@@ -43,18 +43,11 @@ const TransformableAsset: React.SFC<Props> = ({
 		<React.Fragment>
 			<Group
 				ref={groupRef as any}
-				draggable={isSelected}
 				onMouseDown={(e) => {
-					if (e.evt.button !== 0) {
-						groupRef.current?.setDraggable(false)
+					if (e.evt.button === 0 && isSelected) {
+						groupRef.current?.startDrag(e);
 					}
-					else {
-						groupRef.current?.setDraggable(isSelected)
-					}
-				}}
-				onMouseUp={() => {
-					groupRef.current?.setDraggable(isSelected) // reset the draggable
-				}}
+				}}	
 				x={rectTransform.x}
 				y={rectTransform.y}
 				height={rectTransform.height}

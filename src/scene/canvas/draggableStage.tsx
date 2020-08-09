@@ -36,17 +36,10 @@ const DraggableStage: React.SFC<Props> = ({ draggable, initialZoom = 1, classNam
 				width={containerSize.width}
 				height={containerSize.height}
 				scale={{ x: zoom, y: zoom }}
-				draggable={draggable === undefined ? true : draggable}
 				onMouseDown={(e) => {
-					if (e.evt.button === 0) {
-						stageRef.current?.setDraggable(false)
+					if (e.evt.button === 1 || e.evt.button === 2) {
+						stageRef.current?.startDrag(e);
 					}
-					else {
-						stageRef.current?.setDraggable(draggable === undefined ? true : draggable)
-					}
-				}}
-				onMouseUp={() => {
-					stageRef.current?.setDraggable(draggable === undefined ? true : draggable) // reset the draggable
 				}}
 				onWheel={(e) => {
 					e.evt.preventDefault();
