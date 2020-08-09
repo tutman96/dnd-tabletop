@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { IPolygon, PolygonType } from "../editablePolygon";
 import { Vector2d } from 'konva/types/types';
 import { Shape, Line } from 'react-konva';
@@ -6,7 +6,6 @@ import { useTheme } from 'sancho';
 import { getVisibilityPolygon } from './rayCastingUtils';
 import { useCurrentScene } from '../../canvas';
 import { useTableResolution, useTablePPI } from '../../../settings';
-import { LineConfig } from 'konva/types/shapes/Line';
 import Konva from 'konva';
 
 export interface ILightSource {
@@ -37,24 +36,6 @@ function useScreenPolygon(): IPolygon {
   };
 }
 
-const VisibilityPolygon: React.SFC<{ position: Vector2d, obstructionPolygons: Array<IPolygon> } & Partial<LineConfig>> = ({ position, obstructionPolygons, ...lineOptions }) => {
-  const screenPolygon = useScreenPolygon();
-
-  const obstructionWithScreen = [...obstructionPolygons.filter((p) => p.visibleOnTable), screenPolygon];
-  const visibilityPolygon = getVisibilityPolygon(position, obstructionWithScreen);
-
-  const visibilityLinePoints = visibilityPolygon.verticies
-    .map((v) => [v.x, v.y]).flat();
-
-  return (
-    <Line
-      {...lineOptions}
-      points={visibilityLinePoints}
-      listening={false}
-    />
-  )
-}
-
 const fillGradientColorStops = [0, 'rgba(255,255,255,0.90)', 0.10, 'rgba(255,255,255,0.70)', 0.40, 'rgba(255,255,255,0.40)', 0.60, 'rgba(255,255,255,0.10)', 1, 'transparent'];
 
 type Props = {
@@ -64,7 +45,7 @@ type Props = {
   onUpdate: (light: ILightSource) => void,
   isTable: boolean,
   selected: boolean,
-  onSelected: () => void,
+  onSelected: () => void
 };
 const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructionPolygons, onUpdate, isTable, selected, onSelected }) => {
   const theme = useTheme();
@@ -73,16 +54,24 @@ const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructio
 
   const [localPosition, setLocalPosition] = useState(light.position);
 
-  useEffect(() => {
-    setLocalPosition(light.position);
-  }, [light.position, setLocalPosition])
+  const screenPolygon = useScreenPolygon();
 
+  const obstructionWithScreen = [...obstructionPolygons.filter((p) => p.visibleOnTable), screenPolygon];
+  const visibilityPolygon = getVisibilityPolygon(localPosition, obstructionWithScreen);
+
+  const visibilityLinePoints = visibilityPolygon.verticies
+    .map((v) => [v.x, v.y]).flat();
+
+  if (iconRef.current) {
+    iconRef.current.setZIndex(9999);
+  }
 
   return (
     <>
-      <VisibilityPolygon
-        position={localPosition}
-        obstructionPolygons={obstructionPolygons}
+      <Line
+        name={"Polygon"}
+        points={visibilityLinePoints}
+        listening={false}
 
         closed={true}
         fillRadialGradientStartPoint={localPosition}
@@ -90,17 +79,19 @@ const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructio
         fillRadialGradientStartRadius={0}
         fillRadialGradientEndRadius={ppi * (40 / 5)} // TODO: make configurable
         fillRadialGradientColorStops={fillGradientColorStops}
-        opacity={isTable ? 1 : 0.5}
+        opacity={isTable ? 1 : 1}
         globalCompositeOperation="destination-out"
       />
       {displayIcon && (
         <Shape
+          name={"Icon"}
           x={light.position.x}
           y={light.position.y}
           ref={iconRef as any}
           onMouseDown={(e) => {
             if (e.evt.button === 0 && selected) {
               iconRef.current?.startDrag(e)
+              e.cancelBubble = true;
             }
           }}
           sceneFunc={(context, shape) => {

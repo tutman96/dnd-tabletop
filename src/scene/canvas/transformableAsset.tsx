@@ -46,6 +46,7 @@ const TransformableAsset: React.SFC<Props> = ({
 				onMouseDown={(e) => {
 					if (e.evt.button === 0 && isSelected) {
 						groupRef.current?.startDrag(e);
+						e.cancelBubble = true;
 					}
 				}}	
 				x={rectTransform.x}

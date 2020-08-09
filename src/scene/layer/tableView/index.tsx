@@ -68,6 +68,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
             })
           }}
         />
+        &nbsp;
         <Check label="Display Grid" checked={layer.options.displayGrid} onChange={(e) => {
           onUpdate({
             ...layer,
@@ -77,6 +78,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
             }
           })
         }} />
+        &nbsp;
         <ZoomToolbarItem
           zoom={layer.options.scale}
           onUpdate={(zoom) => {
@@ -180,6 +182,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
             onMouseDown={e => {
               if (e.evt.button === 0 && active) {
                 groupRef.current?.startDrag(e)
+                e.cancelBubble = true;
               }
             }}
             onDragMove={e => {

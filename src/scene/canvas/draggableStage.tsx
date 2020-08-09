@@ -8,8 +8,6 @@ import { useTheme } from 'sancho';
 const ZOOM_SPEED = 1 / 250;
 const PAN_SPEED = 1 / 1;
 
-Konva.dragButtons = [0, 1, 2];
-
 type Props = { draggable?: boolean, initialZoom?: number, className?: string };
 const DraggableStage: React.SFC<Props> = ({ draggable, initialZoom = 1, className, children }) => {
 	const theme = useTheme();
@@ -33,12 +31,13 @@ const DraggableStage: React.SFC<Props> = ({ draggable, initialZoom = 1, classNam
 		>
 			<Stage
 				ref={stageRef as any}
-				width={containerSize.width}
-				height={containerSize.height}
+				width={containerSize.width || 1}
+				height={containerSize.height || 1}
 				scale={{ x: zoom, y: zoom }}
 				onMouseDown={(e) => {
 					if (e.evt.button === 1 || e.evt.button === 2) {
 						stageRef.current?.startDrag(e);
+						e.cancelBubble = true;
 					}
 				}}
 				onWheel={(e) => {
