@@ -33,8 +33,8 @@ function NoScenes(props: { onAdd: () => void }) {
         align-items: center;
       `}
       >
-        <IconFilm size="xl" color="#BDBEBF" />
-        <Button iconBefore={<IconPlus />} variant="ghost" color={theme.colors.text.muted} onClick={props.onAdd}>Add a scene</Button>
+        <IconFilm width="150px" height="150px" color="#BDBEBF" />
+        <Button iconBefore={<IconPlus />} variant="ghost" color={theme.colors.text.muted} onClick={props.onAdd} size="xl">Add a scene</Button>
       </div>
     </div>
   )

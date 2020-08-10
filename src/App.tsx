@@ -11,7 +11,7 @@ import routes from './routes';
 import Sidebar from './sidebar';
 import Konva from 'konva';
 
-Konva.showWarnings = process.env.NODE_ENV === 'development';
+Konva.showWarnings = false;
 
 const App: React.SFC = () => {
 	return (
