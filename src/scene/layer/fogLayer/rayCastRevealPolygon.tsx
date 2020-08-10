@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { IPolygon, PolygonType } from "../editablePolygon";
 import { Vector2d } from 'konva/types/types';
 import { Shape, Line } from 'react-konva';
@@ -53,6 +53,10 @@ const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructio
   const iconRef = useRef<Konva.Shape>();
 
   const [localPosition, setLocalPosition] = useState(light.position);
+
+  useEffect(() => {
+    setLocalPosition(light.position);
+  }, [light.position, setLocalPosition])
 
   const screenPolygon = useScreenPolygon();
 
