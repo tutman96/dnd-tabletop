@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouteMatch } from "react-router-dom";
-import { Spinner, Text, useTheme, IconButton, IconPlay, IconPause, IconUpload, IconEdit2, IconCheck, Input } from "sancho";
+import { Spinner, Text, useTheme, IconButton, IconPlay, IconPause, IconUpload, IconEdit2, IconCheck, Input, Button, IconEyeOff } from "sancho";
 import { css } from "emotion";
 
 import { useSceneDatabase, IScene } from ".";
@@ -57,46 +57,48 @@ function SceneNameHeader({ name, onUpdate: updateName }: { name: string, onUpdat
 
 function TableDisplayButton({ scene }: { scene: IScene }) {
 	const theme = useTheme();
+
 	const [displayedScene, updateDisplayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
 	const [tableFreeze, updateTableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
 
-	if (displayedScene === scene.id) {
-		if (tableFreeze) {
-			return (
-				<IconButton
-					icon={<IconPlay />}
-					variant="ghost"
-					label="Unfreeze Table"
-					color={theme.colors.palette.green.base}
-					onPress={() => updateTableFreeze(false)}
-				/>
-			)
-		}
-		else {
-			return (
-				<IconButton
-					icon={<IconPause />}
-					variant="ghost"
-					label="Freeze Table"
-					color={theme.colors.palette.yellow.base}
-					onPress={() => updateTableFreeze(true)}
-				/>
-			)
-		}
-	}
-	else {
-		return (
-			<IconButton
-				icon={<IconUpload />}
-				variant="ghost"
-				label="Display on Table"
-				color={theme.colors.text.heading} onPress={() => {
-					updateDisplayedScene(scene.id);
-					updateTableFreeze(false)
+	const currentSceneSelected = displayedScene === scene.id;
+
+	return (
+		<>
+			<Button
+				iconBefore={currentSceneSelected ? <IconEyeOff /> : <IconUpload />}
+				intent="none"
+				variant="outline"
+				onPress={() => {
+					updateDisplayedScene(!currentSceneSelected ? scene.id : null);
+					updateTableFreeze(false);
 				}}
+			>
+				{currentSceneSelected ? 'Table to Black' : 'Send to Table'}
+			</Button>
+			<span
+				className={css`
+					display: inline-block;
+					width: 1rem;
+				`}
 			/>
-		)
-	}
+			<Button
+				iconBefore={tableFreeze ? <IconPlay /> : <IconPause />}
+				variant={"outline"}
+				disabled={!currentSceneSelected}
+				onPress={() => updateTableFreeze(!tableFreeze)}
+				className={css`
+					${tableFreeze ? `
+						border-color: ${theme.colors.intent.success.dark} !important;
+						background: ${tableFreeze ? theme.colors.intent.success.base : 'initial'} !important;
+					` : ''}
+					min-width: 168px;
+				`}
+			>
+				{tableFreeze ? "Unpause Table" : "Pause Table"}
+			</Button>
+		</>
+	);
 }
 
 type Props = {};
@@ -106,6 +108,9 @@ const SceneEditor: React.SFC<Props> = () => {
 	const match = useRouteMatch<{ id: string }>();
 	const [scene, updateScene] = useOneValue(match.params.id);
 
+	const [displayedScene, updateDisplayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
+	const [tableFreeze, updateTableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
+
 	if (!match.params.id) {
 		return null;
 	}
@@ -113,7 +118,7 @@ const SceneEditor: React.SFC<Props> = () => {
 	if (scene === undefined) {
 		return <Spinner label="Loading scene..." center />
 	}
-	
+
 	if (scene === null) {
 		return null;
 	}
@@ -140,9 +145,13 @@ const SceneEditor: React.SFC<Props> = () => {
 					display: flex;
 					align-items: center;
 					justify-content: space-between;
+					background-color: ${displayedScene === scene.id && !tableFreeze ? theme.colors.intent.success.dark : 'initial'};
 				`}
 			>
-				<SceneNameHeader name={scene.name} onUpdate={(name) => updateScene({ ...scene, name })} />
+				<SceneNameHeader
+					name={scene.name}
+					onUpdate={(name) => updateScene({ ...scene, name })}
+				/>
 				<div>
 					{/* TODO */}
 					{/* <IconButton icon={<IconRotateCcw />} variant="ghost" label="Undo" />

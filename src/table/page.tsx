@@ -18,12 +18,12 @@ const TablePage: React.SFC<Props> = () => {
 	const [tableResolution] = useTableResolution();
 
 	const [scene] = useOneValue(displayedScene as string);
-	const [tableScene, setTableScene] = useState<IScene | null>();
+	const [tableScene, setTableScene] = useState<IScene | null>(null);
 
 	const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight })
 
 	useEffect(() => {
-		if (!tableFreeze && scene) {
+		if (!tableFreeze && scene !== undefined) {
 			setTableScene(scene);
 		}
 	}, [scene, tableFreeze])
