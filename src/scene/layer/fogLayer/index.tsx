@@ -244,11 +244,35 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
     }
   }, [isTable, active, theme])
 
-  const allPolygons = [
-    ...layer.fogPolygons.map((l) => { l.type = PolygonType.FOG; return l }),
-    ...layer.fogClearPolygons.map((l) => { l.type = PolygonType.FOG_CLEAR; return l }),
-    ...layer.obstructionPolygons.map((l) => { l.type = PolygonType.LIGHT_OBSTRUCTION; return l }),
-  ];
+  const polyToEditablePolygon = (type: PolygonType) => {
+    return (poly: IPolygon, i: number) => {
+      poly.type = type;
+      if (isTable && !poly.visibleOnTable) return null;
+
+      const style = getPolygonStyle(poly);
+
+      const selected = selectedPolygon === poly;
+      return (
+        <EditablePolygon
+          key={i}
+          polygon={poly}
+
+          {...style}
+
+          selectable={!addingPolygon}
+          selected={selected}
+          onSelected={() => {
+            setSelectedPolygon(poly)
+            setSelectedLight(null);
+          }}
+
+          adding={false}
+
+          onUpdate={onPolygonUpdated}
+        />
+      )
+    }
+  }
 
   return (
     <Layer
@@ -257,32 +281,8 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
     >
       {active && <ToolbarPortal>{toolbar}</ToolbarPortal>}
 
-      {allPolygons.map((poly, i) => {
-        if (isTable && !poly.visibleOnTable) return null;
-
-        const style = getPolygonStyle(poly);
-
-        const selected = selectedPolygon === poly;
-        return (
-          <EditablePolygon
-            key={i}
-            polygon={poly}
-
-            {...style}
-
-            selectable={!addingPolygon}
-            selected={selected}
-            onSelected={() => {
-              setSelectedPolygon(poly)
-              setSelectedLight(null);
-            }}
-
-            adding={false}
-
-            onUpdate={onPolygonUpdated}
-          />
-        )
-      })}
+      {layer.fogPolygons.map(polyToEditablePolygon(PolygonType.FOG))}
+      {layer.fogClearPolygons.map(polyToEditablePolygon(PolygonType.FOG_CLEAR))}
 
       {layer.lightSources.map((light, i) => (
         <RayCastRevealPolygon
@@ -302,6 +302,8 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
           }}
         />
       ))}
+
+      {layer.obstructionPolygons.map(polyToEditablePolygon(PolygonType.LIGHT_OBSTRUCTION))}
 
       {addingPolygon && (() => {
         const style = getPolygonStyle(addingPolygon);
