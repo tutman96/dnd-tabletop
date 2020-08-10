@@ -108,8 +108,8 @@ const SceneEditor: React.SFC<Props> = () => {
 	const match = useRouteMatch<{ id: string }>();
 	const [scene, updateScene] = useOneValue(match.params.id);
 
-	const [displayedScene, updateDisplayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
-	const [tableFreeze, updateTableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
+	const [displayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
+	const [tableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
 
 	if (!match.params.id) {
 		return null;
