@@ -13,7 +13,7 @@ import { useTablePPI } from '../../../settings';
 import RayCastRevealPolygon, { ILightSource } from './rayCastRevealPolygon';
 import { LineConfig } from 'konva/types/shapes/Line';
 
-const BLUR_RADIUS = 1 / 20;
+export const BLUR_RADIUS = 1 / 20;
 
 export interface IFogLayer extends ILayer {
   lightSources: Array<ILightSource>;
