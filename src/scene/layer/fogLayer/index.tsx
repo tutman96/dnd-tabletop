@@ -12,6 +12,7 @@ import EditablePolygon, { IPolygon, PolygonType } from '../editablePolygon';
 import { useTablePPI } from '../../../settings';
 import RayCastRevealPolygon, { ILightSource } from './rayCastRevealPolygon';
 import { LineConfig } from 'konva/types/shapes/Line';
+import { calculateViewportCenter } from '../../canvas';
 
 export const BLUR_RADIUS = 1 / 20;
 
@@ -97,8 +98,9 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
           label="Add Light"
           icon={<IconZap />}
           onClick={() => {
+            const viewportCenter = calculateViewportCenter(layerRef);
             const light = {
-              position: { x: 0, y: 0 }
+              position: viewportCenter
             } as ILightSource;
             layer.lightSources.push(light);
             setSelectedLight(light);
@@ -163,7 +165,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
         />
       </>
     );
-  }, [selectedPolygon, selectedLight, layer, onUpdate, collections]);
+  }, [selectedPolygon, selectedLight, layer, onUpdate, collections, layerRef]);
 
   useEffect(() => {
     if (isTable && layerRef.current && tablePPI) {

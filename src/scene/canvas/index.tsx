@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { css } from 'emotion';
+import Konva from 'konva';
+import { Vector2d } from 'konva/types/types';
 
 import { IScene } from '..';
 import DraggableStage from './draggableStage';
@@ -14,6 +16,25 @@ import { useExtendedTheme } from '../../theme';
 export const CurrentSceneContext = React.createContext<IScene | null>(null);
 export function useCurrentScene() {
 	return useContext(CurrentSceneContext);
+}
+
+export function calculateViewportCenter(layerRef: React.MutableRefObject<Konva.Layer | undefined>): Vector2d {
+	if (layerRef.current) {
+		const konvaStage = layerRef.current.parent!;
+		const stageOffset = konvaStage.getAbsolutePosition();
+		const stageSize = konvaStage.getSize();
+		const stageZoom = konvaStage.getAbsoluteScale();
+		return {
+			x: (-stageOffset.x + stageSize.width / 2) / stageZoom.x,
+			y: (-stageOffset.y + stageSize.height / 2) / stageZoom.y
+		};
+	}
+	else {
+		return {
+			x: 0,
+			y: 0
+		}
+	}
 }
 
 type Props = { scene: IScene, onUpdate: (scene: IScene) => void };
@@ -110,37 +131,37 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 				`}
 				>
 					<CurrentSceneContext.Provider value={scene}>
-					{
-						scene.layers.map((layer) => {
-							const Component = LayerTypeToComponent[layer.type];
-							if (!Component || layer.visible === false) return null;
-							return (
-								<Component
-									key={layer.id}
-									layer={layer}
-									isTable={false}
-									onUpdate={onLayerUpdate}
-									active={activeLayerId === layer.id}
-								/>
-							);
-						})
-					}
-					<TableViewOverlay
-						layer={{
-							...TableViewLayer,
-							options: scene.table
-						}}
-						isTable={false}
-						active={activeLayerId === TableViewLayer.id}
-						onUpdate={(layer) => {
-							onUpdate({
-								...scene,
-								table: layer.options
+						{
+							scene.layers.map((layer) => {
+								const Component = LayerTypeToComponent[layer.type];
+								if (!Component || layer.visible === false) return null;
+								return (
+									<Component
+										key={layer.id}
+										layer={layer}
+										isTable={false}
+										onUpdate={onLayerUpdate}
+										active={activeLayerId === layer.id}
+									/>
+								);
 							})
-						}}
-						showBorder={true}
-						showGrid={true}
-					/>
+						}
+						<TableViewOverlay
+							layer={{
+								...TableViewLayer,
+								options: scene.table
+							}}
+							isTable={false}
+							active={activeLayerId === TableViewLayer.id}
+							onUpdate={(layer) => {
+								onUpdate({
+									...scene,
+									table: layer.options
+								})
+							}}
+							showBorder={true}
+							showGrid={true}
+						/>
 					</CurrentSceneContext.Provider>
 				</DraggableStage>
 			</ToolbarPortalProvider>
