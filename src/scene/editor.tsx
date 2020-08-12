@@ -74,7 +74,7 @@ function TableDisplayButton({ scene }: { scene: IScene }) {
 					updateTableFreeze(false);
 				}}
 			>
-				{currentSceneSelected ? 'Table to Black' : 'Send to Table'}
+				{currentSceneSelected ? 'Hide TV/Table View' : 'Send to Table'}
 			</Button>
 			<span
 				className={css`
