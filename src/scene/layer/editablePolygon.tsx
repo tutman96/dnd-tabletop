@@ -115,8 +115,6 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
           closed && firstVertex && onAdded &&
           Math.sqrt((relPos.x - firstVertex.x) ** 2 + (relPos.y - firstVertex.y) ** 2) < ANCHOR_RADIUS / stage.getAbsoluteScale().x
         ) {
-          polygon.verticies = [...localVerticies, firstVertex];
-          onUpdate(polygon);
           onAdded();
           return;
         }
@@ -181,7 +179,7 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
       {selected && (
         <>
           <Line
-            closed={lineProps.closed}
+            closed={closed}
             stroke={theme.colors.palette.blue.base}
             strokeWidth={3}
             dash={[4, 4]}

@@ -4,7 +4,7 @@ import AssetComponent from './asset';
 import { IAsset, AssetType, deleteAsset, getNewAssets } from '../../asset';
 import { ILayer, ILayerComponentProps } from '..';
 import Konva from 'konva';
-import { IconFilePlus, IconTrash2, IconRotateCcw, Check } from 'sancho';
+import { IconFilePlus, IconTrash2, Check } from 'sancho';
 import ToolbarItem from '../toolbarItem';
 import ToolbarPortal from '../toolbarPortal';
 import AssetSizer, { calculateCalibratedTransform } from './assetSizer';
@@ -90,18 +90,6 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, is
 						asset.transform = calculateCalibratedTransform(asset, tablePPI!);
 						layer.assets.set(asset.id, asset);
 						onUpdate({ ...layer });
-					}}
-				/>
-				<ToolbarItem
-					icon={<IconRotateCcw />}
-					label="Reset Asset Size"
-					disabled={!selectedAsset || !selectedAsset.calibration || !tablePPI}
-					onClick={() => {
-						selectedAsset!.transform = calculateCalibratedTransform(selectedAsset!, tablePPI!);
-						layer.assets.set(selectedAsset!.id, selectedAsset!);
-						onUpdate({
-							...layer
-						})
 					}}
 				/>
 				<Check label="Snap to Grid" disabled={!selectedAsset} checked={!!selectedAsset?.snapToGrid} onChange={(e) => {
