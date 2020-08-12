@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useContext, useRef } from 'react';
 import { css } from 'emotion';
 import Konva from 'konva';
 import { Vector2d } from 'konva/types/types';
@@ -12,6 +12,8 @@ import LayerList from './layerList';
 import { ToolbarPortalProvider } from '../layer/toolbarPortal';
 import TableViewOverlay, { TableViewLayer } from '../layer/tableView';
 import { useExtendedTheme } from '../../theme';
+import useComponentSize from '@rehooks/component-size';
+import { useTableResolution } from '../../settings';
 
 export const CurrentSceneContext = React.createContext<IScene | null>(null);
 export function useCurrentScene() {
@@ -41,6 +43,9 @@ type Props = { scene: IScene, onUpdate: (scene: IScene) => void };
 const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 	const theme = useExtendedTheme();
 	const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
+	const containerRef = useRef<HTMLDivElement>();
+	const containerSize = useComponentSize(containerRef);
+	const [tableResolution] = useTableResolution();
 
 	// Default selected layer to the first layer
 	useEffect(() => {
@@ -120,51 +125,65 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 		}
 	}
 
+	const initialZoom = tableResolution ?
+		Math.min(
+			containerSize.height / tableResolution.height,
+			containerSize.width / tableResolution.width
+		) :
+		1;
+
 	return (
-		<>
-			<ToolbarPortalProvider>
-				<DraggableStage
-					className={css`
-					flex-grow: 2;
-					width: calc(100vw - ${theme.sceneListWidth + theme.sidebarWidth}px);
-					height: calc(100vh - ${theme.headerHeight}px);
-				`}
-				>
-					<CurrentSceneContext.Provider value={scene}>
-						{
-							scene.layers.map((layer) => {
-								const Component = LayerTypeToComponent[layer.type];
-								if (!Component || layer.visible === false) return null;
-								return (
-									<Component
-										key={layer.id}
-										layer={layer}
-										isTable={false}
-										onUpdate={onLayerUpdate}
-										active={activeLayerId === layer.id}
-									/>
-								);
-							})
-						}
-						<TableViewOverlay
-							layer={{
-								...TableViewLayer,
-								options: scene.table
-							}}
-							isTable={false}
-							active={activeLayerId === TableViewLayer.id}
-							onUpdate={(layer) => {
-								onUpdate({
-									...scene,
-									table: layer.options
+		<div
+			ref={containerRef as any}
+			className={css`
+				flex-grow: 2;
+				width: calc(100vw - ${theme.sceneListWidth + theme.sidebarWidth}px);
+				height: calc(100vh - ${theme.headerHeight}px);
+			`}
+		>
+			{containerSize.height !== 0 && tableResolution ? (
+				<ToolbarPortalProvider>
+					<DraggableStage
+						width={containerSize.width || 1}
+						height={containerSize.height || 1}
+						initialZoom={initialZoom}
+					>
+						<CurrentSceneContext.Provider value={scene}>
+							{
+								scene.layers.map((layer) => {
+									const Component = LayerTypeToComponent[layer.type];
+									if (!Component || layer.visible === false) return null;
+									return (
+										<Component
+											key={layer.id}
+											layer={layer}
+											isTable={false}
+											onUpdate={onLayerUpdate}
+											active={activeLayerId === layer.id}
+										/>
+									);
 								})
-							}}
-							showBorder={true}
-							showGrid={true}
-						/>
-					</CurrentSceneContext.Provider>
-				</DraggableStage>
-			</ToolbarPortalProvider>
+							}
+							<TableViewOverlay
+								layer={{
+									...TableViewLayer,
+									options: scene.table
+								}}
+								isTable={false}
+								active={activeLayerId === TableViewLayer.id}
+								onUpdate={(layer) => {
+									onUpdate({
+										...scene,
+										table: layer.options
+									})
+								}}
+								showBorder={true}
+								showGrid={true}
+							/>
+						</CurrentSceneContext.Provider>
+					</DraggableStage>
+				</ToolbarPortalProvider>
+			) : null}
 
 			<LayerList
 				scene={scene}
@@ -176,7 +195,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 				moveActiveLayer={moveActiveLayer}
 				deleteActiveLayer={deleteActiveLayer}
 			/>
-		</>
+		</div>
 	);
 }
 export default Canvas;

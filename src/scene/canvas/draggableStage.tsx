@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useCallback } from 'react';
-import useComponentSize from '@rehooks/component-size';
-import { css } from 'emotion';
+import { css, cx } from 'emotion';
 import Konva from 'konva';
 import { Stage } from 'react-konva';
 import { useTheme } from 'sancho';
@@ -11,12 +10,9 @@ const ZOOM_SPEED = 1 / 250;
 const PAN_SPEED = 1 / 1;
 const KEYBOARD_ZOOM_SPEED = 1.15;
 
-type Props = { initialZoom?: number, className?: string };
-const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, className, children }) => {
+type Props = { initialZoom?: number, width: number, height: number, className?: string };
+const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, width, height, className, children }) => {
 	const theme = useTheme();
-
-	const containerRef = useRef<HTMLDivElement>(null);
-	const containerSize = useComponentSize(containerRef);
 	const stageRef = useRef<Konva.Stage>();
 
 	const zoomStageFromMiddle = useCallback((deltaZ: number) => {
@@ -84,16 +80,27 @@ const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, className, children
 		}
 	}, [stageRef, initialZoom])
 
+	useEffect(() => {
+		if (stageRef.current) {
+			stageRef.current.scale({ x: initialZoom, y: initialZoom });
+			stageRef.current.batchDraw();
+		}
+	},
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[stageRef]
+	)
+
 	return (
 		<div
-			ref={containerRef}
-			className={css`				
+			className={cx(css`				
 				background-color: ${theme.colors.background.tint2};
 				background-image: linear-gradient(45deg, ${theme.colors.background.tint1} 25%, transparent 25%, transparent 75%, ${theme.colors.background.tint1} 75%, ${theme.colors.background.tint1}),
 				linear-gradient(45deg, ${theme.colors.background.tint1} 25%, transparent 25%, transparent 75%, ${theme.colors.background.tint1} 75%, ${theme.colors.background.tint1});
 				background-size: 20px 20px;
 				background-position: 0 0, 10px 10px;
-			` + (className ? ` ${className}` : '')}
+				width: ${width}px;
+				height: ${height}px;
+			`, className)}
 		>
 			<PanZoomControl
 				onPanZoom={onPanZoom}
@@ -101,9 +108,8 @@ const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, className, children
 			/>
 			<Stage
 				ref={stageRef as any}
-				width={containerSize.width || 1}
-				height={containerSize.height || 1}
-				scale={{ x: initialZoom, y: initialZoom }}
+				width={width}
+				height={height}
 				onMouseDown={(e) => {
 					if (e.evt.button === 1 || e.evt.button === 2) {
 						stageRef.current?.startDrag(e);
