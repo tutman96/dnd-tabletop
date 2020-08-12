@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { List, ListItem, Skeleton, Input, useTheme, IconButton, IconPlusCircle, Button, IconPlus, IconFilm, IconPlay, IconPause } from "sancho";
+import { List, ListItem, Skeleton, Input, useTheme, IconButton, IconPlusCircle, Button, IconPlus, IconFilm, IconPlay, IconPause, Tooltip } from "sancho";
 import { css } from "emotion";
 
 import { IScene, useSceneDatabase, createNewScene } from ".";
@@ -104,7 +104,9 @@ const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
         `}
       >
         <Input type="search" placeholder="Find a scene..." onChange={(e) => setSearchText(e.target.value)} value={searchText} />
-        <IconButton icon={<IconPlusCircle />} label="Add Scene" variant="ghost" onClick={addNewScene} />
+        <Tooltip content="Add Scene">
+          <IconButton icon={<IconPlusCircle />} label="Add Scene" variant="ghost" onClick={addNewScene} />
+        </Tooltip>
       </div>
       <div
         className={css`
