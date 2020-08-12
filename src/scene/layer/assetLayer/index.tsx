@@ -10,6 +10,7 @@ import ToolbarPortal from '../toolbarPortal';
 import AssetSizer, { calculateCalibratedTransform } from './assetSizer';
 import { css } from 'emotion';
 import { useTablePPI } from '../../../settings';
+import { calculateViewportCenter } from '../../canvas';
 
 export interface IAssetLayer extends ILayer {
 	assets: Map<string, IAsset>
@@ -74,7 +75,10 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, is
 					label="Add Asset"
 					onClick={async () => {
 						const assets = await getNewAssets();
+						const viewportCenter = calculateViewportCenter(layerRef);
 						for (const asset of assets) {
+							asset.transform.x = viewportCenter.x - asset.transform.width / 2;
+							asset.transform.y = viewportCenter.y - asset.transform.height / 2;
 							layer.assets.set(asset.id, asset);
 						}
 						onUpdate({ ...layer })
@@ -115,7 +119,7 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, is
 				/>
 			</>
 		);
-	}, [layer, tablePPI, selectedAssetId, onUpdate, deleteSelectedAsset]);
+	}, [layer, layerRef, tablePPI, selectedAssetId, onUpdate, deleteSelectedAsset]);
 
 	return (
 		<>
