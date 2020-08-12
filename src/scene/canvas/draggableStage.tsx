@@ -1,9 +1,11 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import useComponentSize from '@rehooks/component-size';
 import { css } from 'emotion';
 import Konva from 'konva';
 import { Stage } from 'react-konva';
 import { useTheme } from 'sancho';
+
+import PanZoomControl from './panZoomControl';
 
 const ZOOM_SPEED = 1 / 250;
 const PAN_SPEED = 1 / 1;
@@ -17,7 +19,29 @@ const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, className, children
 	const containerSize = useComponentSize(containerRef);
 	const stageRef = useRef<Konva.Stage>();
 
-	const [zoom, setZoom] = useState(initialZoom);
+	const zoomStageFromMiddle = useCallback((deltaZ: number) => {
+		if (deltaZ === 1 || !stageRef.current) return;
+		const stage = stageRef.current;
+
+		const stageSize = stage.getSize();
+		const absoluteCenterOfViewport = {
+			x: stageSize.width / 2,
+			y: stageSize.height / 2
+		};
+
+		const oldZoom = stage.scaleX();
+		const absoluteOffset = {
+			x: (absoluteCenterOfViewport.x - stage.x()) / oldZoom,
+			y: (absoluteCenterOfViewport.y - stage.y()) / oldZoom,
+		};
+
+		const newZoom = deltaZ > 0 ? oldZoom * deltaZ : oldZoom / -deltaZ;
+		stage.scale({ x: newZoom, y: newZoom });
+		stage.setPosition({
+			x: absoluteCenterOfViewport.x - absoluteOffset.x * newZoom,
+			y: absoluteCenterOfViewport.y - absoluteOffset.y * newZoom,
+		});
+	}, [stageRef])
 
 	useEffect(() => {
 		const onKeyDown = (e: KeyboardEvent) => {
@@ -25,32 +49,40 @@ const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, className, children
 			const zoomOutPressed = e.code === 'Minus';
 			if ((e.ctrlKey || e.metaKey) && (zoomInPressed || zoomOutPressed)) {
 				e.preventDefault();
-				const stage = stageRef.current!;
-
-				const stageSize = stage.getSize();
-				const absoluteCenterOfViewport = {
-					x: stageSize.width / 2,
-					y: stageSize.height / 2
-				};
-				
-				const oldZoom = zoom;
-				const absoluteOffset = {
-					x: (absoluteCenterOfViewport.x - stage.x()) / oldZoom,
-					y: (absoluteCenterOfViewport.y - stage.y()) / oldZoom,
-				};
-
-				const newZoom = zoomInPressed ? oldZoom * KEYBOARD_ZOOM_SPEED : oldZoom / KEYBOARD_ZOOM_SPEED;
-				setZoom(newZoom);
-				stage.scale({ x: newZoom, y: newZoom });
-				stage.setPosition({
-					x: absoluteCenterOfViewport.x - absoluteOffset.x * newZoom,
-					y: absoluteCenterOfViewport.y - absoluteOffset.y * newZoom,
-				});
+				zoomStageFromMiddle(zoomInPressed ? KEYBOARD_ZOOM_SPEED : -KEYBOARD_ZOOM_SPEED)
+				stageRef.current?.batchDraw();
 			}
 		}
 		window.document.addEventListener('keydown', onKeyDown);
 		return () => { window.document.removeEventListener('keydown', onKeyDown) };
-	}, [zoom, stageRef])
+	}, [stageRef, zoomStageFromMiddle])
+
+	const onPanZoom = useCallback((dir) => {
+		if (stageRef.current) {
+			zoomStageFromMiddle(Math.abs(1 + dir.z * 0.005));
+
+			const stage = stageRef.current;
+			const currentX = stage.x();
+			const currentY = stage.y();
+
+			const newX = currentX - dir.x * 2;
+			const newY = currentY - dir.y * 2;
+
+			stage.position({
+				x: newX,
+				y: newY
+			})
+			stage.batchDraw();
+		}
+	}, [stageRef, zoomStageFromMiddle]);
+
+	const onHome = useCallback(() => {
+		if (stageRef.current) {
+			stageRef.current.position({ x: 0, y: 0 });
+			stageRef.current.scale({ x: initialZoom, y: initialZoom });
+			stageRef.current.batchDraw();
+		}
+	}, [stageRef, initialZoom])
 
 	return (
 		<div
@@ -63,11 +95,15 @@ const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, className, children
 				background-position: 0 0, 10px 10px;
 			` + (className ? ` ${className}` : '')}
 		>
+			<PanZoomControl
+				onPanZoom={onPanZoom}
+				onHome={onHome}
+			/>
 			<Stage
 				ref={stageRef as any}
 				width={containerSize.width || 1}
 				height={containerSize.height || 1}
-				scale={{ x: zoom, y: zoom }}
+				scale={{ x: initialZoom, y: initialZoom }}
 				onMouseDown={(e) => {
 					if (e.evt.button === 1 || e.evt.button === 2) {
 						stageRef.current?.startDrag(e);
@@ -86,9 +122,9 @@ const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, className, children
 						deltaY = 0;
 					}
 
-					const oldZoom = zoom;
 
 					const stage = stageRef.current!;
+					const oldZoom = stage.scaleX();
 					const pointerPosition = stage.getPointerPosition();
 
 					if (!pointerPosition) {
@@ -106,7 +142,7 @@ const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, className, children
 
 					const zoomSpeed = 1 + (Math.abs(deltaZ) * ZOOM_SPEED);
 					const newZoom = deltaZ < 0 ? oldZoom / zoomSpeed : oldZoom * zoomSpeed;
-					setZoom(newZoom);
+					stage.scale({ x: newZoom, y: newZoom });
 
 					var newPos = {
 						// x: (pointerPosition.x - mousePointTo.x + (deltaX * PAN_SPEED)) * newZoom,
