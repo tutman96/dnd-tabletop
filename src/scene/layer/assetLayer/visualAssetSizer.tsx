@@ -38,9 +38,9 @@ const VisualAssetSizer: React.SFC<{ asset: IAsset; onUpdate: (calibration: IAsse
 
   return (
     <DraggableStage
+      width={theme.visualAssetSizerSize}
+      height={theme.visualAssetSizerSize}
       className={css`
-        width: ${theme.visualAssetSizerSize}px;
-				height: ${theme.visualAssetSizerSize}px;
         margin-left: -${theme.spaces.lg};
       `}
       initialZoom={(theme.visualAssetSizerSize / asset.size.width)}
