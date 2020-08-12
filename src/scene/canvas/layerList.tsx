@@ -53,13 +53,13 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, upd
 						contentBefore={
 							<IconButton
 								variant="ghost"
-								label={'Table View'}
+								label={TableViewLayer.name}
 								icon={<IconTv />}
 								disabled
 								size="sm"
 							/>
 						}
-						primary={'Table View'}
+						primary={TableViewLayer.name}
 						contentAfter={' '}
 						onClick={() => setActiveLayer(TableViewLayer.id)}
 					/>

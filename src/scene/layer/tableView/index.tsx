@@ -14,7 +14,7 @@ import ZoomToolbarItem from './zoomToolbarItem';
 
 export const TableViewLayer = {
   id: 'TABLE_VIEW',
-  name: 'Table View',
+  name: 'TV/Table View',
   type: LayerType.TABLE_VIEW,
   visible: true
 } as ILayer;
