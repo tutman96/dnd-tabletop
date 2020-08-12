@@ -124,7 +124,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
         <ToolbarItem
           label={selectedPolygon && selectedPolygon.visibleOnTable ? 'Hide on Table' : 'Show on Table'}
           disabled={!selectedPolygon}
-          icon={selectedPolygon && selectedPolygon.visibleOnTable ? <IconEye /> : <IconEyeOff />}
+          icon={selectedPolygon && selectedPolygon.visibleOnTable ? <IconEyeOff /> : <IconEye />}
           keyboardShortcuts={['d']}
           onClick={() => {
             if (!selectedPolygon) return;

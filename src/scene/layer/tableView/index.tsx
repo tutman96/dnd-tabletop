@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useEffect, useState } from 'react';
-import { useTheme, IconCrosshair, Check } from 'sancho';
+import { useTheme, IconCrosshair, IconEye, IconEyeOff } from 'sancho';
 import Konva from 'konva';
 import { Layer, Rect, Line, Group, Transformer } from 'react-konva';
 import { Vector2d } from 'konva/types/types';
@@ -68,17 +68,19 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
             })
           }}
         />
-        &nbsp;
-        <Check label="Display Grid" checked={layer.options.displayGrid} onChange={(e) => {
-          onUpdate({
-            ...layer,
-            options: {
-              ...layer.options,
-              displayGrid: e.target.checked
-            }
-          })
-        }} />
-        &nbsp;
+        <ToolbarItem
+          label={layer.options.displayGrid ? 'Hide Grid' : 'Show Grid'}
+          icon={layer.options.displayGrid ? <IconEyeOff /> : <IconEye />}
+          onClick={() => {
+            onUpdate({
+              ...layer,
+              options: {
+                ...layer.options,
+                displayGrid: !layer.options.displayGrid
+              }
+            })
+          }}
+        />
         <ZoomToolbarItem
           zoom={layer.options.scale}
           onUpdate={(zoom) => {
@@ -129,6 +131,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
           ctx.rotate(localOptions.rotation);
           ctx.closePath();
         }}
+        opacity={localOptions.displayGrid ? 1 : (active ? 0.5 : 0)}
       >
         {l.map((line, i) => (
           <React.Fragment key={i}>
@@ -153,7 +156,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
         ))}
       </Group>
     );
-  }, [showGrid, localOptions.offset.x, localOptions.offset.y, localOptions.rotation, localOptions.scale, tableResolution, ppi, theme])
+  }, [showGrid, localOptions, active, tableResolution, ppi, theme])
 
   if (!tableResolution || ppi === null) {
     return null;
