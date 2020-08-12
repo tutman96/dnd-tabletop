@@ -293,6 +293,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
           displayIcon={!isTable}
           isTable={isTable}
           obstructionPolygons={layer.obstructionPolygons}
+          fogPolygons={layer.fogPolygons}
           onUpdate={(light) => {
             layer.lightSources[i] = light;
             onUpdate({ ...layer });

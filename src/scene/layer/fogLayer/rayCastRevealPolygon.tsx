@@ -4,33 +4,44 @@ import { Vector2d } from 'konva/types/types';
 import { Shape, Line } from 'react-konva';
 import { useTheme } from 'sancho';
 import { getVisibilityPolygon } from './rayCastingUtils';
-import { useCurrentScene } from '../../canvas';
-import { useTableResolution, useTablePPI } from '../../../settings';
+import { useTablePPI } from '../../../settings';
 import Konva from 'konva';
 
 export interface ILightSource {
   position: Vector2d
 }
 
-function useScreenPolygon(): IPolygon {
-  const scene = useCurrentScene();
-  const [screenResolution] = useTableResolution();
-  if (!screenResolution || !scene) {
-    return { visibleOnTable: false, verticies: [], type: PolygonType.LIGHT_OBSTRUCTION };
-  }
+function useFogBoundsPolygon(lightSource: Vector2d, fogPolygons: Array<IPolygon>): IPolygon {
+  let minX: number = lightSource.x;
+  let maxX: number = lightSource.x;
+  let minY: number = lightSource.y;
+  let maxY: number = lightSource.y;
 
-  const screenViewOptions = scene.table;
-  const width = screenViewOptions.scale * screenResolution.width;
-  const height = screenViewOptions.scale * screenResolution.height;
+  fogPolygons.forEach(poly => {
+    poly.verticies.forEach(v => {
+      minX = Math.min(minX, v.x);
+      maxX = Math.max(maxX, v.x);
+      minY = Math.min(minY, v.y);
+      maxY = Math.max(maxY, v.y);
+    })
+  })
+
+  // Expand Bounds Around Light to make
+  // sure there's no weird issue with the light
+  // being on top of a vertex.
+  minX -= 10;
+  minY -= 10;
+  maxX += 10;
+  maxY += 10;
 
   return {
     type: PolygonType.LIGHT_OBSTRUCTION,
     verticies: [
-      { x: screenViewOptions.offset.x, y: screenViewOptions.offset.y }, // top left
-      { x: screenViewOptions.offset.x + width, y: screenViewOptions.offset.y }, // top right
-      { x: screenViewOptions.offset.x + width, y: screenViewOptions.offset.y + height }, // bottom right
-      { x: screenViewOptions.offset.x, y: screenViewOptions.offset.y + height }, // bottom left
-      { x: screenViewOptions.offset.x, y: screenViewOptions.offset.y }, // top left (close the poly)
+      { x: minX, y: minY }, // top left
+      { x: maxX, y: minY }, // top right
+      { x: maxX, y: maxY }, // bottom right
+      { x: minX, y: maxY }, // bottom left
+      { x: minX, y: minY }, // top left (close the poly)
     ],
     visibleOnTable: true
   };
@@ -42,12 +53,13 @@ type Props = {
   light: ILightSource,
   displayIcon: boolean,
   obstructionPolygons: Array<IPolygon>,
+  fogPolygons: Array<IPolygon>
   onUpdate: (light: ILightSource) => void,
   isTable: boolean,
   selected: boolean,
   onSelected: () => void
 };
-const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructionPolygons, onUpdate, isTable, selected, onSelected }) => {
+const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, fogPolygons, obstructionPolygons, onUpdate, isTable, selected, onSelected }) => {
   const theme = useTheme();
   const ppi = useTablePPI() || 86;
   const iconRef = useRef<Konva.Shape>();
@@ -58,10 +70,10 @@ const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, obstructio
     setLocalPosition(light.position);
   }, [light.position, setLocalPosition])
 
-  const screenPolygon = useScreenPolygon();
+  let fogPolygon = useFogBoundsPolygon(localPosition, fogPolygons);
 
-  const obstructionWithScreen = [...obstructionPolygons.filter((p) => p.visibleOnTable), screenPolygon];
-  const visibilityPolygon = getVisibilityPolygon(localPosition, obstructionWithScreen);
+  const obstructionWithFogPoly = [...obstructionPolygons.filter((p) => p.visibleOnTable), fogPolygon];
+  const visibilityPolygon = getVisibilityPolygon(localPosition, obstructionWithFogPoly);
 
   const visibilityLinePoints = visibilityPolygon.verticies
     .map((v) => [v.x, v.y]).flat();
