@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { IAsset, IAssetCalibration } from '../../asset';
-import { IconSliders, Dialog, useTheme, Button } from 'sancho';
+import { IconSliders, Dialog, useTheme, Button, Text } from 'sancho';
 import { css } from "emotion";
 
 import ToolbarItem from '../toolbarItem';
@@ -56,6 +56,7 @@ const AssetSizer: React.SFC<Props> = ({ asset, onUpdate }) => {
           title="Asset Calibration"
         >
           <div className={css`padding: ${theme.spaces.lg};`}>
+            <Text variant="paragraph" muted>Drag the corners of the selection box to align with the existing grid on your map. Then drag the box to match the size of the grid squares.</Text>
             <VisualAssetSizer asset={{ ...asset, calibration }} onUpdate={setCalibration} />
             <AdvancedAssetSizer calibration={calibration} onUpdate={setCalibration} />
 
