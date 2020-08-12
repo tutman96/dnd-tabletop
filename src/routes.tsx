@@ -36,7 +36,7 @@ const routes = {
 		}
 	},
 	table: {
-		name: 'Table View',
+		name: 'TV/Table View',
 		path: '/table',
 		sidebarIcon: IconMap,
 		main: () => <TablePage />,

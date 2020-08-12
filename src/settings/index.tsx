@@ -73,7 +73,7 @@ const ScreenSizeSettings: React.SFC = () => {
 
   return (
     <>
-      <Text variant="h6">Table Display Settings</Text>
+      <Text variant="h6">TV/Table Display Settings</Text>
       <InputGroup label="Resolution">
         <div 
           className={css`
