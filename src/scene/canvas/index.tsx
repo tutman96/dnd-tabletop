@@ -69,6 +69,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 		const layer = createNewLayer(type);
 		layer.name = 'Layer ' + (scene.layers.length + 1);
 		scene.layers.push(layer);
+		setActiveLayerId(layer.id);
 		onUpdate({ ...scene });
 	}
 

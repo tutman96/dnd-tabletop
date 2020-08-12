@@ -1,5 +1,5 @@
 import React from "react";
-import { useTheme, Layer, List, ListItem, IconButton, IconTrash2, Popover, MenuList, MenuItem, IconFile, IconCloudDrizzle, IconPlus, Text, IconArrowUp, IconArrowDown, IconEye, IconEyeOff, IconTv } from "sancho";
+import { useTheme, Layer, List, ListItem, IconButton, Popover, MenuList, MenuItem, IconFile, IconCloudDrizzle, IconPlus, Text, IconArrowUp, IconArrowDown, IconEye, IconEyeOff, IconTv } from "sancho";
 import { css } from "emotion";
 
 import { IScene } from "..";
@@ -7,6 +7,7 @@ import { ILayer } from "../layer";
 import LayerType from "../layer/layerType";
 import { TableViewLayer } from "../layer/tableView";
 import EditLayerButton from "./editLayerButton";
+import DeleteLayerButton from "./deleteLayerButton";
 
 type Props = {
 	scene: IScene,
@@ -98,13 +99,9 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, upd
 						`}
 				>
 					{/* Delete Layer */}
-					<IconButton
-						variant="ghost"
-						disabled={!activeLayer || activeLayerId === TableViewLayer.id}
-						color={theme.colors.intent.danger.base}
-						icon={<IconTrash2 />}
-						label="Delete Layer"
-						onClick={deleteActiveLayer}
+					<DeleteLayerButton
+						layer={activeLayer}
+						onDelete={deleteActiveLayer}
 					/>
 
 					<div>
