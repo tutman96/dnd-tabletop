@@ -87,6 +87,7 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, is
 				<AssetSizer
 					asset={selectedAsset}
 					onUpdate={(asset) => {
+						asset.transform = calculateCalibratedTransform(asset, tablePPI!);
 						layer.assets.set(asset.id, asset);
 						onUpdate({ ...layer });
 					}}
