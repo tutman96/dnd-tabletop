@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import useComponentSize from '@rehooks/component-size';
 import { css } from 'emotion';
 import Konva from 'konva';
@@ -7,9 +7,10 @@ import { useTheme } from 'sancho';
 
 const ZOOM_SPEED = 1 / 250;
 const PAN_SPEED = 1 / 1;
+const KEYBOARD_ZOOM_SPEED = 1.15;
 
-type Props = { draggable?: boolean, initialZoom?: number, className?: string };
-const DraggableStage: React.SFC<Props> = ({ draggable, initialZoom = 1, className, children }) => {
+type Props = { initialZoom?: number, className?: string };
+const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, className, children }) => {
 	const theme = useTheme();
 
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -17,6 +18,39 @@ const DraggableStage: React.SFC<Props> = ({ draggable, initialZoom = 1, classNam
 	const stageRef = useRef<Konva.Stage>();
 
 	const [zoom, setZoom] = useState(initialZoom);
+
+	useEffect(() => {
+		const onKeyDown = (e: KeyboardEvent) => {
+			const zoomInPressed = e.code === 'Equal';
+			const zoomOutPressed = e.code === 'Minus';
+			if ((e.ctrlKey || e.metaKey) && (zoomInPressed || zoomOutPressed)) {
+				e.preventDefault();
+				const stage = stageRef.current!;
+
+				const stageSize = stage.getSize();
+				const absoluteCenterOfViewport = {
+					x: stageSize.width / 2,
+					y: stageSize.height / 2
+				};
+				
+				const oldZoom = zoom;
+				const absoluteOffset = {
+					x: (absoluteCenterOfViewport.x - stage.x()) / oldZoom,
+					y: (absoluteCenterOfViewport.y - stage.y()) / oldZoom,
+				};
+
+				const newZoom = zoomInPressed ? oldZoom * KEYBOARD_ZOOM_SPEED : oldZoom / KEYBOARD_ZOOM_SPEED;
+				setZoom(newZoom);
+				stage.scale({ x: newZoom, y: newZoom });
+				stage.setPosition({
+					x: absoluteCenterOfViewport.x - absoluteOffset.x * newZoom,
+					y: absoluteCenterOfViewport.y - absoluteOffset.y * newZoom,
+				});
+			}
+		}
+		window.document.addEventListener('keydown', onKeyDown);
+		return () => { window.document.removeEventListener('keydown', onKeyDown) };
+	}, [zoom, stageRef])
 
 	return (
 		<div
