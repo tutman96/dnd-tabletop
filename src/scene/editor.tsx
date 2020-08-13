@@ -12,7 +12,6 @@ const { useOneValue } = useSceneDatabase();
 const { useOneValue: useOneSettingValue } = useSettingsDatabase();
 
 function SceneNameHeader({ name, onUpdate: updateName }: { name: string, onUpdate: (name: string) => void }) {
-	const theme = useTheme();
 	const [inEdit, setInEdit] = useState(false);
 	const [localName, setLocalName] = useState(name);
 
@@ -41,7 +40,6 @@ function SceneNameHeader({ name, onUpdate: updateName }: { name: string, onUpdat
 						icon={<IconCheck />}
 						size="sm"
 						variant="ghost"
-						color={theme.colors.intent.success.base}
 						label="Save Name"
 						onClick={() => {
 							updateName(localName);
