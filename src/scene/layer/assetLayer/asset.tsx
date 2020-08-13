@@ -17,6 +17,9 @@ const Asset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected, playAu
 	useEffect(() => {
 		if (asset.type === AssetType.VIDEO && el) {
 			(el as HTMLVideoElement).muted = !playAudio;
+			return () => {
+				(el as HTMLVideoElement).muted = true;
+			}
 		}
 	}, [asset, playAudio, el])
 
