@@ -59,6 +59,7 @@ const VisualAssetSizer: React.SFC<{ asset: IAsset; onUpdate: (calibration: IAsse
           onSelected={() => { }}
           selected={false}
           onUpdate={() => { }}
+          playAudio={false}
         />
       </Layer>
       <Layer>

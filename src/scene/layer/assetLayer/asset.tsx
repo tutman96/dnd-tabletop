@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Image } from 'react-konva';
 
-import { IAsset, useAssetElement } from '../../asset';
+import { IAsset, useAssetElement, AssetType } from '../../asset';
 import TransformableAsset from '../../canvas/transformableAsset';
 
 type Props = {
@@ -9,9 +9,16 @@ type Props = {
 	onUpdate: (asset: IAsset) => void;
 	selected: boolean;
 	onSelected: () => void;
+	playAudio: boolean;
 };
-const Asset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected }) => {
+const Asset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected, playAudio }) => {
 	const el = useAssetElement(asset);
+
+	useEffect(() => {
+		if (asset.type === AssetType.VIDEO && el) {
+			(el as HTMLVideoElement).muted = !playAudio;
+		}
+	}, [asset, playAudio, el])
 
 	const xOffset = asset.calibration ? (asset.calibration.xOffset * (asset.transform.width / asset.size.width)) : 0;
 	const yOffset = asset.calibration ? (asset.calibration.yOffset * (asset.transform.height / asset.size.height)) : 0;

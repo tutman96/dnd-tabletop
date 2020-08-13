@@ -120,6 +120,7 @@ async function getImageElement(file: File) {
 async function getVideoElement(file: File) {
 	const video = document.createElement('video');
 	video.src = URL.createObjectURL(file);
+	video.loop = true;
 	video.muted = true;
 	video.autoplay = true;
 	video.play();

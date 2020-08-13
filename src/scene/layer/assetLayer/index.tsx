@@ -9,7 +9,7 @@ import ToolbarItem from '../toolbarItem';
 import ToolbarPortal from '../toolbarPortal';
 import AssetSizer, { calculateCalibratedTransform } from './assetSizer';
 import { css } from 'emotion';
-import { useTablePPI } from '../../../settings';
+import { useTablePPI, usePlayAudioOnTable } from '../../../settings';
 import { calculateViewportCenter } from '../../canvas';
 
 export interface IAssetLayer extends ILayer {
@@ -21,6 +21,7 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, is
 	const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
 	const layerRef = useRef<Konva.Layer>();
 	const tablePPI = useTablePPI();
+	const [playAudioOnTable] = usePlayAudioOnTable();
 
 	const deleteSelectedAsset = useCallback(async () => {
 		if (selectedAssetId && layer.assets.has(selectedAssetId)) {
@@ -130,6 +131,7 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, is
 										layer.assets.set(updatedAsset.id, updatedAsset);
 										onUpdate({ ...layer });
 									}}
+									playAudio={isTable && !!playAudioOnTable}
 								/>
 							);
 						})

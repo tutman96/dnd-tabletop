@@ -1,13 +1,14 @@
 import useGlobalStorage from "../storage";
 import React, { useState, SetStateAction, Dispatch } from "react";
-import { IconButton, useTheme, IconSettings, Dialog, Tooltip, Text, InputGroup, Input } from "sancho";
+import { IconButton, useTheme, IconSettings, Dialog, Tooltip, Text, InputGroup, Input, Check } from "sancho";
 import { css } from "emotion";
 
 export enum Settings {
   DISPLAYED_SCENE = 'displayed_scene',
   TABLE_FREEZE = 'table_freeze',
   TABLE_RESOLUTION = 'table_resolution',
-  TABLE_SIZE = 'table_size'
+  TABLE_SIZE = 'table_size',
+  PLAY_AUDIO_ON_TABLE = 'play_audio_on_table'
 }
 
 const storage = useGlobalStorage<unknown>('settings');
@@ -44,16 +45,27 @@ export function useTableSize(): [number | undefined, Dispatch<SetStateAction<num
   return [tableSize, setTableSize];
 }
 
+export function usePlayAudioOnTable(): [boolean | undefined, Dispatch<SetStateAction<boolean>>] {
+  const [playAudio, setPlayAudio] = useOneSettingValue<boolean>(Settings.PLAY_AUDIO_ON_TABLE);
+  if (playAudio === null) {
+    return [
+      false,
+      setPlayAudio
+    ]
+  }
+  return [playAudio, setPlayAudio];
+}
+
 export function useTablePPI(): number | null {
   const [tableResolution] = useTableResolution();
-	const [tableSize] = useTableSize();
-	if (!tableResolution || !tableSize) {
-		return null;
+  const [tableSize] = useTableSize();
+  if (!tableResolution || !tableSize) {
+    return null;
   }
-  
+
   const theta = Math.atan(tableResolution.height / tableResolution.width);
-	const widthInch = tableSize * Math.cos(theta);
-	// const heightInch = tableSize * Math.sin(theta);
+  const widthInch = tableSize * Math.cos(theta);
+  // const heightInch = tableSize * Math.sin(theta);
 
   const ppi = tableResolution.width / widthInch;
   return ppi;
@@ -61,12 +73,13 @@ export function useTablePPI(): number | null {
 
 const ScreenSizeSettings: React.SFC = () => {
   const theme = useTheme();
-  
+
   const [tableResolution, setTableResolution] = useTableResolution();
   const [tableSize, setTableSize] = useTableSize();
+  const [playAudioOnTable, setPlayAudioOnTable] = usePlayAudioOnTable();
 
   const formItemMargin = css`margin: 0 ${theme.spaces.sm};`;
-  
+
   if (tableResolution === undefined || tableSize === undefined) {
     return null;
   }
@@ -75,7 +88,7 @@ const ScreenSizeSettings: React.SFC = () => {
     <>
       <Text variant="h6">TV/Table Display Settings</Text>
       <InputGroup label="Resolution">
-        <div 
+        <div
           className={css`
             display: flex; 
             align-items: center;
@@ -109,7 +122,7 @@ const ScreenSizeSettings: React.SFC = () => {
         </div>
       </InputGroup>
       <InputGroup label="Screen Size">
-        <div 
+        <div
           className={css`
             display: flex; 
             align-items: center;
@@ -130,6 +143,16 @@ const ScreenSizeSettings: React.SFC = () => {
           <div className={formItemMargin}>inches</div>
         </div>
       </InputGroup>
+      <br/>
+      <Text variant="h6">Other Settings</Text>
+      <Check
+        checked={playAudioOnTable}
+        disabled={playAudioOnTable === undefined}
+        onChange={e => {
+          setPlayAudioOnTable(e.target.checked);
+        }}
+        label="Play Audio on Table"
+      />
     </>
   );
 }
