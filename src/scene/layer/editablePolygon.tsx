@@ -191,7 +191,6 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
               key={i}
               position={{ x: v.x - groupX, y: v.y - groupY }}
               onClick={() => {
-                console.log(i, 'clicked');
                 if (adding && i === 0 && onAdded) {
                   onAdded();
                 }

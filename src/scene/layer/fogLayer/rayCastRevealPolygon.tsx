@@ -8,7 +8,16 @@ import { useTablePPI } from '../../../settings';
 import Konva from 'konva';
 
 export interface ILightSource {
-  position: Vector2d
+  position: Vector2d,
+  brightLightDistance?: number,
+  dimLightDistance?: number,
+}
+
+export function defaultLightSource(light: ILightSource) {
+  // torch light
+  light.brightLightDistance = light.brightLightDistance === undefined ? 4 : light.brightLightDistance;
+  light.dimLightDistance = light.dimLightDistance === undefined ? 8 : light.dimLightDistance;
+  return light;
 }
 
 function useFogBoundsPolygon(lightSource: Vector2d, fogPolygons: Array<IPolygon>): IPolygon {
@@ -47,7 +56,7 @@ function useFogBoundsPolygon(lightSource: Vector2d, fogPolygons: Array<IPolygon>
   };
 }
 
-const fillGradientColorStops = [0, 'rgba(255,255,255,0.90)', 0.10, 'rgba(255,255,255,0.70)', 0.40, 'rgba(255,255,255,0.40)', 0.60, 'rgba(255,255,255,0.10)', 1, 'transparent'];
+// const fillGradientColorStops = [0, 'rgba(255,255,255,0.90)', 0.10, 'rgba(255,255,255,0.70)', 0.40, 'rgba(255,255,255,0.40)', 0.60, 'rgba(255,255,255,0.10)', 1, 'transparent'];
 
 type Props = {
   light: ILightSource,
@@ -93,9 +102,12 @@ const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, fogPolygon
         fillRadialGradientStartPoint={localPosition}
         fillRadialGradientEndPoint={localPosition}
         fillRadialGradientStartRadius={0}
-        fillRadialGradientEndRadius={ppi * (40 / 5)} // TODO: make configurable
-        fillRadialGradientColorStops={fillGradientColorStops}
-        opacity={isTable ? 1 : 1}
+        fillRadialGradientEndRadius={ppi * light.dimLightDistance!}
+        fillRadialGradientColorStops={[
+          0, 'rgba(255,255,255,1)',
+          (light.brightLightDistance! / light.dimLightDistance!), 'rgba(255,255,255,0.30)',
+          1, 'rgba(255,255,255,0)'
+        ]}
         globalCompositeOperation="destination-out"
       />
       {displayIcon && (
