@@ -86,6 +86,7 @@ const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
   if (searchText) {
     sceneList = sceneList.filter((scene) => scene.name.toLowerCase().includes(searchText.toLowerCase()));
   }
+  sceneList = sceneList.sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <List
