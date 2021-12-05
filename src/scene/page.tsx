@@ -62,7 +62,7 @@ const ScenePage: React.SFC<Props> = () => {
             `}
           >
             <SceneList onSceneSelect={onSceneSelect} selectedSceneId={currentSelectedScene!} />
-            <SceneEditor />
+            <SceneEditor onSceneDelete={() => history.push(`${routeMatch.path}/`)}/>
           </div>
         </Route>
       </Switch>

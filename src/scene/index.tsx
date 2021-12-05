@@ -4,6 +4,8 @@ import useGlobalStorage from "../storage";
 import { ILayer, createNewLayer } from "./layer";
 import LayerType from "./layer/layerType";
 import { Vector2d } from "konva/types/types";
+import { IAssetLayer } from "./layer/assetLayer";
+import { deleteAsset } from "./asset";
 
 export interface TableOptions {
 	displayGrid: boolean,
@@ -21,7 +23,21 @@ export interface IScene {
 
 const storage = useGlobalStorage<IScene>('scene');
 export function useSceneDatabase() {
-	return storage;
+	return {
+		...storage,
+		deleteItem: async (key: string) => {
+			const scene = await storage.storage.getItem(key);
+			for (const layer of scene.layers) {
+				if (layer.type !== LayerType.ASSETS) continue;
+
+				for (const asset of Array.from((layer as IAssetLayer).assets.values())) {
+					await deleteAsset(asset)
+				}
+			}
+
+			await storage.deleteItem(key);
+		}
+	};
 }
 
 export function createNewScene(): IScene {

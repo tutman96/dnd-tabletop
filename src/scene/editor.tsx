@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouteMatch } from "react-router-dom";
-import { Spinner, Text, useTheme, IconButton, IconPlay, IconPause, IconUpload, IconEdit2, IconCheck, Input, Button, IconEyeOff } from "sancho";
+import { Spinner, Text, useTheme, IconButton, IconPlay, IconPause, IconUpload, IconEdit2, IconCheck, Input, Button, IconEyeOff, Dialog, IconTrash2 } from "sancho";
 import { css } from "emotion";
 
 import { useSceneDatabase, IScene } from ".";
@@ -8,11 +8,13 @@ import Canvas from "./canvas";
 import { useSettingsDatabase, Settings } from "../settings";
 import { useExtendedTheme } from "../theme";
 
-const { useOneValue } = useSceneDatabase();
+const { useOneValue, deleteItem } = useSceneDatabase();
 const { useOneValue: useOneSettingValue } = useSettingsDatabase();
 
-function SceneNameHeader({ name, onUpdate: updateName }: { name: string, onUpdate: (name: string) => void }) {
+function SceneNameHeader({ name, onUpdate: updateName, onDelete }: { name: string, onUpdate: (name: string) => void, onDelete: () => void }) {
+	const theme = useTheme();
 	const [inEdit, setInEdit] = useState(false);
+	const [inDelete, setInDelete] = useState(false);
 	const [localName, setLocalName] = useState(name);
 
 	useEffect(() => {
@@ -31,6 +33,7 @@ function SceneNameHeader({ name, onUpdate: updateName }: { name: string, onUpdat
 				<>
 					<Text variant="lead">{name}</Text>
 					<IconButton icon={<IconEdit2 />} size="sm" variant="ghost" label="Edit Name" onClick={() => setInEdit(true)} />
+					<IconButton icon={<IconTrash2 />} size="sm" variant="ghost" label="Delete Scene" onClick={() => setInDelete(true)} />
 				</>
 			}
 			{inEdit &&
@@ -49,6 +52,27 @@ function SceneNameHeader({ name, onUpdate: updateName }: { name: string, onUpdat
 					/>
 				</>
 			}
+			<Dialog
+				isOpen={inDelete}
+				onRequestClose={() => setInDelete(false)}
+				title="Delete Scene"
+			>
+				<div className={css`padding: ${theme.spaces.lg};`}>
+					<Text variant="paragraph" muted={true}>Are you sure you want to delete '{name}'?</Text>
+					<div
+						className={css`
+                display: flex;
+                margin-top: ${theme.spaces.lg};
+                justify-content: flex-end;
+              `}
+					>
+						<Button variant="ghost" intent="danger" onClick={() => {
+							onDelete();
+							setInDelete(false);
+						}}>Delete</Button>
+					</div>
+				</div>
+			</Dialog>
 		</div >
 	);
 }
@@ -99,8 +123,8 @@ function TableDisplayButton({ scene }: { scene: IScene }) {
 	);
 }
 
-type Props = {};
-const SceneEditor: React.SFC<Props> = () => {
+type Props = { onSceneDelete: () => void };
+const SceneEditor: React.SFC<Props> = ({ onSceneDelete }) => {
 	const theme = useExtendedTheme();
 
 	const match = useRouteMatch<{ id: string }>();
@@ -149,6 +173,7 @@ const SceneEditor: React.SFC<Props> = () => {
 				<SceneNameHeader
 					name={scene.name}
 					onUpdate={(name) => updateScene({ ...scene, name })}
+					onDelete={() => deleteItem(scene.id).then(() => onSceneDelete())}
 				/>
 				<div>
 					{/* TODO */}

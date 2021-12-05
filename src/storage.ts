@@ -69,6 +69,9 @@ export default function useGlobalStorage<T>(name: string) {
 		createItem: (key: string, object: T) => {
 			storage.setItem(key, object);
 		},
+		deleteItem: async (key: string) => {
+			await storage.removeItem(key);
+		},
 		storage
 	};
 };
