@@ -10,9 +10,10 @@ import ToolbarPortal from '../toolbarPortal';
 import ToolbarItem from '../toolbarItem';
 import EditablePolygon, { IPolygon, PolygonType } from '../editablePolygon';
 import { useTablePPI } from '../../../settings';
-import RayCastRevealPolygon, { ILightSource } from './rayCastRevealPolygon';
+import RayCastRevealPolygon, { ILightSource, defaultLightSource } from './rayCastRevealPolygon';
 import { LineConfig } from 'konva/types/shapes/Line';
 import { calculateViewportCenter } from '../../canvas';
+import EditLightToolbarItem from './editLightToolbarItem';
 
 export const BLUR_RADIUS = 1 / 20;
 
@@ -132,6 +133,15 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
             if (!selectedPolygon) return;
             selectedPolygon.visibleOnTable = !selectedPolygon.visibleOnTable;
             onUpdate({ ...layer })
+          }}
+        />
+        <EditLightToolbarItem
+          light={selectedLight}
+          onUpdate={(light) => {
+            const index = layer.lightSources.indexOf(selectedLight!);
+            layer.lightSources[index] = light;
+            setSelectedLight(light);
+            onUpdate({ ...layer });
           }}
         />
         <div className={css`flex-grow: 2;`} />
@@ -275,6 +285,8 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
       )
     }
   }
+
+  layer.lightSources.forEach(defaultLightSource);
 
   return (
     <Layer
