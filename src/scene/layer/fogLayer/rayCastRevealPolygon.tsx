@@ -80,6 +80,7 @@ const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, fogPolygon
   }, [light.position, setLocalPosition])
 
   let fogPolygon = useFogBoundsPolygon(localPosition, fogPolygons);
+  const defaultedLight = defaultLightSource(light);
 
   const obstructionWithFogPoly = [...obstructionPolygons.filter((p) => p.visibleOnTable), fogPolygon];
   const visibilityPolygon = getVisibilityPolygon(localPosition, obstructionWithFogPoly);
@@ -89,6 +90,11 @@ const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, fogPolygon
 
   if (iconRef.current) {
     iconRef.current.setZIndex(9999);
+  }
+
+  let dimlightBrightLightRatio = Math.max(0, Math.min(1, defaultedLight.brightLightDistance! / defaultedLight.dimLightDistance!));
+  if (isNaN(dimlightBrightLightRatio)) {
+    dimlightBrightLightRatio = 0;
   }
 
   return (
@@ -102,10 +108,10 @@ const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, fogPolygon
         fillRadialGradientStartPoint={localPosition}
         fillRadialGradientEndPoint={localPosition}
         fillRadialGradientStartRadius={0}
-        fillRadialGradientEndRadius={ppi * light.dimLightDistance!}
+        fillRadialGradientEndRadius={ppi * Math.max(defaultedLight.brightLightDistance!, defaultedLight.dimLightDistance!)}
         fillRadialGradientColorStops={[
           0, 'rgba(255,255,255,1)',
-          (light.brightLightDistance! / light.dimLightDistance!), 'rgba(255,255,255,0.30)',
+          dimlightBrightLightRatio, 'rgba(255,255,255,0.30)',
           1, 'rgba(255,255,255,0)'
         ]}
         globalCompositeOperation="destination-out"

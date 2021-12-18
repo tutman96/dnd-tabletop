@@ -109,10 +109,10 @@ const EditLightToolbarItem: React.SFC<Props> = ({ light, onUpdate }) => {
 
             <Text variant="lead">Parameters</Text>
             <InputGroup label="Bright Light Distance (ft)">
-              <Input type="number" value={localLight.brightLightDistance! * 5 + ""} onChange={e => updateNumberParameter('brightLightDistance', e)} />
+              <Input type="number" value={localLight.brightLightDistance! * 5 + ""} onChange={e => updateNumberParameter('brightLightDistance', e)} min={0} />
             </InputGroup>
             <InputGroup label="Dim Light Distance (ft)">
-              <Input type="number" value={localLight.dimLightDistance! * 5 + ""} onChange={e => updateNumberParameter('dimLightDistance', e)} />
+              <Input type="number" value={localLight.dimLightDistance! * 5 + ""} onChange={e => updateNumberParameter('dimLightDistance', e)} min={0} />
             </InputGroup>
 
             <div
