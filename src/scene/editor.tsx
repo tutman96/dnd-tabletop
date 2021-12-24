@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useRouteMatch } from "react-router-dom";
+import { useMatch } from "react-router-dom";
 import { Spinner, Text, useTheme, IconButton, IconPlay, IconPause, IconUpload, IconEdit2, IconCheck, Input, Button, IconEyeOff, Dialog, IconTrash2 } from "sancho";
 import { css } from "emotion";
 
@@ -127,13 +127,13 @@ type Props = { onSceneDelete: () => void };
 const SceneEditor: React.SFC<Props> = ({ onSceneDelete }) => {
 	const theme = useExtendedTheme();
 
-	const match = useRouteMatch<{ id: string }>();
-	const [scene, updateScene] = useOneValue(match.params.id);
+	const match = useMatch('/scenes/:id');
+	const [scene, updateScene] = useOneValue(match!.params.id!);
 
 	const [displayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
 	const [tableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
 
-	if (!match.params.id) {
+	if (!match?.params.id) {
 		return null;
 	}
 

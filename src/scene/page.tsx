@@ -1,30 +1,27 @@
 import React from "react";
-import { css } from 'emotion'
 import { Global } from '@emotion/core'
 import { useTheme } from 'sancho';
 import { Helmet } from 'react-helmet';
-import { Switch, Route, useRouteMatch, useHistory } from "react-router-dom";
+import { useMatch, useNavigate } from "react-router-dom";
 
 import SceneEditor from "../scene/editor";
 import SceneList from "../scene/list";
 import { IScene } from ".";
 
 function useCurrentSelectedScene() {
-  const routeMatch = useRouteMatch();
-  const matchedSceneRoute = useRouteMatch<{ id: string }>({ path: routeMatch.path + '/:id' });
-  return matchedSceneRoute?.params.id;
+  const routeMatch = useMatch('/scenes/:id');
+  return routeMatch?.params.id;
 }
 
 type Props = {};
 const ScenePage: React.SFC<Props> = () => {
   const theme = useTheme();
-  const history = useHistory();
-  const routeMatch = useRouteMatch();
+  const navigate = useNavigate();
 
   const currentSelectedScene = useCurrentSelectedScene();
 
   function onSceneSelect(scene: IScene) {
-    history.push(`${routeMatch.path}/${scene.id}`)
+    navigate(`/scenes/${scene.id}`)
   }
 
   return (
@@ -51,21 +48,8 @@ const ScenePage: React.SFC<Props> = () => {
           }
         }}
       />
-      <Switch>
-        <Route path={[`${routeMatch.path}`, `${routeMatch.path}/:id`]} exact>
-          <div
-            className={css`
-              display: flex;
-              flex-direction: row;
-              width: 100%;
-              height: 100vh;
-            `}
-          >
-            <SceneList onSceneSelect={onSceneSelect} selectedSceneId={currentSelectedScene!} />
-            <SceneEditor onSceneDelete={() => history.push(`${routeMatch.path}/`)}/>
-          </div>
-        </Route>
-      </Switch>
+      <SceneList onSceneSelect={onSceneSelect} selectedSceneId={currentSelectedScene!} />
+      <SceneEditor onSceneDelete={() => navigate(`/`)} />
     </>
   );
 };
