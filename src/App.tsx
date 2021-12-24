@@ -1,7 +1,7 @@
 import React from 'react';
 import {
 	HashRouter as Router,
-	Switch,
+	Routes,
 	Route
 } from 'react-router-dom';
 import { DarkMode } from 'sancho';
@@ -24,19 +24,18 @@ const App: React.SFC = () => {
 					`}
 				>
 					<Sidebar />
-					<Switch>
+					<Routes>
 						{Object.keys(routes).map((routeName) => {
 							const route = routes[routeName as keyof typeof routes];
 							return (
 								<Route
 									key={routeName}
 									path={route.path}
-									exact={route.exact}
-									component={route.main}
+									element={<route.main/>}
 								/>
 							);
 						})}
-					</Switch>
+					</Routes>
 				</div>
 			</Router>
 		</DarkMode>

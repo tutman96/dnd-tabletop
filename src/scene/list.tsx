@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { List, ListItem, Skeleton, Input, useTheme, IconButton, IconPlusCircle, Button, IconPlus, IconFilm, IconPlay, IconPause, Tooltip } from "sancho";
+import { List, ListItem, Skeleton, Input, useTheme, IconButton, IconPlusCircle, IconPlay, IconPause, Tooltip } from "sancho";
 import { css } from "emotion";
 
 import { IScene, useSceneDatabase, createNewScene } from ".";
@@ -11,33 +11,6 @@ const { useOneValue: useOneSettingValue } = useSettingsDatabase();
 
 function LoadingScenes() {
   return <List><ListItem primary={<Skeleton animated />} /></List>
-}
-
-function NoScenes(props: { onAdd: () => void }) {
-  const theme = useTheme();
-
-  return (
-    <div
-      className={css`
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        width: 100%;
-      `}
-    >
-      <div
-        className={css`
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      `}
-      >
-        <IconFilm width="150px" height="150px" color="#BDBEBF" />
-        <Button iconBefore={<IconPlus />} variant="ghost" color={theme.colors.text.muted} onClick={props.onAdd} size="xl">Add a scene</Button>
-      </div>
-    </div>
-  )
 }
 
 function SceneStatusIcon({ scene }: { scene: IScene }) {
@@ -76,10 +49,6 @@ const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
 
   if (!allScenes) {
     return <LoadingScenes />
-  }
-
-  if (allScenes.size === 0) {
-    return <NoScenes onAdd={addNewScene} />
   }
 
   let sceneList = Array.from(allScenes.values());

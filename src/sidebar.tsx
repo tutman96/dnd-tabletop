@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRouteMatch, Link, useLocation } from 'react-router-dom';
+import { useMatch, Link, useLocation } from 'react-router-dom';
 import { css } from "emotion";
 import { useTheme, IconButton, Tooltip } from 'sancho';
 
@@ -10,9 +10,8 @@ import { useExtendedTheme } from './theme';
 type Props = { route: IRoute }
 const SidebarItem: React.SFC<Props> = ({ route }) => {
 	const theme = useTheme();
-	const match = !!useRouteMatch({
-		path: route.path,
-		exact: route.exact
+	const match = !!useMatch({
+		path: route.path
 	});
 	const onClick = route.useOnClick ? route.useOnClick() : undefined;
 
@@ -43,7 +42,7 @@ const Sidebar: React.SFC = () => {
 
 	const hideSidebar = Object.keys(routes)
 		.map((routeName) => routes[routeName])
-		.some((route) => route.exact && route.popout && route.path === location.pathname) || location.pathname === routes.home.path;
+		.some((route) => route.popout && route.path === location.pathname) || location.pathname === routes.home.path;
 
 	if (hideSidebar) {
 		return null;
