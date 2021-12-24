@@ -3,10 +3,10 @@ import { useState, useEffect } from 'react';
 
 import { getImageSize, getVideoSize } from "./assetSize";
 import { AssetTransform } from "../canvas/transformableAsset";
-import { useAssetFileDatabase } from './storage';
+import { assetFileDatabase } from './storage';
 import { v4 } from 'uuid';
 
-const { storage: fileStorage } = useAssetFileDatabase();
+const { storage: fileStorage } = assetFileDatabase();
 
 export enum AssetType {
 	IMAGE,

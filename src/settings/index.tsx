@@ -1,4 +1,4 @@
-import useGlobalStorage from "../storage";
+import globalStorage from "../storage";
 import React, { useState, SetStateAction, Dispatch } from "react";
 import { IconButton, useTheme, IconSettings, Dialog, Tooltip, Text, InputGroup, Input, Check } from "sancho";
 import { css } from "emotion";
@@ -11,12 +11,12 @@ export enum Settings {
   PLAY_AUDIO_ON_TABLE = 'play_audio_on_table'
 }
 
-const storage = useGlobalStorage<unknown>('settings');
-export function useSettingsDatabase() {
+const storage = globalStorage<unknown>('settings');
+export function settingsDatabase() {
   return storage;
 }
 
-const { useOneValue: useOneSettingValue } = useSettingsDatabase();
+const { useOneValue: useOneSettingValue } = settingsDatabase();
 
 type TableResolution = { width: number, height: number };
 export function useTableResolution(): [TableResolution | undefined, Dispatch<SetStateAction<TableResolution>>] {

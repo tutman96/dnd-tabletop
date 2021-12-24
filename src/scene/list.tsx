@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { List, ListItem, Skeleton, Input, useTheme, IconButton, IconPlusCircle, IconPlay, IconPause, Tooltip } from "sancho";
 import { css } from "emotion";
 
-import { IScene, useSceneDatabase, createNewScene } from ".";
-import { useSettingsDatabase, Settings } from "../settings";
+import { IScene, sceneDatabase, createNewScene } from ".";
+import { settingsDatabase, Settings } from "../settings";
 import { useExtendedTheme } from "../theme";
 
-const { useAllValues, createItem } = useSceneDatabase();
-const { useOneValue: useOneSettingValue } = useSettingsDatabase();
+const { useAllValues, createItem } = sceneDatabase();
+const { useOneValue: useOneSettingValue } = settingsDatabase();
 
 function LoadingScenes() {
   return <List><ListItem primary={<Skeleton animated />} /></List>

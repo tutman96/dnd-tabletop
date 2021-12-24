@@ -4,8 +4,8 @@ import TablePage from "./table/page";
 import { IconFilm, IconMap } from "sancho";
 import { SIDEBAR_WIDTH, useSceneSidebarOpen } from "./theme";
 import { useNavigate } from "react-router-dom";
-import { createNewScene, useSceneDatabase } from "./scene";
-import { Settings, useSettingsDatabase } from "./settings";
+import { createNewScene, sceneDatabase } from "./scene";
+import { Settings, settingsDatabase } from "./settings";
 
 export interface IRoute {
 	name: string;
@@ -16,9 +16,9 @@ export interface IRoute {
 	useOnClick?: () => () => void;
 }
 
+const { useAllValues: useAllScenes, createItem } = sceneDatabase();
+const { useOneValue: useOneSettingValue } = settingsDatabase();
 
-const { useAllValues: useAllScenes, createItem } = useSceneDatabase();
-const { useOneValue: useOneSettingValue } = useSettingsDatabase();
 const Redirect: React.FunctionComponent = () => {
 	const navigate = useNavigate()
 	const [displayedScene] = useOneSettingValue<string>(Settings.DISPLAYED_SCENE);

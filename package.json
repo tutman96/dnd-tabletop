@@ -15,7 +15,7 @@
     "react-helmet": "^6.1.0",
     "react-konva": "^17.0.2-5",
     "react-router-dom": "^6.2.1",
-    "react-scripts": "3.4.1",
+    "react-scripts": "5.0.0",
     "react-singleton-hook": "^3.0.140",
     "rt-storage": "^0.1.0",
     "sancho": "^3.5.6",

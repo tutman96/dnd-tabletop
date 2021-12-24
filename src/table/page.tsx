@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useSettingsDatabase, Settings, useTableResolution, useTablePPI } from '../settings';
-import { useSceneDatabase, IScene } from '../scene';
+import { settingsDatabase, Settings, useTableResolution, useTablePPI } from '../settings';
+import { sceneDatabase, IScene } from '../scene';
 import { Stage } from 'react-konva';
 import { Global } from '@emotion/core';
 import { Helmet } from 'react-helmet';
@@ -10,8 +10,8 @@ import { CurrentSceneContext } from '../scene/canvas';
 import { css } from 'emotion';
 import { BLUR_RADIUS } from '../scene/layer/fogLayer';
 
-const { useOneValue } = useSceneDatabase();
-const { useOneValue: useOneSettingValue } = useSettingsDatabase();
+const { useOneValue } = sceneDatabase();
+const { useOneValue: useOneSettingValue } = settingsDatabase();
 
 type Props = {};
 const TablePage: React.SFC<Props> = () => {
