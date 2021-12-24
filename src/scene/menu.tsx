@@ -3,12 +3,14 @@ import { useMatch, Link, useLocation } from 'react-router-dom';
 import { css } from "emotion";
 import { useTheme, IconButton, Tooltip } from 'sancho';
 
-import routes, { IRoute } from './routes';
-import SettingsSidebarItem from './settings';
-import { useExtendedTheme } from './theme';
+import routes, { IRoute } from '../routes';
+import SettingsSidebarItem from '../settings';
+import { useExtendedTheme } from '../theme';
+import { IScene } from '.';
+import SceneList from './list';
 
-type Props = { route: IRoute }
-const SidebarItem: React.SFC<Props> = ({ route }) => {
+type ItemProps = { route: IRoute }
+const SidebarItem: React.FunctionComponent<ItemProps> = ({ route }) => {
 	const theme = useTheme();
 	const match = !!useMatch({
 		path: route.path
@@ -36,21 +38,14 @@ const SidebarItem: React.SFC<Props> = ({ route }) => {
 	)
 }
 
-const Sidebar: React.SFC = () => {
+type Props = { onSceneSelect: (scene: IScene) => any, selectedSceneId: string };
+const Menu: React.FunctionComponent<Props> = ({ onSceneSelect, selectedSceneId }) => {
 	const theme = useExtendedTheme();
-	const location = useLocation();
-
-	const hideSidebar = Object.keys(routes)
-		.map((routeName) => routes[routeName])
-		.some((route) => route.popout && route.path === location.pathname) || location.pathname === routes.home.path;
-
-	if (hideSidebar) {
-		return null;
-	}
 
 	return (
-		<div
-			className={css`
+		<>
+			<div
+				className={css`
 				width: ${theme.sidebarWidth}px;
 				height: 100vh;
 				display: flex;
@@ -58,14 +53,16 @@ const Sidebar: React.SFC = () => {
 				background-color: ${theme.colors.background.default};
 				z-index: 300;
 			`}
-		>
-			{Object.keys(routes).map(routeName => {
-				const route = routes[routeName as keyof typeof routes];
-				return <SidebarItem key={routeName} route={route} />
-			})}
-			<div className={css`flex-grow: 1;`} />
-			<SettingsSidebarItem />
-		</div>
+			>
+				{Object.keys(routes).map(routeName => {
+					const route = routes[routeName as keyof typeof routes];
+					return <SidebarItem key={routeName} route={route} />
+				})}
+				<div className={css`flex-grow: 1;`} />
+				<SettingsSidebarItem />
+			</div>
+			<SceneList onSceneSelect={onSceneSelect} selectedSceneId={selectedSceneId} />
+		</>
 	)
 }
-export default Sidebar;
+export default Menu;
