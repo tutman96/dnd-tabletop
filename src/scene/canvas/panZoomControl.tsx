@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { css } from 'emotion';
 import { useTheme, IconChevronUp, IconChevronRight, IconChevronDown, IconChevronLeft, IconButton, IconPlus, IconMinus, IconButtonProps, IconHome } from 'sancho';
-import { Vector2d } from 'konva/types/types';
+import Konva from 'konva';
 
 const PanButton: React.SFC<{ onActivateRepeat?: (multiplier: number) => void } & IconButtonProps> = ({ onActivateRepeat, ...props }) => {
   const [mouseDown, setMouseDown] = useState<boolean>(false);
@@ -33,7 +33,7 @@ const PanButton: React.SFC<{ onActivateRepeat?: (multiplier: number) => void } &
   );
 }
 
-type Vector3d = Vector2d & { z: number };
+type Vector3d = Konva.Vector2d & { z: number };
 type Props = { onPanZoom: (direction: Vector3d) => void, onHome: () => void };
 const PanZoomControl: React.SFC<Props> = ({ onPanZoom, onHome }) => {
   const theme = useTheme();

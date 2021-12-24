@@ -2,7 +2,6 @@ import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { useTheme, IconCrosshair, IconEye, IconEyeOff } from 'sancho';
 import Konva from 'konva';
 import { Layer, Rect, Line, Group, Transformer } from 'react-konva';
-import { Vector2d } from 'konva/types/types';
 
 import { useTableResolution, useTablePPI } from '../../../settings';
 import { TableOptions } from '../..';
@@ -104,7 +103,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
     const width = tableResolution.width / localOptions.scale;
     const height = tableResolution.height / localOptions.scale;
 
-    const l = new Array<{ start: Vector2d; end: Vector2d; }>();
+    const l = new Array<{ start: Konva.Vector2d; end: Konva.Vector2d; }>();
     if (showGrid) {
       const startX = Math.floor(localOptions.offset.x / ppi) * ppi;
       for (let xOffset = startX; xOffset <= localOptions.offset.x + width; xOffset += ppi) {

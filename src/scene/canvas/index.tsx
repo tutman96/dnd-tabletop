@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useContext, useRef } from 'react';
 import { css } from 'emotion';
 import Konva from 'konva';
-import { Vector2d } from 'konva/types/types';
 
 import { IScene } from '..';
 import DraggableStage from './draggableStage';
@@ -20,7 +19,7 @@ export function useCurrentScene() {
 	return useContext(CurrentSceneContext);
 }
 
-export function calculateViewportCenter(layerRef: React.MutableRefObject<Konva.Layer | undefined>): Vector2d {
+export function calculateViewportCenter(layerRef: React.MutableRefObject<Konva.Layer | undefined>): Konva.Vector2d {
 	if (layerRef.current) {
 		const konvaStage = layerRef.current.parent!;
 		const stageOffset = konvaStage.getAbsolutePosition();

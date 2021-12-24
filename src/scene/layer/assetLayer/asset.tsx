@@ -23,8 +23,8 @@ const Asset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected, playAu
 		}
 	}, [asset, playAudio, el])
 
-	const xOffset = asset.calibration ? (asset.calibration.xOffset * (asset.transform.width / asset.size.width)) : 0;
-	const yOffset = asset.calibration ? (asset.calibration.yOffset * (asset.transform.height / asset.size.height)) : 0;
+	const xOffset = asset.calibration ? (asset.calibration.xOffset * (asset.transform.width ?? 0 / asset.size.width)) : 0;
+	const yOffset = asset.calibration ? (asset.calibration.yOffset * (asset.transform.height ?? 0 / asset.size.height)) : 0;
 
 	return (
 		<TransformableAsset

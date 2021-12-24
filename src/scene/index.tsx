@@ -3,13 +3,13 @@ import { v4 } from "uuid";
 import useGlobalStorage from "../storage";
 import { ILayer, createNewLayer } from "./layer";
 import LayerType from "./layer/layerType";
-import { Vector2d } from "konva/types/types";
+import Konva from 'konva';
 import { IAssetLayer } from "./layer/assetLayer";
 import { deleteAsset } from "./asset";
 
 export interface TableOptions {
 	displayGrid: boolean,
-	offset: Vector2d,
+	offset: Konva.Vector2d,
 	rotation: number,
 	scale: number,
 }

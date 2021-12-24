@@ -1,6 +1,7 @@
 import React from 'react';
 import { Layer, Rect } from 'react-konva';
 import { css } from 'emotion';
+import Konva from 'konva';
 
 import { IAssetCalibration, IAsset } from '../../asset';
 import DraggableStage from '../../canvas/draggableStage';
@@ -8,7 +9,6 @@ import Asset from './asset';
 import { useExtendedTheme } from '../../../theme';
 import { useTablePPI } from '../../../settings';
 import TransformableAsset from '../../canvas/transformableAsset';
-import { IRect } from 'konva/types/types';
 
 const RESIZE_SQUARES = 3;
 
@@ -20,7 +20,7 @@ const VisualAssetSizer: React.SFC<{ asset: IAsset; onUpdate: (calibration: IAsse
     return null;
   }
 
-  const innerRectangles = Array<IRect>();
+  const innerRectangles = Array<Konva.RectConfig>();
   for (let i = 1; i < RESIZE_SQUARES; i += 2) {
     innerRectangles.push({
       width: asset.calibration.ppiX * RESIZE_SQUARES,
@@ -77,10 +77,10 @@ const VisualAssetSizer: React.SFC<{ asset: IAsset; onUpdate: (calibration: IAsse
           onSelected={() => { }}
           onTransform={(transform) => {
             onUpdate({
-              ppiX: Math.round(transform.width / RESIZE_SQUARES * 100) / 100,
-              ppiY: Math.round(transform.height / RESIZE_SQUARES * 100) / 100,
-              xOffset: Math.round(transform.x * 100) / 100,
-              yOffset: Math.round(transform.y * 100) / 100
+              ppiX: Math.round(transform.width! / RESIZE_SQUARES * 100) / 100,
+              ppiY: Math.round(transform.height! / RESIZE_SQUARES * 100) / 100,
+              xOffset: Math.round(transform.x! * 100) / 100,
+              yOffset: Math.round(transform.y! * 100) / 100
             })
           }}
         >
