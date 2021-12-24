@@ -1,9 +1,9 @@
-import { Vector2d } from "konva/types/types";
+import Konva from 'konva';
 import { IPolygon, PolygonType } from "../editablePolygon";
 
 type Segment = {
-  a: Vector2d,
-  b: Vector2d
+  a: Konva.Vector2d,
+  b: Konva.Vector2d
 };
 
 type Intersection = {
@@ -56,15 +56,15 @@ export function getIntersection(ray: Segment, segment: Segment): Intersection | 
   };
 }
 
-export function getVisibilityPolygon(position: Vector2d, polygons: Array<IPolygon>): IPolygon {
+export function getVisibilityPolygon(position: Konva.Vector2d, polygons: Array<IPolygon>): IPolygon {
   // Get all unique points
-  const points = new Array<Vector2d & { angle?: number }>();
+  const points = new Array<Konva.Vector2d & { angle?: number }>();
   const segments = new Array<Segment>();
 
   for (const polygon of polygons) {
     if (polygon.verticies.length === 0) continue;
 
-    let previousVertex: Vector2d | null = null;
+    let previousVertex: Konva.Vector2d | null = null;
     for (const vertex of polygon.verticies) {
       points.push(vertex);
       if (previousVertex) {

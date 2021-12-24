@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { IPolygon, PolygonType } from "../editablePolygon";
-import { Vector2d } from 'konva/types/types';
 import { Shape, Line } from 'react-konva';
 import { useTheme } from 'sancho';
 import { getVisibilityPolygon } from './rayCastingUtils';
@@ -8,7 +7,7 @@ import { useTablePPI } from '../../../settings';
 import Konva from 'konva';
 
 export interface ILightSource {
-  position: Vector2d,
+  position: Konva.Vector2d,
   brightLightDistance?: number,
   dimLightDistance?: number,
 }
@@ -20,7 +19,7 @@ export function defaultLightSource(light: ILightSource) {
   return light;
 }
 
-function useFogBoundsPolygon(lightSource: Vector2d, fogPolygons: Array<IPolygon>): IPolygon {
+function useFogBoundsPolygon(lightSource: Konva.Vector2d, fogPolygons: Array<IPolygon>): IPolygon {
   let minX: number = lightSource.x;
   let maxX: number = lightSource.x;
   let minY: number = lightSource.y;

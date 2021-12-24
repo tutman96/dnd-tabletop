@@ -3,16 +3,14 @@ import { KonvaNodeEvents, Line, Group, Shape } from 'react-konva';
 import { useTheme } from 'sancho';
 import Konva from 'konva';
 
-import { Vector2d } from 'konva/types/types';
-import { KonvaEventObject } from 'konva/types/Node';
 import { useKeyPress } from '../../utils';
 
 const ANCHOR_RADIUS = 7;
 const Anchor: React.SFC<{
   firstAnchor: boolean,
-  position: Vector2d,
+  position: Konva.Vector2d,
   onClick: () => void,
-  onMove: (position: Vector2d, e: KonvaEventObject<DragEvent>) => void,
+  onMove: (position: Konva.Vector2d, e: Konva.KonvaEventObject<DragEvent>) => void,
   onMoveEnd: () => void
 }> = ({ firstAnchor, position, onClick, onMove, onMoveEnd }) => {
   const theme = useTheme();
@@ -63,7 +61,7 @@ export enum PolygonType {
 
 export interface IPolygon {
   type: PolygonType,
-  verticies: Array<Vector2d>
+  verticies: Array<Konva.Vector2d>
   visibleOnTable: boolean;
 }
 
@@ -82,7 +80,7 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
   const theme = useTheme();
   const groupRef = useRef<Konva.Group>();
 
-  const [localVerticies, setLocalVerticies] = useState<Array<Vector2d>>(polygon.verticies);
+  const [localVerticies, setLocalVerticies] = useState<Array<Konva.Vector2d>>(polygon.verticies);
 
   useEffect(() => {
     setLocalVerticies(polygon.verticies);
@@ -101,7 +99,7 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
       const stage = layer.parent! as unknown as Konva.Stage;
 
       stage.container().style.cursor = 'crosshair'
-      const handleClick = (e: KonvaEventObject<MouseEvent>) => {
+      const handleClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
         if (e.evt.button !== 0 || !groupRef.current) return;
 
         // From https://konvajs.org/docs/sandbox/Relative_Pointer_Position.html

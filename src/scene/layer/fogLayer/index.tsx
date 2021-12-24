@@ -3,7 +3,6 @@ import { Layer } from 'react-konva';
 import Konva from 'konva';
 import { IconCloud, IconCloudOff, useTheme, IconTrash2, IconEye, IconEyeOff, IconZapOff, IconZap } from 'sancho';
 import { css } from 'emotion';
-import { KonvaEventObject } from 'konva/types/Node';
 
 import { ILayerComponentProps, ILayer } from '..';
 import ToolbarPortal from '../toolbarPortal';
@@ -11,7 +10,6 @@ import ToolbarItem from '../toolbarItem';
 import EditablePolygon, { IPolygon, PolygonType } from '../editablePolygon';
 import { useTablePPI } from '../../../settings';
 import RayCastRevealPolygon, { ILightSource, defaultLightSource } from './rayCastRevealPolygon';
-import { LineConfig } from 'konva/types/shapes/Line';
 import { calculateViewportCenter } from '../../canvas';
 import EditLightToolbarItem from './editLightToolbarItem';
 
@@ -52,7 +50,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
     if (!layerRef.current?.parent || addingPolygon) return;
     const stage = layerRef.current.parent;
 
-    function onParentClick(e: KonvaEventObject<MouseEvent>) {
+    function onParentClick(e: Konva.KonvaEventObject<MouseEvent>) {
       if (e.evt.button === 0) {
         setSelectedLight(null);
         setSelectedPolygon(null);
@@ -208,7 +206,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
     onUpdate({ ...layer });
   }, [onUpdate, layer])
 
-  const getPolygonStyle = useCallback((poly: IPolygon): Partial<LineConfig> => {
+  const getPolygonStyle = useCallback((poly: IPolygon): Partial<Konva.LineConfig> => {
     if (isTable) {
       switch (poly.type) {
         case PolygonType.FOG:

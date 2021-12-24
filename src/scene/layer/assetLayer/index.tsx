@@ -78,8 +78,8 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, is
 						const assets = await getNewAssets();
 						const viewportCenter = calculateViewportCenter(layerRef);
 						for (const asset of assets) {
-							asset.transform.x = viewportCenter.x - asset.transform.width / 2;
-							asset.transform.y = viewportCenter.y - asset.transform.height / 2;
+							asset.transform.x = viewportCenter.x - (asset.transform.width ?? 0) / 2;
+							asset.transform.y = viewportCenter.y - (asset.transform.height ?? 0) / 2;
 							layer.assets.set(asset.id, asset);
 						}
 						onUpdate({ ...layer })

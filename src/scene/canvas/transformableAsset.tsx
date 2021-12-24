@@ -1,11 +1,10 @@
 import React, { useRef, useEffect } from 'react';
 import { Group, Transformer } from 'react-konva';
 import Konva from 'konva';
-import { IRect } from 'konva/types/types';
 import { useTheme } from 'sancho';
 import { useTablePPI } from '../../settings';
 
-export type AssetTransform = IRect & { rotation: number };
+export type AssetTransform = Konva.RectConfig & { rotation: number };
 
 type Props = {
 	rectTransform: AssetTransform,
