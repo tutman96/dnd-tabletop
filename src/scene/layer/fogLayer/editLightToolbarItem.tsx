@@ -32,9 +32,6 @@ const DEFAULT_LIGHT_SOURCES = [
   },
 ] as Array<Partial<ILightSource> & { name: string }>;
 
-type NumberPropertiesNames<T> = { [K in keyof T]: T[K] extends number ? K : never; }[keyof T]
-type NumberProperties<T> = Pick<T, NumberPropertiesNames<T>>;
-
 type Props = { light: ILightSource | null, onUpdate: (light: ILightSource) => void };
 const EditLightToolbarItem: React.SFC<Props> = ({ light, onUpdate }) => {
   const theme = useTheme();

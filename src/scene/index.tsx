@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
 
-import useGlobalStorage from "../storage";
+import globalStorage from "../storage";
 import { ILayer, createNewLayer } from "./layer";
 import LayerType from "./layer/layerType";
 import Konva from 'konva';
@@ -21,8 +21,8 @@ export interface IScene {
 	layers: Array<ILayer>;
 }
 
-const storage = useGlobalStorage<IScene>('scene');
-export function useSceneDatabase() {
+const storage = globalStorage<IScene>('scene');
+export function sceneDatabase() {
 	return {
 		...storage,
 		deleteItem: async (key: string) => {

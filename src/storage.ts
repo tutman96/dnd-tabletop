@@ -10,7 +10,7 @@ interface IRTStorage<T> {
 	subscribe<V extends T>(key: string, handler: (value: V) => void): { unsubscribe: () => void };
 }
 
-export default function useGlobalStorage<T>(name: string) {
+export default function globalStorage<T>(name: string) {
 	const storage = new RTStorage({ name }) as IRTStorage<T>;
 	const useOneValue = <V extends T = T>(key: string) => {
 		const [data, setState] = useState<V | null | undefined>(undefined);

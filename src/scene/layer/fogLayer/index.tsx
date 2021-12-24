@@ -32,11 +32,11 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
   const [selectedPolygon, setSelectedPolygon] = useState<IPolygon | null>(null)
   const [selectedLight, setSelectedLight] = useState<ILightSource | null>(null)
 
-  const collections = {
+  const collections = useMemo(() => ({
     [PolygonType.FOG]: layer.fogPolygons,
     [PolygonType.FOG_CLEAR]: layer.fogClearPolygons,
     [PolygonType.LIGHT_OBSTRUCTION]: layer.obstructionPolygons
-  };
+  }), [layer]);
 
   useEffect(() => {
     if (!active) {

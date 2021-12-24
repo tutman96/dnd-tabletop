@@ -3,13 +3,13 @@ import { useMatch } from "react-router-dom";
 import { Spinner, Text, useTheme, IconButton, IconPlay, IconPause, IconUpload, IconEdit2, IconCheck, Input, Button, IconEyeOff, Dialog, IconTrash2 } from "sancho";
 import { css } from "emotion";
 
-import { useSceneDatabase, IScene } from ".";
+import { sceneDatabase, IScene } from ".";
 import Canvas from "./canvas";
-import { useSettingsDatabase, Settings } from "../settings";
+import { settingsDatabase, Settings } from "../settings";
 import { useExtendedTheme } from "../theme";
 
-const { useOneValue, deleteItem } = useSceneDatabase();
-const { useOneValue: useOneSettingValue } = useSettingsDatabase();
+const { useOneValue, deleteItem } = sceneDatabase();
+const { useOneValue: useOneSettingValue } = settingsDatabase();
 
 function SceneNameHeader({ name, onUpdate: updateName, onDelete }: { name: string, onUpdate: (name: string) => void, onDelete: () => void }) {
 	const theme = useTheme();
