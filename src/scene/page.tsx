@@ -5,8 +5,8 @@ import { Helmet } from 'react-helmet';
 import { useMatch, useNavigate } from "react-router-dom";
 
 import SceneEditor from "../scene/editor";
-import SceneList from "../scene/list";
 import { IScene } from ".";
+import Menu from "./menu";
 
 function useCurrentSelectedScene() {
   const routeMatch = useMatch('/scenes/:id');
@@ -48,7 +48,7 @@ const ScenePage: React.SFC<Props> = () => {
           }
         }}
       />
-      <SceneList onSceneSelect={onSceneSelect} selectedSceneId={currentSelectedScene!} />
+      <Menu onSceneSelect={onSceneSelect} selectedSceneId={currentSelectedScene!} />
       <SceneEditor onSceneDelete={() => navigate(`/`)} />
     </>
   );

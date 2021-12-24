@@ -1,4 +1,5 @@
 import { singletonHook } from 'react-singleton-hook';
+import { createTheme } from '@mui/material/styles';
 import { useTheme } from 'sancho';
 import { useState } from 'react';
 
@@ -8,6 +9,13 @@ export const HEADER_HEIGHT = 56;
 export const VISUAL_ASSET_SIZER_SIZE = 650;
 
 export const useSceneSidebarOpen = singletonHook([true, () => { }], () => useState<boolean>(true));
+export const theme = createTheme({
+	palette: {
+		mode: 'dark',
+	},
+});
+
+
 export function useExtendedTheme() {
   const theme = useTheme();
   const [sceneSidebarOpen] = useSceneSidebarOpen();

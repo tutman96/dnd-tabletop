@@ -1,44 +1,44 @@
 import React from 'react';
-import {
-	HashRouter as Router,
-	Routes,
-	Route
-} from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { DarkMode } from 'sancho';
 import { css } from 'emotion';
-
-import routes from './routes';
-import Sidebar from './sidebar';
 import Konva from 'konva';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+
+import { theme } from './theme';
+import routes from './routes';
 
 Konva.showWarnings = false;
 
-const App: React.SFC = () => {
+const App: React.FunctionComponent = () => {
 	return (
-		<DarkMode>
-			<Router>
-				<div
-					className={css`
+		<ThemeProvider theme={theme}>
+			{/* <CssBaseline /> TODO - reenable once on mui */}
+			<DarkMode>
+				<Router>
+					<div
+						className={css`
 						display: flex;
 						width: 100%;
 					`}
-				>
-					<Sidebar />
-					<Routes>
-						{Object.keys(routes).map((routeName) => {
-							const route = routes[routeName as keyof typeof routes];
-							return (
-								<Route
-									key={routeName}
-									path={route.path}
-									element={<route.main/>}
-								/>
-							);
-						})}
-					</Routes>
-				</div>
-			</Router>
-		</DarkMode>
+					>
+						<Routes>
+							{Object.keys(routes).map((routeName) => {
+								const route = routes[routeName as keyof typeof routes];
+								return (
+									<Route
+										key={routeName}
+										path={route.path}
+										element={<route.main />}
+									/>
+								);
+							})}
+						</Routes>
+					</div>
+				</Router>
+			</DarkMode>
+		</ThemeProvider>
 	);
 }
 export default App;
