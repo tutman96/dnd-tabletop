@@ -58,10 +58,12 @@ const Menu: React.FunctionComponent<Props> = ({ onSceneSelect, selectedSceneId }
 						<Box sx={{ display: selectedTab === TabOptions.SCENES ? 'block' : 'none' }}>
 							<SceneList onSceneSelect={onSceneSelect} selectedSceneId={selectedSceneId} />
 						</Box>
-						{selectedTab === TabOptions.DISPLAYS && (
+						<Box sx={{ display: selectedTab === TabOptions.DISPLAYS ? 'block' : 'none' }}>
 							<Link href="#/table" target="_blank" >Open Local Display</Link>
-						)}
-						{selectedTab === TabOptions.SETTINGS && <SettingsPanel />}
+						</Box>
+						<Box sx={{ display: selectedTab === TabOptions.SETTINGS ? 'block' : 'none' }}>
+							<SettingsPanel />
+						</Box>
 					</CardContent>
 				</Card>
 			</Modal>

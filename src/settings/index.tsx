@@ -139,7 +139,7 @@ const ScreenSizeSettings: React.FunctionComponent = () => {
       <SettingGroup header="Screen Size">
         <InputWithUnit
           type="number"
-          inputProps={{ min: 1, max: 200 }}
+          inputProps={{ min: 1, max: 200, step: 0.1 }}
           unit="in"
           fullWidth
           value={tableSize}
