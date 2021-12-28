@@ -160,6 +160,7 @@ const SceneEditor: React.SFC<Props> = ({ onSceneDelete }) => {
 				className={css`
 					background-color: ${theme.colors.background.layer};
 					padding: ${theme.spaces.sm} ${theme.spaces.md};
+					padding-left: ${theme.headerHeight}px;
 					box-shadow: ${theme.shadows.sm};
 					width: 100%;
 					box-sizing: border-box;

@@ -14,7 +14,7 @@ Konva.showWarnings = false;
 const App: React.FunctionComponent = () => {
 	return (
 		<ThemeProvider theme={theme}>
-			{/* <CssBaseline /> TODO - reenable once on mui */}
+			<CssBaseline />
 			<DarkMode>
 				<Router>
 					<div

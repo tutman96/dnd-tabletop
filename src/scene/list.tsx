@@ -1,29 +1,50 @@
 import React, { useState } from "react";
-import { List, ListItem, Skeleton, Input, useTheme, IconButton, IconPlusCircle, IconPlay, IconPause, Tooltip } from "sancho";
-import { css } from "emotion";
+
+import Box from '@mui/material/Box'
+import Typography from '@mui/material/Typography'
+import List from '@mui/material/List'
+import ListItem from '@mui/material/ListItemButton'
+import ListItemButton from '@mui/material/ListItemButton'
+import ListItemText from '@mui/material/ListItemText'
+import ListItemIcon from '@mui/material/ListItemIcon'
+import Tooltip from '@mui/material/Tooltip'
+import Skeleton from '@mui/material/Skeleton'
+import Input from '@mui/material/Input'
+import IconButton from '@mui/material/IconButton'
+import { green } from '@mui/material/colors';
+
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 import { IScene, sceneDatabase, createNewScene } from ".";
 import { settingsDatabase, Settings } from "../settings";
-import { useExtendedTheme } from "../theme";
 
 const { useAllValues, createItem } = sceneDatabase();
 const { useOneValue: useOneSettingValue } = settingsDatabase();
 
 function LoadingScenes() {
-  return <List><ListItem primary={<Skeleton animated />} /></List>
+  return (
+    <>
+      <Skeleton />
+      <Skeleton />
+      <Skeleton />
+      <Skeleton />
+      <Skeleton />
+    </>
+  );
 }
 
-function SceneStatusIcon({ scene }: { scene: IScene }) {
-  const theme = useTheme();
+const SceneStatusIcon: React.FunctionComponent<{ scene: IScene }> = ({ scene }) => {
   const [displayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
   const [tableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
 
   if (displayedScene === scene.id) {
     if (!tableFreeze) {
-      return <IconPlay color={theme.colors.palette.green.base} />;
+      return <ListItemIcon><PlayArrowIcon sx={{ color: green[500] }} /></ListItemIcon>;
     }
     else {
-      return <IconPause color={theme.colors.palette.yellow.base} />;
+      return <ListItemIcon><PauseIcon /></ListItemIcon>;
     }
   }
   else {
@@ -32,9 +53,7 @@ function SceneStatusIcon({ scene }: { scene: IScene }) {
 }
 
 type Props = { onSceneSelect: (scene: IScene) => any, selectedSceneId: string };
-const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
-  const theme = useExtendedTheme();
-
+const SceneList: React.FunctionComponent<Props> = ({ onSceneSelect, selectedSceneId }) => {
   const allScenes = useAllValues();
   const [searchText, setSearchText] = useState("");
 
@@ -47,7 +66,7 @@ const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
     onSceneSelect(scene);
   }
 
-  if (!allScenes) {
+  if (allScenes === undefined) {
     return <LoadingScenes />
   }
 
@@ -58,44 +77,36 @@ const SceneList: React.SFC<Props> = ({ onSceneSelect, selectedSceneId }) => {
   sceneList = sceneList.sort((a, b) => a.name.localeCompare(b.name));
 
   return (
-    <List
-      className={css`
-        display: ${theme.sceneListWidth > 0 ? 'flex' : 'none'};
-        width: ${theme.sceneListWidth}px;
-        flex-shrink: 0;
-        flex-direction: column;
-        z-index: 300;
-      `}
-    >
-      <div
-        className={css`
-          display: flex;
-          padding: ${theme.spaces.sm};
-        `}
-      >
-        <Input type="search" placeholder="Find a scene..." onChange={(e) => setSearchText(e.target.value)} value={searchText} />
-        <Tooltip content="Add Scene">
-          <IconButton icon={<IconPlusCircle />} label="Add Scene" variant="ghost" onClick={addNewScene} />
+    <>
+      <Box sx={{ display: 'flex' }}>
+        <Input placeholder="Find a scene..." onChange={(e) => setSearchText(e.target.value)} value={searchText} fullWidth />
+        <Tooltip title="Add Scene">
+          <IconButton onClick={addNewScene}><AddCircleOutlineIcon /></IconButton>
         </Tooltip>
-      </div>
-      <div
-        className={css`
-          overflow: auto;
-        `}
-      >
-        {sceneList.map((scene) => (
-          <ListItem
-            primary={scene.name}
-            key={scene.id}
-            contentAfter={<SceneStatusIcon scene={scene} />}
-            onPress={() => onSceneSelect(scene)}
-            className={css`
-              background: ${selectedSceneId === scene.id ? theme.colors.intent.primary.dark : undefined} !important;
-            `}
-          />
-        ))}
-      </div>
-    </List>
+      </Box>
+      <List sx={{ marginX: -2 }}>
+        <Box sx={{ overflow: 'auto' }}>
+          {sceneList.map((scene) => (
+            <ListItemButton
+              key={scene.id}
+              selected={selectedSceneId === scene.id}
+              onClick={() => onSceneSelect(scene)}
+            >
+              <ListItemText primary={scene.name} />
+              <SceneStatusIcon scene={scene} />
+            </ListItemButton>
+          ))}
+
+          {!sceneList.length && (
+            <ListItem sx={{ justifyContent: 'center' }} disabled={true}>
+              {/* <ListItemText> */}
+              <Typography>No Scenes</Typography>
+              {/* </ListItemText> */}
+            </ListItem>
+          )}
+        </Box >
+      </List >
+    </>
   );
 };
 export default SceneList;

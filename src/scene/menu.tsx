@@ -1,68 +1,64 @@
-import React from 'react';
-import { useMatch, Link, useLocation } from 'react-router-dom';
-import { css } from "emotion";
-import { useTheme, IconButton, Tooltip } from 'sancho';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
-import routes, { IRoute } from '../routes';
-import SettingsSidebarItem from '../settings';
-import { useExtendedTheme } from '../theme';
+import Box from '@mui/material/Box'
+import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
+import Modal from '@mui/material/Modal'
+
+import theme from '../theme';
 import { IScene } from '.';
 import SceneList from './list';
+import FloatingIcon from '../partials/floatingIcon';
+import SettingsPanel from '../settings';
 
-type ItemProps = { route: IRoute }
-const SidebarItem: React.FunctionComponent<ItemProps> = ({ route }) => {
-	const theme = useTheme();
-	const match = !!useMatch({
-		path: route.path
-	});
-	const onClick = route.useOnClick ? route.useOnClick() : undefined;
-
-	const inner = (
-		<Tooltip content={route.name} placement="right">
-			<IconButton variant="ghost" color={match ? theme.colors.text.default : theme.colors.text.muted} size="lg" icon={<route.sidebarIcon />} label={route.name} />
-		</Tooltip>
-	);
-
-	if (match) {
-		return (
-			<div onClick={onClick}>
-				{inner}
-			</div>
-		);
-	}
-
-	return (
-		<Link to={route.path} target={route.popout ? '_blank' : undefined}>
-			{inner}
-		</Link>
-	)
+enum TabOptions {
+	SCENES,
+	SETTINGS
 }
 
 type Props = { onSceneSelect: (scene: IScene) => any, selectedSceneId: string };
 const Menu: React.FunctionComponent<Props> = ({ onSceneSelect, selectedSceneId }) => {
-	const theme = useExtendedTheme();
+	const [menuOpen, setMenuOpen] = useState<boolean>(false);
+	const [selectedTab, setSelectedTab] = useState(TabOptions.SCENES);
+	const location = useLocation();
+
+	useEffect(() => {
+		setMenuOpen(false);
+		setSelectedTab(TabOptions.SCENES);
+	}, [location])
 
 	return (
 		<>
-			<div
-				className={css`
-				width: ${theme.sidebarWidth}px;
-				height: 100vh;
-				display: flex;
-				flex-direction: column;
-				background-color: ${theme.colors.background.default};
-				z-index: 300;
-			`}
-			>
-				{Object.keys(routes).map(routeName => {
-					const route = routes[routeName as keyof typeof routes];
-					return <SidebarItem key={routeName} route={route} />
-				})}
-				<div className={css`flex-grow: 1;`} />
-				<SettingsSidebarItem />
-			</div>
-			<SceneList onSceneSelect={onSceneSelect} selectedSceneId={selectedSceneId} />
+			<FloatingIcon onClick={() => setMenuOpen(!menuOpen)} active={menuOpen} />
+			<Modal open={menuOpen} onClose={() => setMenuOpen(false)}>
+				<Card sx={{
+					position: 'absolute',
+					top: 0, left: 0,
+					margin: theme.spacing(1),
+					width: '100%', maxWidth: theme.spacing(64)
+				}}
+					elevation={5}
+				>
+					<Box sx={{
+						borderBottom: 1, borderColor: 'divider',
+						display: 'flex', justifyContent: 'space-between'
+					}}>
+						<Tabs sx={{ marginLeft: theme.spacing(6) }} value={selectedTab} onChange={(e, v) => setSelectedTab(v)}>
+							<Tab label="Scenes" value={TabOptions.SCENES} />
+							<Tab label="Settings" value={TabOptions.SETTINGS} />
+						</Tabs>
+					</Box>
+					<CardContent>
+						{selectedTab === TabOptions.SCENES && <SceneList onSceneSelect={onSceneSelect} selectedSceneId={selectedSceneId} />}
+						{selectedTab === TabOptions.SETTINGS && <SettingsPanel />}
+					</CardContent>
+				</Card>
+			</Modal>
 		</>
 	)
 }
+
 export default Menu;

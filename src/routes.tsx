@@ -6,6 +6,7 @@ import { SIDEBAR_WIDTH, useSceneSidebarOpen } from "./theme";
 import { useNavigate } from "react-router-dom";
 import { createNewScene, sceneDatabase } from "./scene";
 import { Settings, settingsDatabase } from "./settings";
+import Favicon from "./partials/favicon";
 
 export interface IRoute {
 	name: string;
@@ -51,7 +52,7 @@ const routes = {
 	home: {
 		name: 'Home',
 		path: '/',
-		sidebarIcon: () => <img width={SIDEBAR_WIDTH / 1.5} height={SIDEBAR_WIDTH / 1.5} src="favicon.png" alt="home icon" />,
+		sidebarIcon: Favicon,
 		main: () => <Redirect />,
 	},
 	scenes: {

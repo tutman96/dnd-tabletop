@@ -1,6 +1,6 @@
 import globalStorage from "../storage";
-import React, { useState, SetStateAction, Dispatch } from "react";
-import { IconButton, useTheme, IconSettings, Dialog, Tooltip, Text, InputGroup, Input, Check } from "sancho";
+import React, { SetStateAction, Dispatch } from "react";
+import { useTheme, Text, InputGroup, Input, Check } from "sancho";
 import { css } from "emotion";
 
 export enum Settings {
@@ -143,7 +143,7 @@ const ScreenSizeSettings: React.SFC = () => {
           <div className={formItemMargin}>inches</div>
         </div>
       </InputGroup>
-      <br/>
+      <br />
       <Text variant="h6">Other Settings</Text>
       <Check
         checked={playAudioOnTable}
@@ -157,32 +157,12 @@ const ScreenSizeSettings: React.SFC = () => {
   );
 }
 
-const SettingsSidebarItem: React.SFC = () => {
-  const theme = useTheme();
-  const [dialogOpen, setDialogOpen] = useState(false);
+const SettingsPanel: React.FunctionComponent = () => {
 
   return (
     <>
-      <Tooltip content="Settings" placement="right">
-        <IconButton
-          variant="ghost"
-          color={theme.colors.text.muted}
-          size="lg"
-          icon={<IconSettings />}
-          label="Settings"
-          onClick={() => setDialogOpen(true)}
-        />
-      </Tooltip>
-      <Dialog
-        isOpen={dialogOpen}
-        onRequestClose={() => setDialogOpen(false)}
-        title="Settings"
-      >
-        <div className={css`padding: ${theme.spaces.lg};`}>
-          <ScreenSizeSettings />
-        </div>
-      </Dialog>
+      <ScreenSizeSettings />
     </>
   );
 }
-export default SettingsSidebarItem;
+export default SettingsPanel;
