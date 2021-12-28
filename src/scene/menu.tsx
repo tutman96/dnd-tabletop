@@ -7,6 +7,7 @@ import CardContent from '@mui/material/CardContent'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Modal from '@mui/material/Modal'
+import Link from '@mui/material/Link'
 
 import theme from '../theme';
 import { IScene } from '.';
@@ -16,6 +17,7 @@ import SettingsPanel from '../settings';
 
 enum TabOptions {
 	SCENES,
+	DISPLAYS,
 	SETTINGS
 }
 
@@ -48,11 +50,15 @@ const Menu: React.FunctionComponent<Props> = ({ onSceneSelect, selectedSceneId }
 					}}>
 						<Tabs sx={{ marginLeft: theme.spacing(6) }} value={selectedTab} onChange={(e, v) => setSelectedTab(v)}>
 							<Tab label="Scenes" value={TabOptions.SCENES} />
+							<Tab label="Displays" value={TabOptions.DISPLAYS} />
 							<Tab label="Settings" value={TabOptions.SETTINGS} />
 						</Tabs>
 					</Box>
 					<CardContent>
 						{selectedTab === TabOptions.SCENES && <SceneList onSceneSelect={onSceneSelect} selectedSceneId={selectedSceneId} />}
+						{selectedTab === TabOptions.DISPLAYS && (
+							<Link href="#/table" target="_blank" >Open Local Display</Link>
+						)}
 						{selectedTab === TabOptions.SETTINGS && <SettingsPanel />}
 					</CardContent>
 				</Card>
