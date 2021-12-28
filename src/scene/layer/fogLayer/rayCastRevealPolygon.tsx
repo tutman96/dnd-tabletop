@@ -67,7 +67,7 @@ type Props = {
   selected: boolean,
   onSelected: () => void
 };
-const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, fogPolygons, obstructionPolygons, onUpdate, isTable, selected, onSelected }) => {
+const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, fogPolygons, obstructionPolygons, onUpdate, selected, onSelected }) => {
   const theme = useTheme();
   const ppi = useTablePPI() || 86;
   const iconRef = useRef<Konva.Shape>();

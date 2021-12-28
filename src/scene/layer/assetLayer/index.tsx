@@ -44,6 +44,7 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, is
 			// 10 FPS cap on DM display
 			if (!isTable && now - previousUpdate < 100) return false;
 			else previousUpdate = now;
+			return true;
 		}, layerRef.current);
 		anim.start();
 		return () => { anim.stop() }

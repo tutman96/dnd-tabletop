@@ -44,7 +44,7 @@ const Anchor: React.SFC<{
         onMove({ x: e.target.x(), y: e.target.y() }, e);
         e.cancelBubble = true;
       }}
-      onDragEnd={e => onMoveEnd()}
+      onDragEnd={() => onMoveEnd()}
       stroke={theme.colors.palette.blue.base}
       strokeWidth={3}
       strokeScaleEnabled={false}
@@ -127,6 +127,7 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
         stage.container().style.cursor = 'default';
       };
     }
+    return () => {}
   }, [groupRef, adding, localVerticies, onUpdate, onAdded, polygon, closed])
 
   const isEscapePressed = useKeyPress('Escape');

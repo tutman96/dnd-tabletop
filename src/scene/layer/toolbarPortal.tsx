@@ -19,6 +19,7 @@ const ToolbarPortal: React.SFC = ({ children }) => {
 		if (portal) {
 			return () => { ReactDOM.unmountComponentAtNode(portal) };
 		}
+		return () => {}
 	}, [portal])
 
 	return null;

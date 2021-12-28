@@ -44,6 +44,11 @@ const Menu: React.FunctionComponent<Props> = () => {
 		setSelectedTab(TabOptions.SCENES);
 	}, [location])
 
+	if (!currentSelectedSceneId) {
+		navigate('/')
+		return null;
+	}
+
 	return (
 		<>
 			<FloatingIcon onClick={() => setMenuOpen(!menuOpen)} active={menuOpen} />
@@ -60,7 +65,7 @@ const Menu: React.FunctionComponent<Props> = () => {
 						borderBottom: 1, borderColor: 'divider',
 						display: 'flex', justifyContent: 'space-between'
 					}}>
-						<Tabs sx={{ marginLeft: theme.spacing(6) }} value={selectedTab} onChange={(e, v) => setSelectedTab(v)}>
+						<Tabs sx={{ marginLeft: theme.spacing(6) }} value={selectedTab} onChange={(_, v) => setSelectedTab(v)}>
 							<Tab label="Scenes" value={TabOptions.SCENES} />
 							<Tab label="Displays" value={TabOptions.DISPLAYS} />
 							<Tab label="Settings" value={TabOptions.SETTINGS} />
