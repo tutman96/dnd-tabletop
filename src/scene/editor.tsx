@@ -1,18 +1,33 @@
 import React, { useState, useEffect } from "react";
-import { useMatch } from "react-router-dom";
-import { Spinner, Text, useTheme, IconButton, IconPlay, IconPause, IconUpload, IconEdit2, IconCheck, Input, Button, IconEyeOff, Dialog, IconTrash2 } from "sancho";
-import { css } from "emotion";
+import { useMatch, useNavigate } from "react-router-dom";
+
+import Toolbar from '@mui/material/Toolbar';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import Input from '@mui/material/Input';
+import CircularProgress from '@mui/material/CircularProgress';
+import Tooltip from '@mui/material/Tooltip';
+
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import CheckIcon from '@mui/icons-material/Check';
+import UploadIcon from '@mui/icons-material/Upload';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
 
 import { sceneDatabase, IScene } from ".";
 import Canvas from "./canvas";
 import { settingsDatabase, Settings } from "../settings";
-import { useExtendedTheme } from "../theme";
+import theme from "../theme";
+import ConfirmDialog from "../partials/confirmDialog";
 
 const { useOneValue, deleteItem } = sceneDatabase();
 const { useOneValue: useOneSettingValue } = settingsDatabase();
 
 function SceneNameHeader({ name, onUpdate: updateName, onDelete }: { name: string, onUpdate: (name: string) => void, onDelete: () => void }) {
-	const theme = useTheme();
 	const [inEdit, setInEdit] = useState(false);
 	const [inDelete, setInDelete] = useState(false);
 	const [localName, setLocalName] = useState(name);
@@ -22,100 +37,79 @@ function SceneNameHeader({ name, onUpdate: updateName, onDelete }: { name: strin
 	}, [name]);
 
 	return (
-		<div
-			className={css`
-				display: flex;
-				align-items: center;
-				z-index: 200;
-			`}
+		<Box
+			sx={{
+				display: 'flex',
+				alignItems: 'center'
+			}}
 		>
 			{!inEdit &&
 				<>
-					<Text variant="lead">{name}</Text>
-					<IconButton icon={<IconEdit2 />} size="sm" variant="ghost" label="Edit Name" onClick={() => setInEdit(true)} />
-					<IconButton icon={<IconTrash2 />} size="sm" variant="ghost" label="Delete Scene" onClick={() => setInDelete(true)} />
+					<Typography variant="h6">{name}</Typography>
+					<Tooltip title="Edit Name">
+						<IconButton size="small" onClick={() => setInEdit(true)}><EditIcon /></IconButton>
+					</Tooltip>
+					<Tooltip title="Delete Scene">
+						<IconButton size="small" onClick={() => setInDelete(true)}><DeleteIcon /></IconButton>
+					</Tooltip>
 				</>
 			}
 			{inEdit &&
 				<>
 					<Input value={localName} onChange={(e) => setLocalName(e.target.value)} />
-					<IconButton
-						icon={<IconCheck />}
-						size="sm"
-						variant="ghost"
-						label="Save Name"
-						onClick={() => {
-							updateName(localName);
-							setInEdit(false);
-						}}
-						disabled={!localName.trim()}
-					/>
+					<Tooltip title="Save Name">
+						<IconButton
+							size="small"
+							onClick={() => {
+								updateName(localName);
+								setInEdit(false);
+							}}
+							disabled={!localName.trim()}
+						>
+							<CheckIcon />
+						</IconButton>
+					</Tooltip>
 				</>
 			}
-			<Dialog
-				isOpen={inDelete}
-				onRequestClose={() => setInDelete(false)}
-				title="Delete Scene"
-			>
-				<div className={css`padding: ${theme.spaces.lg};`}>
-					<Text variant="paragraph" muted={true}>Are you sure you want to delete '{name}'?</Text>
-					<div
-						className={css`
-                display: flex;
-                margin-top: ${theme.spaces.lg};
-                justify-content: flex-end;
-              `}
-					>
-						<Button variant="ghost" intent="danger" onClick={() => {
-							onDelete();
-							setInDelete(false);
-						}}>Delete</Button>
-					</div>
-				</div>
-			</Dialog>
-		</div >
+			<ConfirmDialog
+				open={inDelete}
+				onConfirm={() => {
+					onDelete();
+					setInDelete(false);
+				}}
+				onCancel={() => setInDelete(false)}
+				description={`Are you sure you want to delete '${name}'?`}
+			/>
+		</Box >
 	);
 }
 
 function TableDisplayButton({ scene }: { scene: IScene }) {
-	const theme = useTheme();
-
 	const [displayedScene, updateDisplayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
 	const [tableFreeze, updateTableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
 
-	const currentSceneSelected = displayedScene === scene.id;
+	const currentSceneDisplayed = displayedScene === scene.id;
 
 	return (
 		<>
 			<Button
-				iconBefore={currentSceneSelected ? <IconEyeOff /> : <IconUpload />}
-				intent="none"
-				variant="outline"
-				onPress={() => {
-					updateDisplayedScene(!currentSceneSelected ? scene.id : null);
+				startIcon={currentSceneDisplayed ? <VisibilityOffIcon /> : <UploadIcon />}
+				variant={currentSceneDisplayed ? "contained" : "outlined"}
+				color={currentSceneDisplayed ? "success" : "primary"}
+				onClick={() => {
+					updateDisplayedScene(!currentSceneDisplayed ? scene.id : null);
 					updateTableFreeze(false);
 				}}
+				sx={{ marginRight: theme.spacing(1) }}
 			>
-				{currentSceneSelected ? 'Hide TV/Table View' : 'Send to Table'}
+				{currentSceneDisplayed ? 'Hide TV/Table View' : 'Send to Table'}
 			</Button>
-			<span
-				className={css`
-					display: inline-block;
-					width: 1rem;
-				`}
-			/>
 			<Button
-				iconBefore={tableFreeze ? <IconPlay /> : <IconPause />}
-				variant={"outline"}
-				disabled={!currentSceneSelected}
-				onPress={() => updateTableFreeze(!tableFreeze)}
-				className={css`
-					${tableFreeze ? `
-						border-color: ${theme.colors.intent.success.dark} !important;
-						background: ${tableFreeze ? theme.colors.intent.success.base : 'initial'} !important;
-					` : ''}
-					min-width: 168px;
-				`}
+				startIcon={tableFreeze ? <PlayArrowIcon /> : <PauseIcon />}
+				variant="outlined"
+				color="secondary"
+				disabled={!currentSceneDisplayed}
+				onClick={() => updateTableFreeze(!tableFreeze)}
 			>
 				{tableFreeze ? "Unpause Table" : "Pause Table"}
 			</Button>
@@ -123,22 +117,24 @@ function TableDisplayButton({ scene }: { scene: IScene }) {
 	);
 }
 
-type Props = { onSceneDelete: () => void };
-const SceneEditor: React.SFC<Props> = ({ onSceneDelete }) => {
-	const theme = useExtendedTheme();
+type Props = {};
+const SceneEditor: React.FunctionComponent<Props> = () => {
+	const navigate = useNavigate();
 
 	const match = useMatch('/scenes/:id');
 	const [scene, updateScene] = useOneValue(match!.params.id!);
 
-	const [displayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
-	const [tableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
+	function onSceneDelete() {
+		navigate(`/`)
+	}
 
 	if (!match?.params.id) {
 		return null;
 	}
 
 	if (scene === undefined) {
-		return <Spinner label="Loading scene..." center />
+		// TODO make prettier
+		return <CircularProgress />
 	}
 
 	if (scene === null) {
@@ -146,31 +142,23 @@ const SceneEditor: React.SFC<Props> = ({ onSceneDelete }) => {
 	}
 
 	return (
-		<div
-			className={css`
-				display: flex;
-				flex-direction: column;
-				height: 100%;
-				width: 100%;
-				flex-grow: 1;
-			`}
+		<Box
+			sx={{
+				backgroundColor: theme.palette.grey[900],
+				display: 'flex',
+				flexDirection: 'column',
+				height: '100vh',
+				width: '100vw',
+				flexGrow: 1,
+			}}
 		>
 			{/* Header */}
-			<div
-				className={css`
-					background-color: ${theme.colors.background.layer};
-					padding: ${theme.spaces.sm} ${theme.spaces.md};
-					padding-left: ${theme.headerHeight}px;
-					box-shadow: ${theme.shadows.sm};
-					width: 100%;
-					box-sizing: border-box;
-					height: ${theme.headerHeight}px;
-					display: flex;
-					align-items: center;
-					justify-content: space-between;
-					background-color: ${displayedScene === scene.id && !tableFreeze ? theme.colors.intent.success.dark : 'initial'};
-				`}
-			>
+			<Toolbar sx={{
+				marginLeft: theme.spacing(5),
+				display: 'flex',
+				alignItems: 'center',
+				justifyContent: 'space-between'
+			}}>
 				<SceneNameHeader
 					name={scene.name}
 					onUpdate={(name) => updateScene({ ...scene, name })}
@@ -184,11 +172,11 @@ const SceneEditor: React.SFC<Props> = ({ onSceneDelete }) => {
 				<div>
 					<TableDisplayButton scene={scene} />
 				</div>
-			</div>
+			</Toolbar>
 
 			{/* Canvas */}
 			<Canvas scene={scene} onUpdate={updateScene} />
-		</div>
+		</Box >
 	);
 }
 export default SceneEditor;

@@ -133,57 +133,59 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 		1;
 
 	return (
-		<div
-			ref={containerRef as any}
-			className={css`
-				flex-grow: 2;
-				width: calc(100vw - ${theme.sceneListWidth + theme.sidebarWidth}px);
-				height: calc(100vh - ${theme.headerHeight}px);
-			`}
-		>
-			{containerSize.height !== 0 && tableResolution ? (
-				<ToolbarPortalProvider>
-					<DraggableStage
-						width={containerSize.width || 1}
-						height={containerSize.height || 1}
-						initialZoom={initialZoom}
-					>
-						<CurrentSceneContext.Provider value={scene}>
-							{
-								scene.layers.map((layer) => {
-									const Component = LayerTypeToComponent[layer.type];
-									if (!Component || layer.visible === false) return null;
-									return (
-										<Component
-											key={layer.id}
-											layer={layer}
-											isTable={false}
-											onUpdate={onLayerUpdate}
-											active={activeLayerId === layer.id}
-										/>
-									);
-								})
-							}
-							<TableViewOverlay
-								layer={{
-									...TableViewLayer,
-									options: scene.table
-								}}
-								isTable={false}
-								active={activeLayerId === TableViewLayer.id}
-								onUpdate={(layer) => {
-									onUpdate({
-										...scene,
-										table: layer.options
+		<>
+			<ToolbarPortalProvider>
+				<div
+					ref={containerRef as any}
+					className={css`
+							display: flex;
+							flex-grow: 2;
+							height: 100%;
+							`}
+				>
+					{containerSize.height !== 0 && tableResolution ? (
+						<DraggableStage
+							width={containerSize.width || 1}
+							height={containerSize.height || 1}
+							initialZoom={initialZoom}
+						>
+							<CurrentSceneContext.Provider value={scene}>
+								{
+									scene.layers.map((layer) => {
+										const Component = LayerTypeToComponent[layer.type];
+										if (!Component || layer.visible === false) return null;
+										return (
+											<Component
+												key={layer.id}
+												layer={layer}
+												isTable={false}
+												onUpdate={onLayerUpdate}
+												active={activeLayerId === layer.id}
+											/>
+										);
 									})
-								}}
-								showBorder={true}
-								showGrid={true}
-							/>
-						</CurrentSceneContext.Provider>
-					</DraggableStage>
-				</ToolbarPortalProvider>
-			) : null}
+								}
+								<TableViewOverlay
+									layer={{
+										...TableViewLayer,
+										options: scene.table
+									}}
+									isTable={false}
+									active={activeLayerId === TableViewLayer.id}
+									onUpdate={(layer) => {
+										onUpdate({
+											...scene,
+											table: layer.options
+										})
+									}}
+									showBorder={true}
+									showGrid={true}
+								/>
+							</CurrentSceneContext.Provider>
+						</DraggableStage>
+					) : null}
+				</div>
+			</ToolbarPortalProvider>
 
 			<LayerList
 				scene={scene}
@@ -195,7 +197,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 				moveActiveLayer={moveActiveLayer}
 				deleteActiveLayer={deleteActiveLayer}
 			/>
-		</div>
+		</>
 	);
 }
 export default Canvas;
