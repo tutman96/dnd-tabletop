@@ -1,6 +1,5 @@
 import { singletonHook } from 'react-singleton-hook';
 import { createTheme } from '@mui/material/styles';
-import { useTheme } from 'sancho';
 import { useState } from 'react';
 import { grey } from '@mui/material/colors';
 
@@ -21,14 +20,3 @@ export const theme = createTheme({
   }
 });
 export default theme;
-
-
-export function useExtendedTheme() {
-  const theme = useTheme();
-
-  return {
-    ...theme,
-    headerHeight: HEADER_HEIGHT,
-    visualAssetSizerSize: VISUAL_ASSET_SIZER_SIZE
-  }
-}

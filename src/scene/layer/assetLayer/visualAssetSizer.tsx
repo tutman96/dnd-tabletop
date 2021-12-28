@@ -6,14 +6,13 @@ import Konva from 'konva';
 import { IAssetCalibration, IAsset } from '../../asset';
 import DraggableStage from '../../canvas/draggableStage';
 import Asset from './asset';
-import { useExtendedTheme } from '../../../theme';
+import theme, { VISUAL_ASSET_SIZER_SIZE } from '../../../theme';
 import { useTablePPI } from '../../../settings';
 import TransformableAsset from '../../canvas/transformableAsset';
 
 const RESIZE_SQUARES = 3;
 
 const VisualAssetSizer: React.SFC<{ asset: IAsset; onUpdate: (calibration: IAssetCalibration) => void; }> = ({ asset, onUpdate }) => {
-  const theme = useExtendedTheme();
   const tablePPI = useTablePPI();
 
   if (!tablePPI || !asset.calibration) {
@@ -38,12 +37,12 @@ const VisualAssetSizer: React.SFC<{ asset: IAsset; onUpdate: (calibration: IAsse
 
   return (
     <DraggableStage
-      width={theme.visualAssetSizerSize}
-      height={theme.visualAssetSizerSize}
+      width={VISUAL_ASSET_SIZER_SIZE}
+      height={VISUAL_ASSET_SIZER_SIZE}
       className={css`
-        margin-left: -${theme.spaces.lg};
+        margin-left: -1.5rem;
       `}
-      initialZoom={(theme.visualAssetSizerSize / asset.size.width)}
+      initialZoom={(VISUAL_ASSET_SIZER_SIZE / asset.size.width)}
     >
       <Layer>
         <Asset
@@ -91,7 +90,7 @@ const VisualAssetSizer: React.SFC<{ asset: IAsset; onUpdate: (calibration: IAsse
             width={asset.calibration.ppiX * RESIZE_SQUARES}
             height={asset.calibration.ppiY * RESIZE_SQUARES}
             strokeWidth={1}
-            stroke={theme.colors.palette.blue.base}
+            stroke={theme.palette.primary.dark}
             strokeScaleEnabled={false}
           />
           {innerRectangles.map((rect, i) => (
@@ -99,7 +98,7 @@ const VisualAssetSizer: React.SFC<{ asset: IAsset; onUpdate: (calibration: IAsse
               key={i}
               {...rect}
               strokeWidth={1}
-              stroke={theme.colors.palette.blue.base}
+              stroke={theme.palette.primary.dark}
               strokeScaleEnabled={false}
             />
           ))}
