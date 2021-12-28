@@ -13,7 +13,12 @@ export const useSceneSidebarOpen = singletonHook([true, () => { }], () => useSta
 export const theme = createTheme({
   palette: {
     mode: 'dark',
-    secondary: grey
+    secondary: grey,
+    error: {
+      main: '#db292f',
+      dark: '#991c20',
+      light: '#e25358'
+    }
   },
   shape: {
     borderRadius: 8

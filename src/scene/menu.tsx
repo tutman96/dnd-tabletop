@@ -59,7 +59,7 @@ const Menu: React.FunctionComponent<Props> = () => {
 					margin: theme.spacing(1),
 					width: '100%', maxWidth: theme.spacing(64)
 				}}
-					elevation={5}
+					elevation={2}
 				>
 					<Box sx={{
 						borderBottom: 1, borderColor: 'divider',
