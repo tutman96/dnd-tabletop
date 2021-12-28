@@ -1,21 +1,10 @@
 import React, { useEffect } from "react";
+import { Routes as ReactRouterRoutes, Route, useNavigate } from "react-router-dom";
+
 import ScenePage from "./scene/page";
 import TablePage from "./table/page";
-import { IconFilm, IconMap } from "sancho";
-import { SIDEBAR_WIDTH, useSceneSidebarOpen } from "./theme";
-import { useNavigate } from "react-router-dom";
 import { createNewScene, sceneDatabase } from "./scene";
 import { Settings, settingsDatabase } from "./settings";
-import Favicon from "./partials/favicon";
-
-export interface IRoute {
-	name: string;
-	path: string;
-	sidebarIcon: React.ComponentType<any>,
-	main: React.ComponentType<any>;
-	popout?: boolean;
-	useOnClick?: () => () => void;
-}
 
 const { useAllValues: useAllScenes, createItem } = sceneDatabase();
 const { useOneValue: useOneSettingValue } = settingsDatabase();
@@ -48,32 +37,14 @@ const Redirect: React.FunctionComponent = () => {
 	return null;
 }
 
-const routes = {
-	home: {
-		name: 'Home',
-		path: '/',
-		sidebarIcon: Favicon,
-		main: () => <Redirect />,
-	},
-	scenes: {
-		name: 'Scenes',
-		path: '/scenes/*',
-		sidebarIcon: IconFilm,
-		main: () => <ScenePage />,
-		useOnClick: () => {
-			const [sidebarOpen, setSidebarOpen] = useSceneSidebarOpen()
-			return () => {
-				setSidebarOpen(!sidebarOpen)
-			}
-		}
-	},
-	table: {
-		name: 'TV/Table View',
-		path: '/table',
-		sidebarIcon: IconMap,
-		main: () => <TablePage />,
-		popout: true,
-	}
-} as { [key: string]: IRoute }
+const Routes: React.FunctionComponent = () => {
+	return (
+		<ReactRouterRoutes>
+			<Route path="/" element={<Redirect />} />
+			<Route path="/scenes/*" element={<ScenePage />} />
+			<Route path="/table" element={<TablePage />} />
+		</ReactRouterRoutes>
+	)
+}
 
-export default routes;
+export default Routes;

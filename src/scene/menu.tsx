@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
@@ -21,11 +21,23 @@ enum TabOptions {
 	SETTINGS
 }
 
-type Props = { onSceneSelect: (scene: IScene) => any, selectedSceneId: string };
-const Menu: React.FunctionComponent<Props> = ({ onSceneSelect, selectedSceneId }) => {
+function useCurrentSelectedSceneId() {
+	const routeMatch = useMatch('/scenes/:id');
+	return routeMatch?.params.id;
+}
+
+type Props = {};
+const Menu: React.FunctionComponent<Props> = () => {
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const [selectedTab, setSelectedTab] = useState(TabOptions.SCENES);
 	const location = useLocation();
+	const navigate = useNavigate();
+
+	const currentSelectedSceneId = useCurrentSelectedSceneId();
+
+	function onSceneSelect(scene: IScene) {
+		navigate(`/scenes/${scene.id}`)
+	}
 
 	useEffect(() => {
 		setMenuOpen(false);
@@ -56,7 +68,7 @@ const Menu: React.FunctionComponent<Props> = ({ onSceneSelect, selectedSceneId }
 					</Box>
 					<CardContent>
 						<Box sx={{ display: selectedTab === TabOptions.SCENES ? 'block' : 'none' }}>
-							<SceneList onSceneSelect={onSceneSelect} selectedSceneId={selectedSceneId} />
+							<SceneList onSceneSelect={onSceneSelect} selectedSceneId={currentSelectedSceneId} />
 						</Box>
 						<Box sx={{ display: selectedTab === TabOptions.DISPLAYS ? 'block' : 'none' }}>
 							<Link href="#/table" target="_blank" >Open Local Display</Link>
