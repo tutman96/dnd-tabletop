@@ -55,7 +55,9 @@ const Menu: React.FunctionComponent<Props> = ({ onSceneSelect, selectedSceneId }
 						</Tabs>
 					</Box>
 					<CardContent>
-						{selectedTab === TabOptions.SCENES && <SceneList onSceneSelect={onSceneSelect} selectedSceneId={selectedSceneId} />}
+						<Box sx={{ display: selectedTab === TabOptions.SCENES ? 'block' : 'none' }}>
+							<SceneList onSceneSelect={onSceneSelect} selectedSceneId={selectedSceneId} />
+						</Box>
 						{selectedTab === TabOptions.DISPLAYS && (
 							<Link href="#/table" target="_blank" >Open Local Display</Link>
 						)}

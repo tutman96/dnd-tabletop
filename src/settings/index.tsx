@@ -1,7 +1,15 @@
-import globalStorage from "../storage";
 import React, { SetStateAction, Dispatch } from "react";
-import { useTheme, Text, InputGroup, Input, Check } from "sancho";
-import { css } from "emotion";
+
+import Typography from '@mui/material/Typography'
+import Box from '@mui/material/Box'
+import Input from '@mui/material/Input'
+import Switch from '@mui/material/Switch'
+import FormControlLabel from '@mui/material/FormControlLabel'
+
+import globalStorage from "../storage";
+import theme from "../theme";
+import InputWithUnit from "../partials/inputWithUnit";
+
 
 export enum Settings {
   DISPLAYED_SCENE = 'displayed_scene',
@@ -24,7 +32,7 @@ export function useTableResolution(): [TableResolution | undefined, Dispatch<Set
 
   if (tableResolution === null) {
     return [
-      { width: 1920, height: 1080 },
+      { width: 3840, height: 2160 },
       setTableResolution
     ]
   }
@@ -71,14 +79,27 @@ export function useTablePPI(): number | null {
   return ppi;
 }
 
-const ScreenSizeSettings: React.SFC = () => {
-  const theme = useTheme();
+const SettingGroup: React.FunctionComponent<{ header: string }> = ({ header, children }) => {
+  return (
+    <>
+      <Typography variant="overline">{header}</Typography>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          marginBottom: theme.spacing(1),
+        }}
+      >
+        {children}
+      </Box>
+    </>
+  );
+}
 
+const ScreenSizeSettings: React.FunctionComponent = () => {
   const [tableResolution, setTableResolution] = useTableResolution();
   const [tableSize, setTableSize] = useTableSize();
   const [playAudioOnTable, setPlayAudioOnTable] = usePlayAudioOnTable();
-
-  const formItemMargin = css`margin: 0 ${theme.spaces.sm};`;
 
   if (tableResolution === undefined || tableSize === undefined) {
     return null;
@@ -86,73 +107,64 @@ const ScreenSizeSettings: React.SFC = () => {
 
   return (
     <>
-      <Text variant="h6">TV/Table Display Settings</Text>
-      <InputGroup label="Resolution">
-        <div
-          className={css`
-            display: flex; 
-            align-items: center;
-          `}
-        >
-          <Input
-            type="number"
-            min={1}
-            placeholder="width"
-            value={tableResolution.width}
-            onChange={(e) => {
-              const value = Number(e.target.value);
-              if (!isNaN(value)) {
-                setTableResolution({ ...tableResolution, width: value })
-              }
-            }}
-          />
-          <div className={formItemMargin}>x</div>
-          <Input
-            type="number"
-            min={1}
-            placeholder="height"
-            value={tableResolution.height}
-            onChange={(e) => {
-              const value = Number(e.target.value);
-              if (!isNaN(value)) {
-                setTableResolution({ ...tableResolution, height: value })
-              }
-            }}
-          />
-        </div>
-      </InputGroup>
-      <InputGroup label="Screen Size">
-        <div
-          className={css`
-            display: flex; 
-            align-items: center;
-          `}
-        >
-          <Input
-            type="number"
-            min={1}
-            max={200}
-            value={tableSize}
-            onChange={(e) => {
-              const value = Number(e.target.value);
-              if (!isNaN(value) && value <= 200 && value > 1) {
-                setTableSize(value)
-              }
-            }}
-          />
-          <div className={formItemMargin}>inches</div>
-        </div>
-      </InputGroup>
-      <br />
-      <Text variant="h6">Other Settings</Text>
-      <Check
-        checked={playAudioOnTable}
-        disabled={playAudioOnTable === undefined}
-        onChange={e => {
-          setPlayAudioOnTable(e.target.checked);
-        }}
-        label="Play Audio on Table"
-      />
+      <SettingGroup header="Resolution">
+        <InputWithUnit
+          type="number"
+          inputProps={{ min: 1 }}
+          unit="px"
+          fullWidth
+          value={tableResolution.width}
+          onChange={(e) => {
+            const value = Number(e.target.value);
+            if (!isNaN(value)) {
+              setTableResolution({ ...tableResolution, width: value })
+            }
+          }}
+        />
+        <Box sx={{ margin: theme.spacing(1) }}>x</Box>
+        <InputWithUnit
+          type="number"
+          inputProps={{ min: 1 }}
+          unit="px"
+          fullWidth
+          value={tableResolution.height}
+          onChange={(e) => {
+            const value = Number(e.target.value);
+            if (!isNaN(value)) {
+              setTableResolution({ ...tableResolution, height: value })
+            }
+          }}
+        />
+      </SettingGroup>
+      <SettingGroup header="Screen Size">
+        <InputWithUnit
+          type="number"
+          inputProps={{ min: 1, max: 200 }}
+          unit="in"
+          fullWidth
+          value={tableSize}
+          onChange={(e) => {
+            const value = Number(e.target.value);
+            if (!isNaN(value) && value <= 200 && value > 1) {
+              setTableSize(value)
+            }
+          }}
+        />
+      </SettingGroup>
+      <SettingGroup header="Other Settings">
+        <FormControlLabel
+          control={
+            <Switch
+              checked={playAudioOnTable ?? true}
+              disabled={playAudioOnTable === undefined}
+              onChange={e => {
+                setPlayAudioOnTable(e.target.checked);
+              }}
+            />
+          }
+          label="Play Audio on Table"
+        />
+      </SettingGroup>
     </>
   );
 }
