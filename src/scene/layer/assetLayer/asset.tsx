@@ -21,6 +21,7 @@ const Asset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected, playAu
 				(el as HTMLVideoElement).muted = true;
 			}
 		}
+		return () => {}
 	}, [asset, playAudio, el])
 
 	const xOffset = asset.calibration ? (asset.calibration.xOffset * (asset.transform.width ?? 0 / asset.size.width)) : 0;

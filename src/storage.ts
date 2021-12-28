@@ -1,4 +1,4 @@
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import { useState, useEffect } from 'react';
 const RTStorage = require('rt-storage');
 
 interface IRTStorage<T> {
@@ -36,7 +36,7 @@ export default function globalStorage<T>(name: string) {
 			await storage.setItem(key, newData);
 		}
 
-		return [data, setData] as [V | null | undefined, Dispatch<SetStateAction<V>>];
+		return [data, setData] as [V | null | undefined, (newData: V) => Promise<void>];
 	}
 
 	return {

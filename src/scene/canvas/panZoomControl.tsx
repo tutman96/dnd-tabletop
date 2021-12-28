@@ -21,6 +21,7 @@ const PanButton: React.SFC<{ onActivateRepeat?: (multiplier: number) => void } &
       
       return () => cancelAnimationFrame(animationFrame);
     }
+    return () => {}
   }, [mouseDown, onActivateRepeat])
 
   return (

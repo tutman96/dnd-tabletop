@@ -3,9 +3,7 @@ import React, { useState } from "react";
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItemButton'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemText from '@mui/material/ListItemText'
+import ListItem from '@mui/material/ListItem'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import Tooltip from '@mui/material/Tooltip'
 import Skeleton from '@mui/material/Skeleton'
@@ -19,6 +17,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
 import { IScene, sceneDatabase, createNewScene } from ".";
 import { settingsDatabase, Settings } from "../settings";
+import { SceneListItem } from "../partials/sceneListItem";
 
 const { useAllValues, createItem } = sceneDatabase();
 const { useOneValue: useOneSettingValue } = settingsDatabase();
@@ -35,7 +34,7 @@ function LoadingScenes() {
   );
 }
 
-const SceneStatusIcon: React.FunctionComponent<{ scene: IScene }> = ({ scene }) => {
+export const SceneStatusIcon: React.FunctionComponent<{ scene: IScene }> = ({ scene }) => {
   const [displayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
   const [tableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
 
@@ -87,21 +86,17 @@ const SceneList: React.FunctionComponent<Props> = ({ onSceneSelect, selectedScen
       <List sx={{ marginX: -2 }}>
         <Box sx={{ overflow: 'auto' }}>
           {sceneList.map((scene) => (
-            <ListItemButton
+            <SceneListItem
               key={scene.id}
+              scene={scene}
               selected={selectedSceneId === scene.id}
-              onClick={() => onSceneSelect(scene)}
-            >
-              <ListItemText primary={scene.name} />
-              <SceneStatusIcon scene={scene} />
-            </ListItemButton>
+              onSelect={() => onSceneSelect(scene)}
+            />
           ))}
 
           {!sceneList.length && (
             <ListItem sx={{ justifyContent: 'center' }} disabled={true}>
-              {/* <ListItemText> */}
               <Typography>No Scenes</Typography>
-              {/* </ListItemText> */}
             </ListItem>
           )}
         </Box >

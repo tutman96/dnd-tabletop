@@ -86,7 +86,7 @@ const TransformableAsset: React.SFC<Props> = ({
 						height: node.height() * scaleY
 					});
 				}}
-				onTransformEnd={e => {
+				onTransformEnd={() => {
 					const node = groupRef.current!;
 					const scaleX = node.scaleX();
 					const scaleY = node.scaleY();

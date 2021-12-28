@@ -10,7 +10,6 @@ import { deleteLayer } from '../layer';
 import LayerList from './layerList';
 import { ToolbarPortalProvider } from '../layer/toolbarPortal';
 import TableViewOverlay, { TableViewLayer } from '../layer/tableView';
-import { useExtendedTheme } from '../../theme';
 import useComponentSize from '@rehooks/component-size';
 import { useTableResolution } from '../../settings';
 
@@ -40,7 +39,6 @@ export function calculateViewportCenter(layerRef: React.MutableRefObject<Konva.L
 
 type Props = { scene: IScene, onUpdate: (scene: IScene) => void };
 const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
-	const theme = useExtendedTheme();
 	const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
 	const containerRef = useRef<HTMLDivElement>();
 	const containerSize = useComponentSize(containerRef);

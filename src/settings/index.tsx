@@ -1,8 +1,7 @@
-import React, { SetStateAction, Dispatch } from "react";
+import React from "react";
 
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
-import Input from '@mui/material/Input'
 import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
 
@@ -27,7 +26,7 @@ export function settingsDatabase() {
 const { useOneValue: useOneSettingValue } = settingsDatabase();
 
 type TableResolution = { width: number, height: number };
-export function useTableResolution(): [TableResolution | undefined, Dispatch<SetStateAction<TableResolution>>] {
+export function useTableResolution(): [TableResolution | undefined, (newValue: TableResolution) => Promise<void>] {
   const [tableResolution, setTableResolution] = useOneSettingValue<TableResolution>(Settings.TABLE_RESOLUTION);
 
   if (tableResolution === null) {
@@ -40,7 +39,7 @@ export function useTableResolution(): [TableResolution | undefined, Dispatch<Set
   return [tableResolution, setTableResolution];
 }
 
-export function useTableSize(): [number | undefined, Dispatch<SetStateAction<number>>] {
+export function useTableSize(): [number | undefined, (newValue: number) => Promise<void>] {
   const [tableSize, setTableSize] = useOneSettingValue<number>(Settings.TABLE_SIZE);
 
   if (tableSize === null) {
@@ -53,7 +52,7 @@ export function useTableSize(): [number | undefined, Dispatch<SetStateAction<num
   return [tableSize, setTableSize];
 }
 
-export function usePlayAudioOnTable(): [boolean | undefined, Dispatch<SetStateAction<boolean>>] {
+export function usePlayAudioOnTable(): [boolean | undefined, (newValue: boolean) => Promise<void>] {
   const [playAudio, setPlayAudio] = useOneSettingValue<boolean>(Settings.PLAY_AUDIO_ON_TABLE);
   if (playAudio === null) {
     return [

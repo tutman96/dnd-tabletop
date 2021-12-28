@@ -19,6 +19,7 @@ const ToolbarItem: React.SFC<Props> = ({ label, icon, keyboardShortcuts, ...othe
 			window.addEventListener('keyup', onKeyPress);
 			return () => window.removeEventListener('keyup', onKeyPress);
 		}
+		return () => {}
 	}, [keyboardShortcuts, otherProps.onClick])
 
 	return (
