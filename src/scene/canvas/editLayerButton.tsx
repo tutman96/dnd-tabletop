@@ -10,30 +10,22 @@ import { TableViewLayer } from "../layer/tableView";
 import RenameDialog from "../../partials/renameDialog";
 
 type Props = { layer?: ILayer; onUpdate: (layer: ILayer) => void; };
-const EditLayerButton: React.SFC<Props> = ({ layer, onUpdate }) => {
+const EditLayerButton: React.FunctionComponent<Props> = ({ layer, onUpdate }) => {
   const [showModal, setShowModal] = useState(false);
 
   const disabled = !layer || layer.id === TableViewLayer.id;
 
-  // Can't have a disabled button be the target of a tooltip
-  if (disabled) {
-    return (
-      <IconButton disabled={true} size="small">
-        <DriveFileRenameOutlineOutlinedIcon />
-      </IconButton>
-    )
-  }
-
   return (
     <>
-      <Tooltip title="Edit Layer Name">
-        <IconButton
-          onClick={() => setShowModal(true)}
-          size="small"
-        >
+      <IconButton
+        onClick={() => setShowModal(true)}
+        size="small"
+        disabled={disabled}
+      >
+        <Tooltip title="Edit Layer Name">
           <DriveFileRenameOutlineOutlinedIcon />
-        </IconButton>
-      </Tooltip>
+        </Tooltip>
+      </IconButton>
       {layer && <RenameDialog
         open={showModal}
         onCancel={() => setShowModal(false)}
