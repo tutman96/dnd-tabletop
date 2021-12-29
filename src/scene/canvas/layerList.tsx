@@ -48,6 +48,7 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, add
 			width: theme.spacing(38),
 			position: 'absolute',
 			right: theme.spacing(2), bottom: theme.spacing(2),
+			boxShadow: theme.shadows[10]
 		}}	>
 			<List dense={true}>
 				<ListItemButton
