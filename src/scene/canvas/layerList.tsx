@@ -1,6 +1,22 @@
 import React from "react";
-import { useTheme, Layer, List, ListItem, IconButton, Popover, MenuList, MenuItem, IconFile, IconCloudDrizzle, IconPlus, Text, IconArrowUp, IconArrowDown, IconEye, IconEyeOff, IconTv } from "sancho";
-import { css } from "emotion";
+
+import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
+import CardActions from '@mui/material/CardActions';
+import IconButton from '@mui/material/IconButton';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemButton from '@mui/material/ListItemButton';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+
+import TvOutlinedIcon from '@mui/icons-material/TvOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+import ArrowUpwardOutlinedIcon from '@mui/icons-material/ArrowUpwardOutlined';
+import ArrowDownwardOutlinedIcon from '@mui/icons-material/ArrowDownwardOutlined';
 
 import { IScene } from "..";
 import { ILayer } from "../layer";
@@ -8,6 +24,8 @@ import LayerType from "../layer/layerType";
 import { TableViewLayer } from "../layer/tableView";
 import EditLayerButton from "./editLayerButton";
 import DeleteLayerButton from "./deleteLayerButton";
+import AddLayerButton from "./addLayerButton";
+import theme from "../../theme";
 
 type Props = {
 	scene: IScene,
@@ -19,135 +37,95 @@ type Props = {
 	moveActiveLayer: (direction: "up" | "down") => void;
 	deleteActiveLayer: () => void
 };
-const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, updateLayer, addLayer, moveActiveLayer, deleteActiveLayer }) => {
+const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, addLayer, updateLayer, moveActiveLayer, deleteActiveLayer }) => {
 	const layerIndex = scene.layers.findIndex((l) => l.id === activeLayerId);
 	const isActiveLayerTop = layerIndex === scene.layers.length - 1;
 	const isActiveLayerBottom = layerIndex === 0;
 	const activeLayer = scene.layers.find((l) => l.id === activeLayerId);
 
-	const theme = useTheme();
 	return (
-		<div
-			className={css`
-				position: absolute;
-				right: ${theme.spaces.md};
-				bottom: ${theme.spaces.md};
-			`}
-		>
-			<Layer
-				className={css`
-					overflow: hidden;
-					width: 300px;
-				`}
-			>
-				<List
-					className={css`
-						max-height: 350px;
-						overflow: auto;
-					`}
+		<Card sx={{
+			width: theme.spacing(38),
+			position: 'absolute',
+			right: theme.spacing(2), bottom: theme.spacing(2),
+		}}	>
+			<List dense={true}>
+				<ListItemButton
+					selected={activeLayerId === TableViewLayer.id}
+					onClick={() => setActiveLayer(TableViewLayer.id)}
 				>
-					<ListItem
-						className={css`
-							background-color: ${activeLayerId === TableViewLayer.id ? theme.colors.intent.primary.base : 'initial'} !important;
-							padding: ${theme.spaces.sm} !important;
-						`}
-						contentBefore={
-							<IconButton
-								variant="ghost"
-								label={TableViewLayer.name}
-								icon={<IconTv />}
-								disabled
-								size="sm"
-							/>
-						}
-						primary={TableViewLayer.name}
-						contentAfter={' '}
-						onClick={() => setActiveLayer(TableViewLayer.id)}
-					/>
+					<ListItemIcon><IconButton size="small" disabled><TvOutlinedIcon /></IconButton></ListItemIcon>
+					<ListItemText primary={TableViewLayer.name} secondary=" " />
+				</ListItemButton>
 
-					{Array.from(scene.layers).reverse().map((layer) => (
-						<ListItem
-							key={layer.id}
-							className={css`
-								background-color: ${activeLayer === layer ? theme.colors.intent.primary.base : 'initial'} !important;
-								padding: ${theme.spaces.sm} !important;
-							`}
-							contentBefore={
+				{Array.from(scene.layers).reverse().map((layer) => (
+					<ListItem
+						key={layer.id}
+						disablePadding
+						secondaryAction={<Typography color={theme.palette.text.disabled} variant="overline">{LayerType[layer.type]}</Typography>}
+					>
+						<ListItemButton
+							selected={activeLayer === layer}
+							onClick={() => setActiveLayer(layer.id)}
+						>
+							<ListItemIcon>
 								<IconButton
-									variant="ghost"
-									label={layer.visible ? 'Hide Layer' : 'Show Layer'}
+									size="small"
 									onClick={(e) => {
 										updateLayer({ ...layer, visible: !layer.visible })
-										e.preventDefault(); // prevent passing through to the list item
+										e.stopPropagation() // to prevent the layer from becoming active
 									}}
-									icon={layer.visible ? <IconEye /> : <IconEyeOff />}
-									size="sm"
-								/>
-							}
-							primary={layer.name}
-							contentAfter={<Text variant="subtitle">{LayerType[layer.type]}</Text>}
-							onClick={() => setActiveLayer(layer.id)}
-						/>
-					))}
-				</List>
-				<div
-					className={css`
-							display: flex;
-							align-items: center;
-							justify-content: space-between;
-							background-color: ${theme.colors.background.tint1};
-						`}
-				>
-					{/* Delete Layer */}
-					<DeleteLayerButton
-						layer={activeLayer}
-						onDelete={deleteActiveLayer}
-					/>
+									disableRipple
+								>
+									{layer.visible ? <VisibilityOutlinedIcon /> : <VisibilityOffOutlinedIcon />}
+								</IconButton>
+							</ListItemIcon>
+							<ListItemText primary={layer.name} />
+						</ListItemButton>
+					</ListItem>
+				))}
+			</List>
+			<CardActions sx={{ display: 'flex', justifyContent: 'space-between' }}>
+				{/* Delete Layer */}
+				<DeleteLayerButton
+					layer={activeLayer}
+					onDelete={deleteActiveLayer}
+				/>
 
-					<div>
-
-
-						{/* Move Layer Up */}
-						<IconButton
-							variant="ghost"
-							disabled={activeLayerId === null || activeLayerId === TableViewLayer.id || isActiveLayerTop}
-							icon={<IconArrowUp />}
-							label="Layer Up"
-							onClick={() => moveActiveLayer('up')}
-						/>
-
-
-						{/* Move Layer Down */}
-						<IconButton
-							variant="ghost"
-							disabled={activeLayerId === null || activeLayerId === TableViewLayer.id || isActiveLayerBottom}
-							icon={<IconArrowDown />}
-							label="Layer Down"
-							onClick={() => moveActiveLayer('down')}
-						/>
-
-
-						<EditLayerButton
-							layer={activeLayer}
-							onUpdate={updateLayer}
-						/>
-					</div>
-
-					{/* Add Layer Button */}
-					<Popover
-						placement="top-end"
-						content={
-							<MenuList>
-								<MenuItem contentBefore={<IconFile />} onPress={() => addLayer(LayerType.ASSETS)}>Asset Layer</MenuItem>
-								<MenuItem contentBefore={<IconCloudDrizzle />} onPress={() => addLayer(LayerType.FOG)}>Fog Layer (beta)</MenuItem>
-							</MenuList>
-						}
+				<Box>
+					{/* Move Layer Up */}
+					<IconButton
+						disabled={activeLayerId === null || activeLayerId === TableViewLayer.id || isActiveLayerTop}
+						onClick={() => moveActiveLayer('up')}
+						size="small"
 					>
-						<IconButton variant="ghost" icon={<IconPlus />} label="Add Layer" />
-					</Popover>
-				</div>
-			</Layer>
-		</div>
+						<Tooltip title="Layer Up">
+							<ArrowUpwardOutlinedIcon />
+						</Tooltip>
+					</IconButton>
+
+
+					{/* Move Layer Down */}
+					<IconButton
+						disabled={activeLayerId === null || activeLayerId === TableViewLayer.id || isActiveLayerBottom}
+						onClick={() => moveActiveLayer('down')}
+						size="small"
+					>
+						<Tooltip title="Layer Down">
+							<ArrowDownwardOutlinedIcon />
+						</Tooltip>
+					</IconButton>
+
+					{/* Edit Layer Name */}
+					<EditLayerButton
+						layer={activeLayer}
+						onUpdate={updateLayer}
+					/>
+				</Box>
+
+				<AddLayerButton onAdd={(type) => addLayer(type)} />
+			</CardActions>
+		</Card>
 	);
 }
 export default LayerList;

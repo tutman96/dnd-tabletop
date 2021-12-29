@@ -1,6 +1,5 @@
 import React from 'react';
 import { Layer, Rect } from 'react-konva';
-import { css } from 'emotion';
 import Konva from 'konva';
 
 import { IAssetCalibration, IAsset } from '../../asset';
@@ -39,9 +38,9 @@ const VisualAssetSizer: React.SFC<{ asset: IAsset; onUpdate: (calibration: IAsse
     <DraggableStage
       width={VISUAL_ASSET_SIZER_SIZE}
       height={VISUAL_ASSET_SIZER_SIZE}
-      className={css`
-        margin-left: -1.5rem;
-      `}
+      sx={{
+        marginLeft: `-1.5rem`
+      }}
       initialZoom={(VISUAL_ASSET_SIZER_SIZE / asset.size.width)}
     >
       <Layer>

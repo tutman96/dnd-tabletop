@@ -1,18 +1,21 @@
 import React, { useRef, useEffect, useCallback } from 'react';
-import { css, cx } from 'emotion';
 import Konva from 'konva';
 import { Stage } from 'react-konva';
-import { useTheme } from 'sancho';
+import { SxProps } from '@mui/system';
 
 import PanZoomControl from './panZoomControl';
+
+import Box from '@mui/material/Box';
+
+const TINT1 = '#3f3f3f';
+const TINT2 = '#353535';
 
 const ZOOM_SPEED = 1 / 250;
 const PAN_SPEED = 1 / 1;
 const KEYBOARD_ZOOM_SPEED = 1.15;
 
-type Props = { initialZoom?: number, width: number, height: number, className?: string };
-const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, width, height, className, children }) => {
-	const theme = useTheme();
+type Props = { initialZoom?: number, width: number, height: number, sx?: SxProps };
+const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, width, height, sx, children }) => {
 	const stageRef = useRef<Konva.Stage>();
 
 	const zoomStageFromMiddle = useCallback((deltaZ: number) => {
@@ -91,16 +94,15 @@ const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, width, height, clas
 	)
 
 	return (
-		<div
-			className={cx(css`				
-				background-color: ${theme.colors.background.tint2};
-				background-image: linear-gradient(45deg, ${theme.colors.background.tint1} 25%, transparent 25%, transparent 75%, ${theme.colors.background.tint1} 75%, ${theme.colors.background.tint1}),
-				linear-gradient(45deg, ${theme.colors.background.tint1} 25%, transparent 25%, transparent 75%, ${theme.colors.background.tint1} 75%, ${theme.colors.background.tint1});
-				background-size: 20px 20px;
-				background-position: 0 0, 10px 10px;
-				width: ${width}px;
-				height: ${height}px;
-			`, className)}
+		<Box
+			sx={{				
+				backgroundColor: TINT2,
+				backgroundImage: `linear-gradient(45deg, ${TINT1} 25%, transparent 25%, transparent 75%, ${TINT1} 75%, ${TINT1}), linear-gradient(45deg, ${TINT1} 25%, transparent 25%, transparent 75%, ${TINT1} 75%, ${TINT1})`,
+				backgroundSize: `20px 20px`,
+				backgroundPosition: `0 0, 10px 10px`,
+				width, height,
+				...sx
+			}}
 		>
 			<PanZoomControl
 				onPanZoom={onPanZoom}
@@ -166,7 +168,7 @@ const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, width, height, clas
 			>
 				{children}
 			</Stage>
-		</div>
+		</Box>
 	);
 }
 export default DraggableStage;
