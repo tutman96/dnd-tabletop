@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import { Group, Transformer } from 'react-konva';
 import Konva from 'konva';
-import { useTheme } from 'sancho';
 import { useTablePPI } from '../../settings';
+import theme from '../../theme';
 
 export type AssetTransform = Konva.RectConfig & { rotation: number };
 
@@ -17,15 +17,13 @@ type Props = {
 	rotateEnabled?: boolean;
 	strokeEnabled?: boolean;
 };
-const TransformableAsset: React.SFC<Props> = ({
+const TransformableAsset: React.FunctionComponent<Props> = ({
 	rectTransform, onTransform,
 	isSelected, onSelected,
 	snapOffset,
 	children,
 	rotateEnabled, scaleEnabled, skewEnabled, strokeEnabled
 }) => {
-	const theme = useTheme();
-
 	const groupRef = useRef<Konva.Group>();
 	const trRef = useRef<Konva.Transformer>();
 	const ppi = useTablePPI();
@@ -113,8 +111,8 @@ const TransformableAsset: React.SFC<Props> = ({
 					enabledAnchors={skewEnabled === false ? ['top-left', 'top-right', 'bottom-left', 'bottom-right'] : undefined}
 					ref={trRef as any}
 					borderStrokeWidth={strokeEnabled === false ? 0 : undefined}
-					anchorFill={theme.colors.background.overlay}
-					anchorStroke={theme.colors.palette.blue.light}
+					anchorFill={theme.palette.primary.contrastText}
+					anchorStroke={theme.palette.primary.dark}
 					rotationSnaps={[0, 45, 90, 135, 180, 225, 270, 315]}
 					rotateAnchorOffset={20}
 				/>

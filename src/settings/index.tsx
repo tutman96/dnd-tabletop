@@ -1,6 +1,5 @@
 import React from "react";
 
-import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
@@ -8,7 +7,7 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import globalStorage from "../storage";
 import theme from "../theme";
 import InputWithUnit from "../partials/inputWithUnit";
-
+import InputGroup from "../partials/inputGroup";
 
 export enum Settings {
   DISPLAYED_SCENE = 'displayed_scene',
@@ -78,23 +77,6 @@ export function useTablePPI(): number | null {
   return ppi;
 }
 
-const SettingGroup: React.FunctionComponent<{ header: string }> = ({ header, children }) => {
-  return (
-    <>
-      <Typography variant="overline">{header}</Typography>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          marginBottom: theme.spacing(1),
-        }}
-      >
-        {children}
-      </Box>
-    </>
-  );
-}
-
 const ScreenSizeSettings: React.FunctionComponent = () => {
   const [tableResolution, setTableResolution] = useTableResolution();
   const [tableSize, setTableSize] = useTableSize();
@@ -106,7 +88,7 @@ const ScreenSizeSettings: React.FunctionComponent = () => {
 
   return (
     <>
-      <SettingGroup header="Resolution">
+      <InputGroup header="Resolution">
         <InputWithUnit
           type="number"
           inputProps={{ min: 1 }}
@@ -134,8 +116,8 @@ const ScreenSizeSettings: React.FunctionComponent = () => {
             }
           }}
         />
-      </SettingGroup>
-      <SettingGroup header="Screen Size">
+      </InputGroup>
+      <InputGroup header="Screen Size">
         <InputWithUnit
           type="number"
           inputProps={{ min: 1, max: 200, step: 0.1 }}
@@ -149,8 +131,8 @@ const ScreenSizeSettings: React.FunctionComponent = () => {
             }
           }}
         />
-      </SettingGroup>
-      <SettingGroup header="Other Settings">
+      </InputGroup>
+      <InputGroup header="Other Settings">
         <FormControlLabel
           control={
             <Switch
@@ -163,7 +145,7 @@ const ScreenSizeSettings: React.FunctionComponent = () => {
           }
           label="Play Audio on Table"
         />
-      </SettingGroup>
+      </InputGroup>
     </>
   );
 }

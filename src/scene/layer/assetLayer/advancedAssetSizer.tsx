@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
+
+import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
+
 import { IAssetCalibration } from '../../asset';
-import { InputGroup, Input, useTheme, IconButton, IconLock, IconUnlock } from 'sancho';
-import { css } from "emotion";
+import theme from '../../../theme';
+import InputWithUnit from '../../../partials/inputWithUnit';
+import InputGroup from '../../../partials/inputGroup';
 
-const AdvancedAssetSizer: React.SFC<{ calibration: IAssetCalibration; onUpdate: (calibration: IAssetCalibration) => void; }> = ({ calibration, onUpdate }) => {
-  const theme = useTheme();
-  const formItemMargin = css`margin: 0 ${theme.spaces.sm};`;
-
-  function updateCalibrationValue(keys: Array<keyof IAssetCalibration>, e: React.ChangeEvent<HTMLInputElement>) {
+const AdvancedAssetSizer: React.FunctionComponent<{ calibration: IAssetCalibration; onUpdate: (calibration: IAssetCalibration) => void; }> = ({ calibration, onUpdate }) => {
+  function updateCalibrationValue(keys: Array<keyof IAssetCalibration>, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const value = Number(e.target.value);
     if (!isNaN(value)) {
       const newCal = { ...calibration! };
@@ -26,70 +32,64 @@ const AdvancedAssetSizer: React.SFC<{ calibration: IAssetCalibration; onUpdate: 
   }, [calibration, onUpdate, ppiLocked])
 
   return (
-    <>
-      <InputGroup label="Pixels per Inch">
-        <div
-          className={css`
-            display: flex; 
-            align-items: center;
-          `}
-        >
-          <Input
-            type="number"
-            min={1}
-            placeholder="Horizontal PPI"
-            value={calibration.ppiX}
-            onChange={(e) => updateCalibrationValue((ppiLocked ? ['ppiX', 'ppiY'] : ['ppiX']), e)}
-          />
-          <div className={formItemMargin}>
-            <IconButton
-              variant="ghost"
-              label={ppiLocked ? 'Unlock PPI' : 'Lock PPI'}
-              icon={ppiLocked ? <IconLock /> : <IconUnlock />}
-              onClick={() => {
-                if (calibration.ppiX !== calibration.ppiY) {
-                  onUpdate({
-                    ...calibration,
-                    ppiY: calibration.ppiX
-                  })
-                }
-                setPPILocked(!ppiLocked)
-              }}
-            />
-          </div>
-          <Input
-            type="number"
-            min={1}
-            placeholder="Vertical PPI"
-            value={ppiLocked ? calibration.ppiX : calibration.ppiY}
-            disabled={ppiLocked}
-            onChange={(e) => updateCalibrationValue(['ppiY'], e)}
-          />
-        </div>
+    <Box sx={{ marginTop: theme.spacing(1) }}>
+      <InputGroup header="Pixels per Inch">
+        <InputWithUnit
+          type="number"
+          inputProps={{ min: 1 }}
+          placeholder="Horizontal PPI"
+          unit="ppi"
+          fullWidth
+          value={calibration.ppiX}
+          onChange={(e) => updateCalibrationValue((ppiLocked ? ['ppiX', 'ppiY'] : ['ppiX']), e)}
+        />
+        <Tooltip title={ppiLocked ? 'Unlock PPI' : 'Lock PPI'}>
+          <IconButton
+            sx={{ marginX: theme.spacing(1) }}
+            onClick={() => {
+              if (calibration.ppiX !== calibration.ppiY) {
+                onUpdate({
+                  ...calibration,
+                  ppiY: calibration.ppiX
+                })
+              }
+              setPPILocked(!ppiLocked)
+            }}
+          >
+            {ppiLocked ? <LockOutlinedIcon /> : <LockOpenOutlinedIcon />}
+          </IconButton>
+        </Tooltip>
+        <InputWithUnit
+          type="number"
+          inputProps={{ min: 1 }}
+          placeholder="Vertical PPI"
+          unit="ppi"
+          fullWidth
+          value={ppiLocked ? calibration.ppiX : calibration.ppiY}
+          disabled={ppiLocked}
+          onChange={(e) => updateCalibrationValue(['ppiY'], e)}
+        />
       </InputGroup>
-      <InputGroup label="Offset">
-        <div
-          className={css`
-            display: flex; 
-            align-items: center;
-          `}
-        >
-          <Input
-            type="number"
-            placeholder="Horizontal Offset"
-            value={calibration.xOffset}
-            onChange={(e) => updateCalibrationValue(['xOffset'], e)}
-          />
-          <div className={formItemMargin}>x</div>
-          <Input
-            type="number"
-            placeholder="Vertical Offset"
-            value={calibration.yOffset}
-            onChange={(e) => updateCalibrationValue(['yOffset'], e)}
-          />
-        </div>
+      <InputGroup header="Offset">
+        <InputWithUnit
+          type="number"
+          placeholder="Horizontal Offset"
+          unit="px"
+          fullWidth
+          value={calibration.xOffset}
+          onChange={(e) => updateCalibrationValue(['xOffset'], e)}
+        />
+        <Box sx={{ margin: theme.spacing(1) }}>x</Box>
+        <InputWithUnit
+          type="number"
+          placeholder="Vertical Offset"
+          unit="px"
+          fullWidth
+          value={calibration.yOffset}
+          onChange={(e) => updateCalibrationValue(['yOffset'], e)}
+        />
       </InputGroup>
-    </>
+    </Box>
   );
 };
 

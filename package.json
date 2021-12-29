@@ -4,25 +4,21 @@
   "private": true,
   "homepage": "./",
   "dependencies": {
-    "@emotion/core": "^10.0.28",
-    "@emotion/css": "^10.0.27",
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@mui/icons-material": "^5.2.5",
     "@mui/material": "^5.2.5",
     "@rehooks/component-size": "^1.0.3",
-    "emotion": "^10.0.27",
     "konva": "^8.3.1",
     "lru-cache": "^6.0.0",
     "react": "^17.0.2",
-    "react-dom": "^16.13.1",
+    "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0",
     "react-konva": "^17.0.2-5",
     "react-router-dom": "^6.2.1",
     "react-scripts": "5.0.0",
     "react-singleton-hook": "^3.0.140",
     "rt-storage": "^0.1.0",
-    "sancho": "^3.5.6",
     "typescript": "~4.5.4",
     "uuid": "^8.1.0"
   },
@@ -55,17 +51,5 @@
     "@types/react-helmet": "^6.0.0",
     "@types/react-router-dom": "^5.1.5",
     "@types/uuid": "^8.0.0"
-  },
-  "resolutions": {
-    "react-spring": "9.0.0-beta.34",
-    "@react-spring/core": "9.0.0-beta.33",
-    "@react-spring/native": "9.0.0-beta.33",
-    "@react-spring/web": "9.0.0-beta.34",
-    "@react-spring/addons": "9.0.0-beta.33",
-    "@react-spring/konva": "9.0.0-beta.33",
-    "@react-spring/three": "9.0.0-beta.33",
-    "@react-spring/zdog": "9.0.0-beta.33",
-    "@react-spring/animated": "9.0.0-beta.33",
-    "@react-spring/shared": "9.0.0-beta.33"
   }
 }

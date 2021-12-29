@@ -1,6 +1,5 @@
 import React from 'react';
 import { HashRouter as Router } from 'react-router-dom';
-import { DarkMode } from 'sancho';
 import Konva from 'konva';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -14,11 +13,9 @@ const App: React.FunctionComponent = () => {
 	return (
 		<ThemeProvider theme={theme}>
 			<CssBaseline enableColorScheme />
-			<DarkMode>
-				<Router>
-					<Routes />
-				</Router>
-			</DarkMode>
+			<Router>
+				<Routes />
+			</Router>
 		</ThemeProvider>
 	);
 }

@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { IPolygon, PolygonType } from "../editablePolygon";
 import { Shape, Line } from 'react-konva';
-import { useTheme } from 'sancho';
+import Konva from 'konva';
+
+import { yellow } from '@mui/material/colors';
+
+import { IPolygon, PolygonType } from "../editablePolygon";
 import { getVisibilityPolygon } from './rayCastingUtils';
 import { useTablePPI } from '../../../settings';
-import Konva from 'konva';
+import theme from '../../../theme';
 
 export interface ILightSource {
   position: Konva.Vector2d,
@@ -67,8 +70,7 @@ type Props = {
   selected: boolean,
   onSelected: () => void
 };
-const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, fogPolygons, obstructionPolygons, onUpdate, selected, onSelected }) => {
-  const theme = useTheme();
+const RayCastRevealPolygon: React.FunctionComponent<Props> = ({ light, displayIcon, fogPolygons, obstructionPolygons, onUpdate, selected, onSelected }) => {
   const ppi = useTablePPI() || 86;
   const iconRef = useRef<Konva.Shape>();
 
@@ -152,9 +154,9 @@ const RayCastRevealPolygon: React.SFC<Props> = ({ light, displayIcon, fogPolygon
               onSelected();
             }
           }}
-          fill={theme.colors.palette.violet.lightest}
+          fill={yellow[100]}
           strokeEnabled={selected}
-          stroke={selected ? theme.colors.palette.blue.base : undefined}
+          stroke={selected ? theme.palette.primary.dark : undefined}
           strokeWidth={5}
           strokeScaleEnabled={false}
           dash={[2, 2]}

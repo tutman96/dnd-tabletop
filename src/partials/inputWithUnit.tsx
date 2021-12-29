@@ -1,11 +1,18 @@
 import React from "react";
 
-import Input, { InputProps } from '@mui/material/Input';
+import TextField, { TextFieldProps } from '@mui/material/TextField';
 import InputAdornment from '@mui/material/InputAdornment';
 
-const InputWithUnit: React.FunctionComponent<InputProps & { unit: string }> = ({ unit, ...props }) => {
+const InputWithUnit: React.FunctionComponent<TextFieldProps & { unit: string }> = ({ unit, ...props }) => {
   return (
-    <Input {...props} endAdornment={<InputAdornment position="end">{unit}</InputAdornment>} />
+    <TextField
+      variant="outlined"
+      size="small"
+      {...props}
+      InputProps={{
+        endAdornment: <InputAdornment position="end">{unit}</InputAdornment>
+      }}
+    />
   )
 }
 export default InputWithUnit;

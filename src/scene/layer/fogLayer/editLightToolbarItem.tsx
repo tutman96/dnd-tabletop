@@ -1,8 +1,20 @@
 import React, { useState, useEffect } from 'react';
+
+import Box from '@mui/material/Box';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Typography from "@mui/material/Typography";
+import Button from "@mui/material/Button";
+
+import BrightnessMediumOutlinedIcon from '@mui/icons-material/BrightnessMediumOutlined';
+
 import { ILightSource } from './rayCastRevealPolygon';
 import ToolbarItem from '../toolbarItem';
-import { IconSliders, Dialog, useTheme, Button, Text, Input, InputGroup } from 'sancho';
-import { css } from 'emotion';
+import InputGroup from '../../../partials/inputGroup';
+import InputWithUnit from '../../../partials/inputWithUnit';
+import theme from '../../../theme';
 
 const DEFAULT_LIGHT_SOURCES = [
   {
@@ -33,8 +45,7 @@ const DEFAULT_LIGHT_SOURCES = [
 ] as Array<Partial<ILightSource> & { name: string }>;
 
 type Props = { light: ILightSource | null, onUpdate: (light: ILightSource) => void };
-const EditLightToolbarItem: React.SFC<Props> = ({ light, onUpdate }) => {
-  const theme = useTheme();
+const EditLightToolbarItem: React.FunctionComponent<Props> = ({ light, onUpdate }) => {
   const [showModal, setShowModal] = useState(false);
   const [localLight, setLocalLight] = useState<ILightSource | null>(light);
 
@@ -42,7 +53,7 @@ const EditLightToolbarItem: React.SFC<Props> = ({ light, onUpdate }) => {
     setLocalLight(light);
   }, [light, setLocalLight]);
 
-  function updateNumberParameter(key: string, e: React.ChangeEvent<HTMLInputElement>) {
+  function updateNumberParameter(key: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const value = Number(e.target.value);
     if (!isNaN(value)) {
       setLocalLight({
@@ -55,7 +66,7 @@ const EditLightToolbarItem: React.SFC<Props> = ({ light, onUpdate }) => {
   return (
     <>
       <ToolbarItem
-        icon={<IconSliders />}
+        icon={<BrightnessMediumOutlinedIcon />}
         label="Configure"
         keyboardShortcuts={['r']}
         disabled={!light}
@@ -63,33 +74,34 @@ const EditLightToolbarItem: React.SFC<Props> = ({ light, onUpdate }) => {
       />
       {localLight && (
         <Dialog
-          isOpen={showModal}
-          onRequestClose={() => setShowModal(false)}
+          open={showModal}
+          onClose={() => setShowModal(false)}
           title="Configure Light"
         >
-          <div className={css`padding: ${theme.spaces.lg};`}>
-            <Text variant="lead">Predefined Lights</Text>
-            <div
-              className={css`
-                padding: ${theme.spaces.md} 0;
-                display: flex;
-                flex-direction: row;
-                flex-wrap: wrap;
-              `}
+          <DialogTitle>Configure Light</DialogTitle>
+          <DialogContent>
+            <Typography variant="subtitle1">Predefined Lights</Typography>
+            <Box
+              sx={{
+                paddingY: theme.spacing(2),
+                display: 'flex',
+                flexDirection: 'row',
+                flexWrap: 'wrap'
+              }}
             >
               {DEFAULT_LIGHT_SOURCES.map((lightSource) => (
                 <Button
                   key={lightSource.name}
-                  variant="outline"
-                  size="sm"
-                  className={css`
-                    margin: 0 ${theme.spaces.sm} ${theme.spaces.sm} 0;
-                  `}
-                  intent={
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    margin: `0 ${theme.spacing(1)} ${theme.spacing(1)} 0`,
+                  }}
+                  color={
                     lightSource.brightLightDistance === localLight.brightLightDistance &&
                       lightSource.dimLightDistance === localLight.dimLightDistance ?
                       'primary' :
-                      'none'
+                      'secondary'
                   }
                   onClick={() => {
                     setLocalLight({
@@ -102,31 +114,25 @@ const EditLightToolbarItem: React.SFC<Props> = ({ light, onUpdate }) => {
                   {lightSource.name}
                 </Button>
               ))}
-            </div>
+            </Box>
 
-            <Text variant="lead">Parameters</Text>
-            <InputGroup label="Bright Light Distance (ft)">
-              <Input type="number" value={localLight.brightLightDistance! * 5 + ""} onChange={e => updateNumberParameter('brightLightDistance', e)} min={0} />
+            <Typography variant="subtitle1">Parameters</Typography>
+            <InputGroup header="Bright Light Distance">
+              <InputWithUnit type="number" unit="ft" fullWidth value={localLight.brightLightDistance! * 5 + ""} onChange={e => updateNumberParameter('brightLightDistance', e)} inputProps={{ min: 0 }} />
             </InputGroup>
-            <InputGroup label="Dim Light Distance (ft)">
-              <Input type="number" value={localLight.dimLightDistance! * 5 + ""} onChange={e => updateNumberParameter('dimLightDistance', e)} min={0} />
+            <InputGroup header="Dim Light Distance">
+              <InputWithUnit type="number" unit="ft" fullWidth value={localLight.dimLightDistance! * 5 + ""} onChange={e => updateNumberParameter('dimLightDistance', e)} inputProps={{ min: 0 }} />
             </InputGroup>
+          </DialogContent>
 
-            <div
-              className={css`
-                display: flex;
-                margin-top: ${theme.spaces.lg};
-                justify-content: flex-end;
-              `}
-            >
-              <Button variant="ghost" intent="primary" onClick={() => {
-                onUpdate({ ...localLight });
-                setShowModal(false);
-              }}>
-                Save
-              </Button>
-            </div>
-          </div>
+          <DialogActions>
+            <Button onClick={() => {
+              onUpdate({ ...localLight });
+              setShowModal(false);
+            }}>
+              Save
+            </Button>
+          </DialogActions>
         </Dialog>
       )}
     </>

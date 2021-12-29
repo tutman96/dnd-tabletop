@@ -1,8 +1,17 @@
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import { Layer } from 'react-konva';
 import Konva from 'konva';
-import { IconCloud, IconCloudOff, useTheme, IconTrash2, IconEye, IconEyeOff, IconZapOff, IconZap } from 'sancho';
-import { css } from 'emotion';
+
+import Box from '@mui/material/Box';
+import { deepPurple } from '@mui/material/colors';
+
+import CloudOutlinedIcon from '@mui/icons-material/CloudOutlined';
+import CloudOffOutlinedIcon from '@mui/icons-material/CloudOffOutlined';
+import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
+import CastleOutlinedIcon from '@mui/icons-material/CastleOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 
 import { ILayerComponentProps, ILayer } from '..';
 import ToolbarPortal from '../toolbarPortal';
@@ -23,8 +32,7 @@ export interface IFogLayer extends ILayer {
 }
 
 interface Props extends ILayerComponentProps<IFogLayer> { };
-const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
-  const theme = useTheme();
+const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, active }) => {
   const layerRef = useRef<Konva.Layer>();
   const tablePPI = useTablePPI();
 
@@ -65,7 +73,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
       <>
         <ToolbarItem
           label="Add Fog"
-          icon={<IconCloud />}
+          icon={<CloudOutlinedIcon />}
           keyboardShortcuts={['a']}
           onClick={() => {
             const poly = {
@@ -80,7 +88,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
         />
         <ToolbarItem
           label="Add Fog Clear"
-          icon={<IconCloudOff />}
+          icon={<CloudOffOutlinedIcon />}
           keyboardShortcuts={['s']}
           onClick={() => {
             const poly = {
@@ -95,7 +103,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
         />
         <ToolbarItem
           label="Add Light"
-          icon={<IconZap />}
+          icon={<LightbulbOutlinedIcon />}
           onClick={() => {
             const viewportCenter = calculateViewportCenter(layerRef);
             const light = {
@@ -109,7 +117,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
         />
         <ToolbarItem
           label="Add Wall"
-          icon={<IconZapOff />}
+          icon={<CastleOutlinedIcon />}
           onClick={() => {
             const poly = {
               verticies: [],
@@ -125,7 +133,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
         <ToolbarItem
           label={selectedPolygon && selectedPolygon.visibleOnTable ? 'Hide on Table' : 'Show on Table'}
           disabled={!selectedPolygon}
-          icon={selectedPolygon && selectedPolygon.visibleOnTable ? <IconEyeOff /> : <IconEye />}
+          icon={selectedPolygon && selectedPolygon.visibleOnTable ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
           keyboardShortcuts={['d']}
           onClick={() => {
             if (!selectedPolygon) return;
@@ -142,9 +150,9 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
             onUpdate({ ...layer });
           }}
         />
-        <div className={css`flex-grow: 2;`} />
+        <Box sx={{ flexGrow: 2 }} />
         <ToolbarItem
-          icon={<IconTrash2 />}
+          icon={<DeleteOutlinedIcon />}
           label="Delete"
           disabled={selectedPolygon === null && selectedLight === null}
           onClick={() => {
@@ -177,9 +185,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
 
   useEffect(() => {
     if (isTable && layerRef.current && tablePPI) {
-      layerRef.current.canvas._canvas.className = css`
-        filter: blur(${tablePPI * BLUR_RADIUS}px);
-      `;
+      layerRef.current.canvas._canvas.style.filter = `blur(${tablePPI * BLUR_RADIUS}px)`;
     }
   }, [layerRef, isTable, tablePPI]);
 
@@ -237,13 +243,13 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
         case PolygonType.FOG_CLEAR:
           return {
             opacity: poly.visibleOnTable ? (active ? 0.3 : 1) : 0.6,
-            fill: theme.colors.palette.violet.lightest,
+            fill: deepPurple[200],
             globalCompositeOperation: active ? undefined : "destination-out",
             closed: true
           };
         case PolygonType.LIGHT_OBSTRUCTION:
           return {
-            stroke: active ? (poly.visibleOnTable ? theme.colors.palette.violet.base : theme.colors.palette.violet.lightest) : undefined,
+            stroke: active ? (poly.visibleOnTable ? deepPurple[700] : deepPurple[400]) : undefined,
             strokeWidth: active ? 10 : undefined,
             hitStrokeWidth: 20,
             lineCap: "round",
@@ -252,7 +258,7 @@ const FogLayer: React.SFC<Props> = ({ layer, isTable, onUpdate, active }) => {
           }
       }
     }
-  }, [isTable, active, theme])
+  }, [isTable, active])
 
   const polyToEditablePolygon = (type: PolygonType) => {
     return (poly: IPolygon, i: number) => {

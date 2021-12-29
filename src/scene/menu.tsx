@@ -52,7 +52,7 @@ const Menu: React.FunctionComponent<Props> = () => {
 	return (
 		<>
 			<FloatingIcon onClick={() => setMenuOpen(!menuOpen)} active={menuOpen} />
-			<Modal open={menuOpen} onClose={() => setMenuOpen(false)}>
+			<Modal open={menuOpen} onClose={() => setMenuOpen(false)} sx={{zIndex: theme.zIndex.appBar + 1}}>
 				<Card sx={{
 					position: 'absolute',
 					top: 0, left: 0,

@@ -1,4 +1,4 @@
-import React, {  } from "react";
+import React, { } from "react";
 import { useMatch } from "react-router-dom";
 
 import Toolbar from '@mui/material/Toolbar';
@@ -74,7 +74,6 @@ const SceneEditor: React.FunctionComponent<Props> = () => {
 	return (
 		<Box
 			sx={{
-				backgroundColor: theme.palette.grey[900],
 				display: 'flex',
 				flexDirection: 'column',
 				height: '100vh',
@@ -85,20 +84,15 @@ const SceneEditor: React.FunctionComponent<Props> = () => {
 		>
 			{/* Header */}
 			<Toolbar sx={{
-				marginLeft: theme.spacing(5),
+				zIndex: theme.zIndex.appBar,
+				backgroundColor: theme.palette.grey[900],
 				display: 'flex',
 				alignItems: 'center',
 				justifyContent: 'space-between'
 			}}>
-				<Typography variant="h6">{scene.name}</Typography>
-				<div>
-					{/* TODO */}
-					{/* <IconButton icon={<IconRotateCcw />} variant="ghost" label="Undo" />
-					<IconButton icon={<IconRotateCw />} variant="ghost" label="Redo" /> */}
-				</div>
-				<div>
-					<TableDisplayButton scene={scene} />
-				</div>
+				<Typography variant="h6" sx={{ marginLeft: theme.spacing(5) }}>{scene.name}</Typography>
+				<Box />
+				<Box><TableDisplayButton scene={scene} /></Box>
 			</Toolbar>
 
 			{/* Canvas */}
