@@ -1,57 +1,48 @@
+import React, { useState } from "react";
+
+import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip';
+
+import DriveFileRenameOutlineOutlinedIcon from '@mui/icons-material/DriveFileRenameOutlineOutlined';
+
 import { ILayer } from "../layer";
-import { useTheme, IconButton, IconEdit2, Dialog, Button, InputGroup, Input } from "sancho";
-import React, { useState, useEffect } from "react";
-import { css } from "emotion";
 import { TableViewLayer } from "../layer/tableView";
+import RenameDialog from "../../partials/renameDialog";
 
 type Props = { layer?: ILayer; onUpdate: (layer: ILayer) => void; };
 const EditLayerButton: React.SFC<Props> = ({ layer, onUpdate }) => {
-  const theme = useTheme();
   const [showModal, setShowModal] = useState(false);
-  const [name, setName] = useState(layer?.name);
 
-  useEffect(() => {
-    if (layer) {
-      setName(layer.name);
-    }
-  }, [layer, showModal]);
+  const disabled = !layer || layer.id === TableViewLayer.id;
+
+  // Can't have a disabled button be the target of a tooltip
+  if (disabled) {
+    return (
+      <IconButton disabled={true} size="small">
+        <DriveFileRenameOutlineOutlinedIcon />
+      </IconButton>
+    )
+  }
 
   return (
     <>
-      <IconButton
-        variant="ghost"
-        disabled={!layer || layer.id === TableViewLayer.id}
-        icon={<IconEdit2 />}
-        label="Edit"
-        onClick={() => setShowModal(true)} />
-      {layer && <Dialog
-        isOpen={showModal}
-        onRequestClose={() => setShowModal(false)}
-        title="Edit Layer"
-      >
-        <div className={css`padding: ${theme.spaces.lg};`}>
-          <InputGroup label="Name">
-            <Input
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)} />
-          </InputGroup>
-          <div
-            className={css`
-                display: flex;
-                margin-top: ${theme.spaces.lg};
-                justify-content: flex-end;
-              `}
-          >
-            <Button variant="ghost" intent="primary" onClick={() => {
-              if (name) {
-                onUpdate({ ...layer, name });
-              }
-              setShowModal(false);
-            }}>Save</Button>
-          </div>
-        </div>
-      </Dialog>}
+      <Tooltip title="Edit Layer Name">
+        <IconButton
+          onClick={() => setShowModal(true)}
+          size="small"
+        >
+          <DriveFileRenameOutlineOutlinedIcon />
+        </IconButton>
+      </Tooltip>
+      {layer && <RenameDialog
+        open={showModal}
+        onCancel={() => setShowModal(false)}
+        onConfirm={(name) => {
+          onUpdate({ ...layer, name })
+          setShowModal(false)
+        }}
+        name={layer.name}
+      />}
     </>
   );
 };

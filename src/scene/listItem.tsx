@@ -15,7 +15,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DriveFileRenameOutlineOutlinedIcon from '@mui/icons-material/DriveFileRenameOutlineOutlined';
-import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 
 import { IScene, sceneDatabase } from ".";
 import { settingsDatabase, Settings } from "../settings";
@@ -89,7 +89,7 @@ export const SceneListItem: React.FunctionComponent<{ scene: IScene; selected: b
           setInDelete(true);
           setMenuOpen(false);
         }}>
-          <ListItemIcon><DeleteOutlineOutlinedIcon /></ListItemIcon>
+          <ListItemIcon><DeleteOutlinedIcon /></ListItemIcon>
           <ListItemText>Delete</ListItemText>
         </MenuItem>
       </Menu>

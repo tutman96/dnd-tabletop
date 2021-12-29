@@ -1,44 +1,48 @@
-import { ILayer } from "../layer";
-import { useTheme, IconButton, Dialog, Button, IconTrash2, Text } from "sancho";
 import React, { useState } from "react";
-import { css } from "emotion";
+
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+
+import { ILayer } from "../layer";
 import { TableViewLayer } from "../layer/tableView";
+import ConfirmDialog from "../../partials/confirmDialog";
 
 type Props = { layer?: ILayer; onDelete: () => void; };
 const DeleteLayerButton: React.SFC<Props> = ({ layer, onDelete }) => {
-  const theme = useTheme();
   const [showModal, setShowModal] = useState(false);
+  const disabled = !layer || layer.id === TableViewLayer.id;
+
+  // Can't have a disabled button be the target of a tooltip
+  if (disabled) {
+    return (
+      <IconButton disabled={true} color="error" size="small">
+        <DeleteOutlinedIcon />
+      </IconButton>
+    )
+  }
 
   return (
     <>
-      <IconButton
-        variant="ghost"
-        disabled={!layer || layer.id === TableViewLayer.id}
-        color={theme.colors.intent.danger.base}
-        icon={<IconTrash2 />}
-        label="Delete"
-        onClick={() => setShowModal(true)} />
-      {layer && <Dialog
-        isOpen={showModal}
-        onRequestClose={() => setShowModal(false)}
-        title="Delete Layer"
-      >
-        <div className={css`padding: ${theme.spaces.lg};`}>
-          <Text variant="paragraph" muted={true}>Are you sure you want to delete '{layer.name}'?</Text>
-          <div
-            className={css`
-                display: flex;
-                margin-top: ${theme.spaces.lg};
-                justify-content: flex-end;
-              `}
-          >
-            <Button variant="ghost" intent="danger" onClick={() => {
-              onDelete();
-              setShowModal(false);
-            }}>Delete</Button>
-          </div>
-        </div>
-      </Dialog>}
+      <Tooltip title="Delete Layer">
+        <IconButton
+          onClick={() => setShowModal(true)}
+          color="error"
+          size="small"
+        >
+          <DeleteOutlinedIcon />
+        </IconButton>
+      </Tooltip>
+      {layer && <ConfirmDialog
+        description={`Are you sure you want to delete '${layer.name}'`}
+        open={showModal}
+        onCancel={() => setShowModal(false)}
+        onConfirm={() => {
+          onDelete()
+          setShowModal(false)
+        }}
+      />}
     </>
   );
 };
