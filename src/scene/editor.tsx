@@ -80,6 +80,7 @@ const SceneEditor: React.FunctionComponent<Props> = () => {
 				height: '100vh',
 				width: '100vw',
 				flexGrow: 1,
+				overflow: 'hidden'
 			}}
 		>
 			{/* Header */}
