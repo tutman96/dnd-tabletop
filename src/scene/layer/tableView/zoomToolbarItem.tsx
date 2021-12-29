@@ -1,12 +1,17 @@
 import React from 'react';
-import { IconButton, IconZoomOut, IconZoomIn, Button, useTheme } from 'sancho';
-import { css } from 'emotion';
+
+import Box from '@mui/material/Box'
+import IconButton from '@mui/material/IconButton'
+import Button from '@mui/material/Button'
+
+import ZoomInOutlinedIcon from '@mui/icons-material/ZoomInOutlined';
+import ZoomOutOutlinedIcon from '@mui/icons-material/ZoomOutOutlined';
+import theme from '../../../theme';
 
 const ZOOM_RATE = 1.5;
 
 type Props = { zoom: number, onUpdate: (zoom: number) => void };
-const ZoomToolbarItem: React.SFC<Props> = ({ zoom, onUpdate }) => {
-  const theme = useTheme();
+const ZoomToolbarItem: React.FunctionComponent<Props> = ({ zoom, onUpdate }) => {
   let zoomDisplay: string;
   if (zoom < 1) {
     zoomDisplay = `1/${+(1 / zoom).toFixed(1)}x`
@@ -16,48 +21,43 @@ const ZoomToolbarItem: React.SFC<Props> = ({ zoom, onUpdate }) => {
   }
 
   return (
-    <div
-      className={css`
-        display: flex;
-        align-items: center;
-        padding: 0 ${theme.spaces.sm};
-      `}
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        paddingX: theme.spacing(1)
+      }}
     >
       Zoom:
       <IconButton
-        variant="ghost"
-        icon={<IconZoomOut />}
-        label="Zoom Out"
-        size="sm"
+        size="small"
         onClick={() => {
           let newZoom = Math.round(zoom / ZOOM_RATE * 100) / 100;
           if (newZoom > 0.95 && newZoom < 1.05) newZoom = 1;
           onUpdate(newZoom)
         }}
-      />
-      <div
-        className={css`
-          min-width: 2rem;
-          text-align: center;
-        `}
       >
-        {zoomDisplay}
-      </div>
+        <ZoomOutOutlinedIcon />
+      </IconButton>
+      <Box
+        sx={{
+          minWidth: theme.spacing(2),
+          textAlign: 'center'
+        }}
+      >{zoomDisplay}</Box>
       <IconButton
-        variant="ghost"
-        icon={<IconZoomIn />}
-        label="Zoom In"
-        size="sm"
+        size="small"
         onClick={() => {
           let newZoom = Math.round(zoom * ZOOM_RATE * 100) / 100;
           if (newZoom > 0.95 && newZoom < 1.05) newZoom = 1;
           onUpdate(newZoom)
         }}
-      />
+      >
+        <ZoomInOutlinedIcon />
+      </IconButton>
       {zoom !== 1 && (
         <Button
-          variant="ghost"
-          size="xs"
+          size="small"
           onClick={() => {
             onUpdate(1);
           }}
@@ -65,7 +65,7 @@ const ZoomToolbarItem: React.SFC<Props> = ({ zoom, onUpdate }) => {
           Reset Zoom
         </Button>
       )}
-    </div>
+    </Box>
   )
 }
 export default ZoomToolbarItem;

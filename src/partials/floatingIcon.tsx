@@ -13,7 +13,7 @@ const FloatingIcon: React.FunctionComponent<{ onClick: () => void, active: boole
         margin: theme.spacing(1),
         top: 0,
         left: 0,
-        zIndex: theme.zIndex.modal + 1,
+        zIndex: theme.zIndex.appBar + 2,
         cursor: 'pointer'
       }}
       onClick={onClick}

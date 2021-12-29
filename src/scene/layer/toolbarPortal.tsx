@@ -1,17 +1,19 @@
+import { ThemeProvider } from '@mui/system';
 import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { singletonHook } from 'react-singleton-hook';
-import { DarkMode } from 'sancho';
+
+import theme from '../../theme';
 import Toolbar from './toolbar';
 
 const useToolbarPortal = singletonHook([undefined, () => { }], () => useState<HTMLElement | undefined>(undefined));
 
-const ToolbarPortal: React.SFC = ({ children }) => {
+const ToolbarPortal: React.FunctionComponent = ({ children }) => {
 	const [portal] = useToolbarPortal()!;
 
 	useEffect(() => {
 		if (portal) {
-			ReactDOM.render(<DarkMode>{children}</DarkMode>, portal);
+			ReactDOM.render(<ThemeProvider theme={theme}>{children}</ThemeProvider>, portal);
 		}
 	}, [children, portal])
 
@@ -26,7 +28,7 @@ const ToolbarPortal: React.SFC = ({ children }) => {
 }
 export default ToolbarPortal;
 
-export const ToolbarPortalProvider: React.SFC = ({ children }) => {
+export const ToolbarPortalProvider: React.FunctionComponent = ({ children }) => {
 	const node = useRef<HTMLSpanElement>();
 	const [, setPortal] = useToolbarPortal()!;
 

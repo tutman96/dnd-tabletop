@@ -2,19 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { settingsDatabase, Settings, useTableResolution, useTablePPI } from '../settings';
 import { sceneDatabase, IScene } from '../scene';
 import { Stage } from 'react-konva';
-import { Global } from '@emotion/core';
 import { Helmet } from 'react-helmet';
 import { LayerTypeToComponent } from '../scene/layer';
 import TableViewOverlay, { TableViewLayer } from '../scene/layer/tableView';
 import { CurrentSceneContext } from '../scene/canvas';
-import { css } from 'emotion';
 import { BLUR_RADIUS } from '../scene/layer/fogLayer';
 
 const { useOneValue } = sceneDatabase();
 const { useOneValue: useOneSettingValue } = settingsDatabase();
 
 type Props = {};
-const TablePage: React.SFC<Props> = () => {
+const TablePage: React.FunctionComponent<Props> = () => {
 	const [displayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
 	const [tableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
 	const [tableResolution] = useTableResolution();
@@ -47,30 +45,21 @@ const TablePage: React.SFC<Props> = () => {
 
 	return (
 		<>
-			<Global
-				styles={{
-					body: {
-						background: 'black',
-						margin: 0,
-						padding: 0,
-						overflow: 'hidden'
-					}
-				}}
-			/>
 			<Helmet title="D&amp;D Table View" />
 			{tableScene &&
 				<Stage
 					width={windowSize.width + BLUR_OFFSET * 2}
-					height={windowSize.width + BLUR_OFFSET * 2}
+					height={windowSize.height + BLUR_OFFSET * 2}
 					offsetX={tableScene.table.offset.x - BLUR_OFFSET}
 					offsetY={tableScene.table.offset.y - BLUR_OFFSET}
 					scaleX={tableScene.table.scale}
 					scaleY={tableScene.table.scale}
-					className={css`
-						position: relative;
-						top: ${-BLUR_OFFSET}px;
-						left: ${-BLUR_OFFSET}px;
-					`}
+					style={{
+						position: 'relative',
+						top: `${-BLUR_OFFSET}px`,
+						left: `${-BLUR_OFFSET}px`,
+						backgroundColor: 'black'
+					}}
 				>
 					<CurrentSceneContext.Provider value={tableScene}>
 						{

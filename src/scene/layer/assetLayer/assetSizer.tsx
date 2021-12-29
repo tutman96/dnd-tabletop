@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { IAsset, IAssetCalibration } from '../../asset';
-import { IconSliders, Dialog, useTheme, Button, Text } from 'sancho';
-import { css } from "emotion";
 
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+
+import AspectRatioOutlinedIcon from '@mui/icons-material/AspectRatioOutlined';
+
+import { IAsset, IAssetCalibration } from '../../asset';
 import ToolbarItem from '../toolbarItem';
 import AdvancedAssetSizer from './advancedAssetSizer';
 import { AssetTransform } from '../../canvas/transformableAsset';
 import VisualAssetSizer from './visualAssetSizer';
+import { VISUAL_ASSET_SIZER_SIZE } from '../../../theme';
 
 export function calculateCalibratedTransform(asset: IAsset, screenPPI: number): AssetTransform {
   if (!asset.calibration) {
@@ -26,7 +34,6 @@ type Props = {
 };
 
 const AssetSizer: React.SFC<Props> = ({ asset, onUpdate }) => {
-  const theme = useTheme();
   const [showModal, setShowModal] = useState(false);
   const [calibration, setCalibration] = useState<IAssetCalibration>();
 
@@ -45,34 +52,29 @@ const AssetSizer: React.SFC<Props> = ({ asset, onUpdate }) => {
     <>
       <ToolbarItem
         label="Calibrate Size"
-        icon={<IconSliders />}
+        icon={<AspectRatioOutlinedIcon />}
         onClick={() => setShowModal(true)}
         disabled={!asset}
       />
       {calibration && asset &&
         <Dialog
-          isOpen={showModal}
-          onRequestClose={() => setShowModal(false)}
-          title="Asset Calibration"
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          maxWidth={false}
         >
-          <div className={css`padding: ${theme.spaces.lg};`}>
-            <Text variant="paragraph" muted>Drag the corners of the selection box to align with the existing grid on your map. Then drag the box to match the size of the grid squares.</Text>
+          <DialogTitle>Asset Calibration</DialogTitle>
+          <DialogContent sx={{ width: VISUAL_ASSET_SIZER_SIZE }}>
+            <Typography>Drag the corners of the selection box to align with the existing grid on your map. Then drag the box to match the size of the grid squares.</Typography>
+            <br />
             <VisualAssetSizer asset={{ ...asset, calibration }} onUpdate={setCalibration} />
             <AdvancedAssetSizer calibration={calibration} onUpdate={setCalibration} />
-
-            <div
-              className={css`
-                display: flex;
-                margin-top: ${theme.spaces.lg};
-                justify-content: flex-end;
-              `}
-            >
-              <Button variant="ghost" intent="primary" onClick={() => {
-                onUpdate({ ...asset, calibration })
-                setShowModal(false);
-              }}>Save</Button>
-            </div>
-          </div>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => {
+              onUpdate({ ...asset, calibration })
+              setShowModal(false);
+            }}>Save</Button>
+          </DialogActions>
         </Dialog>
       }
     </>

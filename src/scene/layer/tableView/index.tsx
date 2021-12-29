@@ -1,7 +1,12 @@
 import React, { useMemo, useRef, useEffect, useState } from 'react';
-import { useTheme, IconCrosshair, IconEye, IconEyeOff } from 'sancho';
 import Konva from 'konva';
 import { Layer, Rect, Line, Group, Transformer } from 'react-konva';
+
+import { grey } from '@mui/material/colors';
+
+import AnchorOutlinedIcon from '@mui/icons-material/AnchorOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 
 import { useTableResolution, useTablePPI } from '../../../settings';
 import { TableOptions } from '../..';
@@ -10,6 +15,7 @@ import LayerType from "../layerType";
 import ToolbarItem from '../toolbarItem';
 import ToolbarPortal from '../toolbarPortal';
 import ZoomToolbarItem from './zoomToolbarItem';
+import theme from '../../../theme';
 
 export const TableViewLayer = {
   id: 'TABLE_VIEW',
@@ -27,8 +33,7 @@ interface Props extends ILayerComponentProps<ITableViewLayer> {
   showGrid: boolean;
 }
 
-const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGrid, onUpdate }) => {
-  const theme = useTheme();
+const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showBorder, showGrid, onUpdate }) => {
   const [tableResolution] = useTableResolution();
   const ppi = useTablePPI();
 
@@ -53,7 +58,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
     return (
       <>
         <ToolbarItem
-          icon={<IconCrosshair />}
+          icon={<AnchorOutlinedIcon />}
           label="Reset View"
           onClick={() => {
             onUpdate({
@@ -69,7 +74,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
         />
         <ToolbarItem
           label={layer.options.displayGrid ? 'Hide Grid' : 'Show Grid'}
-          icon={layer.options.displayGrid ? <IconEyeOff /> : <IconEye />}
+          icon={layer.options.displayGrid ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
           onClick={() => {
             onUpdate({
               ...layer,
@@ -137,7 +142,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
             <Line
               key={`l${i}`}
               points={[line.start.x, line.start.y, line.end.x, line.end.y]}
-              stroke={theme.colors.palette.gray.light}
+              stroke={grey[100]}
               dash={[1, 1]}
               strokeWidth={1}
               strokeScaleEnabled={false}
@@ -145,7 +150,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
             <Line
               key={`d${i}`}
               points={[line.start.x, line.start.y, line.end.x, line.end.y]}
-              stroke={theme.colors.palette.gray.dark}
+              stroke={grey[900]}
               dash={[1, 1]}
               dashOffset={1}
               strokeWidth={1}
@@ -155,7 +160,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
         ))}
       </Group>
     );
-  }, [showGrid, localOptions, active, tableResolution, ppi, theme])
+  }, [showGrid, localOptions, active, tableResolution, ppi])
 
   if (!tableResolution || ppi === null) {
     return null;
@@ -224,7 +229,7 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
             <Rect
               width={width}
               height={height}
-              stroke={active ? theme.colors.palette.blue.base : theme.colors.palette.gray.light}
+              stroke={active ? theme.palette.primary.dark : grey[300]}
               dash={[10, 10]}
               strokeWidth={5}
               listening={active}
@@ -237,8 +242,8 @@ const TableViewOverlay: React.SFC<Props> = ({ layer, active, showBorder, showGri
               enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
               ref={trRef as any}
               borderStrokeWidth={0}
-              anchorFill={theme.colors.background.overlay}
-              anchorStroke={theme.colors.palette.blue.light}
+              anchorFill={theme.palette.primary.contrastText}
+              anchorStroke={theme.palette.primary.dark}
             />
           )}
         </>

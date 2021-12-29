@@ -1,14 +1,20 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Layer } from "react-konva";
+import Konva from 'konva';
+
+import Box from '@mui/material/Box';
+
+import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import GridOnOutlinedIcon from '@mui/icons-material/GridOnOutlined';
+import GridOffOutlinedIcon from '@mui/icons-material/GridOffOutlined';
+
+import { ILayer, ILayerComponentProps } from '..';
 import AssetComponent from './asset';
 import { IAsset, AssetType, deleteAsset, getNewAssets } from '../../asset';
-import { ILayer, ILayerComponentProps } from '..';
-import Konva from 'konva';
-import { IconFilePlus, IconTrash2, Check } from 'sancho';
 import ToolbarItem from '../toolbarItem';
 import ToolbarPortal from '../toolbarPortal';
 import AssetSizer, { calculateCalibratedTransform } from './assetSizer';
-import { css } from 'emotion';
 import { useTablePPI, usePlayAudioOnTable } from '../../../settings';
 import { calculateViewportCenter } from '../../canvas';
 
@@ -17,7 +23,7 @@ export interface IAssetLayer extends ILayer {
 }
 
 interface Props extends ILayerComponentProps<IAssetLayer> { }
-const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, isTable }) => {
+const AssetLayer: React.FunctionComponent<Props> = ({ layer, onUpdate, active: layerActive, isTable }) => {
 	const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
 	const layerRef = useRef<Konva.Layer>();
 	const tablePPI = useTablePPI();
@@ -73,7 +79,7 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, is
 		return (
 			<>
 				<ToolbarItem
-					icon={<IconFilePlus />}
+					icon={<AddPhotoAlternateOutlinedIcon />}
 					label="Add Asset"
 					onClick={async () => {
 						const assets = await getNewAssets();
@@ -94,15 +100,19 @@ const AssetLayer: React.SFC<Props> = ({ layer, onUpdate, active: layerActive, is
 						onUpdate({ ...layer });
 					}}
 				/>
-				<Check label="Snap to Grid" disabled={!selectedAsset} checked={!!selectedAsset?.snapToGrid} onChange={(e) => {
-					selectedAsset!.snapToGrid = e.target.checked;
-					onUpdate({
-						...layer
-					})
-				}} />
-				<div className={css`flex-grow: 2;`} />
 				<ToolbarItem
-					icon={<IconTrash2 />}
+          label={!!selectedAsset?.snapToGrid ? 'Snap to Grid' : 'Free Move' }
+          disabled={!selectedAsset}
+          icon={!!selectedAsset?.snapToGrid ? <GridOnOutlinedIcon /> : <GridOffOutlinedIcon />}
+          onClick={() => {
+            if (!selectedAsset) return;
+            selectedAsset.snapToGrid = !selectedAsset.snapToGrid;
+            onUpdate({ ...layer })
+          }}
+        />
+				<Box sx={{ flexGrow: 2 }} />
+				<ToolbarItem
+					icon={<DeleteOutlinedIcon />}
 					label="Delete Asset"
 					disabled={selectedAssetId === null}
 					onClick={deleteSelectedAsset}

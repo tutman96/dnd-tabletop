@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useContext, useRef } from 'react';
-import { css } from 'emotion';
 import Konva from 'konva';
+import useComponentSize from '@rehooks/component-size';
+
+import Box from '@mui/material/Box'
 
 import { IScene } from '..';
 import DraggableStage from './draggableStage';
@@ -10,7 +12,6 @@ import { deleteLayer } from '../layer';
 import LayerList from './layerList';
 import { ToolbarPortalProvider } from '../layer/toolbarPortal';
 import TableViewOverlay, { TableViewLayer } from '../layer/tableView';
-import useComponentSize from '@rehooks/component-size';
 import { useTableResolution } from '../../settings';
 
 export const CurrentSceneContext = React.createContext<IScene | null>(null);
@@ -133,13 +134,13 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 	return (
 		<>
 			<ToolbarPortalProvider>
-				<div
+				<Box
 					ref={containerRef as any}
-					className={css`
-							display: flex;
-							flex-grow: 2;
-							height: 100%;
-							`}
+					sx={{
+						display: 'flex',
+						flexGrow: 2,
+						height: '100%'
+					}}
 				>
 					{containerSize.height !== 0 && tableResolution ? (
 						<DraggableStage
@@ -182,7 +183,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 							</CurrentSceneContext.Provider>
 						</DraggableStage>
 					) : null}
-				</div>
+				</Box>
 			</ToolbarPortalProvider>
 
 			<LayerList

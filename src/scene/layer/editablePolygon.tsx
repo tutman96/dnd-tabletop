@@ -1,19 +1,18 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { KonvaNodeEvents, Line, Group, Shape } from 'react-konva';
-import { useTheme } from 'sancho';
 import Konva from 'konva';
 
 import { useKeyPress } from '../../utils';
+import theme from '../../theme';
 
 const ANCHOR_RADIUS = 7;
-const Anchor: React.SFC<{
+const Anchor: React.FunctionComponent<{
   firstAnchor: boolean,
   position: Konva.Vector2d,
   onClick: () => void,
   onMove: (position: Konva.Vector2d, e: Konva.KonvaEventObject<DragEvent>) => void,
   onMoveEnd: () => void
 }> = ({ firstAnchor, position, onClick, onMove, onMoveEnd }) => {
-  const theme = useTheme();
   const shapeRef = useRef<Konva.Shape>();
   return (
     <Shape
@@ -45,10 +44,10 @@ const Anchor: React.SFC<{
         e.cancelBubble = true;
       }}
       onDragEnd={() => onMoveEnd()}
-      stroke={theme.colors.palette.blue.base}
+      stroke={theme.palette.primary.dark}
       strokeWidth={3}
       strokeScaleEnabled={false}
-      fill={firstAnchor ? theme.colors.palette.blue.base : undefined}
+      fill={firstAnchor ? theme.palette.primary.dark : undefined}
     />
   )
 }
@@ -76,8 +75,7 @@ interface Props {
   selected: boolean
   onSelected?: () => void
 }
-const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & KonvaNodeEvents> = ({ polygon, onUpdate, adding, onAdded, selectable, selected, onSelected, closed, ...lineProps }) => {
-  const theme = useTheme();
+const EditablePolygon: React.FunctionComponent<Props & Omit<Konva.LineConfig, 'points'> & KonvaNodeEvents> = ({ polygon, onUpdate, adding, onAdded, selectable, selected, onSelected, closed, ...lineProps }) => {
   const groupRef = useRef<Konva.Group>();
 
   const [localVerticies, setLocalVerticies] = useState<Array<Konva.Vector2d>>(polygon.verticies);
@@ -179,7 +177,7 @@ const EditablePolygon: React.SFC<Props & Omit<Konva.LineConfig, 'points'> & Konv
         <>
           <Line
             closed={closed}
-            stroke={theme.colors.palette.blue.base}
+            stroke={theme.palette.primary.dark}
             strokeWidth={3}
             dash={[4, 4]}
             strokeScaleEnabled={false}
