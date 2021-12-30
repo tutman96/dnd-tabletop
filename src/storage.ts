@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 const RTStorage = require('rt-storage');
 
-interface IRTStorage<T> {
+export interface IRTStorage<T> {
 	getItem<V extends T>(key: string): Promise<V>;
 	setItem<V extends T>(key: string, value: V): Promise<V>;
 	removeItem(key: string): Promise<void>;

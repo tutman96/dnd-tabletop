@@ -20,7 +20,6 @@ const TablePage: React.FunctionComponent<Props> = () => {
 	const [scene] = useOneValue(displayedScene as string);
 	const [tableScene, setTableScene] = useState<IScene | null>(null);
 
-	const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight })
 	const tablePPI = useTablePPI();
 
 	const BLUR_OFFSET = (tablePPI || 100) * BLUR_RADIUS * 2;
@@ -31,14 +30,6 @@ const TablePage: React.FunctionComponent<Props> = () => {
 		}
 	}, [scene, tableFreeze])
 
-	useEffect(() => {
-		function onResize() {
-			setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-		}
-		window.addEventListener('resize', onResize);
-		return () => window.removeEventListener('resize', onResize)
-	}, [])
-
 	if (!tableResolution) {
 		return null;
 	}
@@ -48,8 +39,8 @@ const TablePage: React.FunctionComponent<Props> = () => {
 			<Helmet title="D&amp;D Table View" />
 			{tableScene &&
 				<Stage
-					width={windowSize.width + BLUR_OFFSET * 2}
-					height={windowSize.height + BLUR_OFFSET * 2}
+					width={tableResolution.width + BLUR_OFFSET * 2}
+					height={tableResolution.height + BLUR_OFFSET * 2}
 					offsetX={tableScene.table.offset.x - BLUR_OFFSET}
 					offsetY={tableScene.table.offset.y - BLUR_OFFSET}
 					scaleX={tableScene.table.scale}

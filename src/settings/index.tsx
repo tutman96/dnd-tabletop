@@ -3,11 +3,13 @@ import React from "react";
 import Box from '@mui/material/Box'
 import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import Button from '@mui/material/Button'
 
 import globalStorage from "../storage";
 import theme from "../theme";
 import InputWithUnit from "../partials/inputWithUnit";
 import InputGroup from "../partials/inputGroup";
+import { migrate } from '../scene/migrate';
 
 export enum Settings {
   DISPLAYED_SCENE = 'displayed_scene',
@@ -62,6 +64,25 @@ export function usePlayAudioOnTable(): [boolean | undefined, (newValue: boolean)
   return [playAudio, setPlayAudio];
 }
 
+export async function tablePPI() {
+	let [resolution, size] = await Promise.all([
+		storage.storage.getItem<{width:number, height: number}>(Settings.TABLE_RESOLUTION),
+		storage.storage.getItem<number>(Settings.TABLE_SIZE)
+	])
+
+	if (!resolution || !size) {
+		resolution = { width: 3840, height: 2160 };
+		size = 45;
+	}
+
+	const theta = Math.atan(resolution.height / resolution.width);
+  const widthInch = size * Math.cos(theta);
+  // const heightInch = tableSize * Math.sin(theta);
+
+  const ppi = resolution.width / widthInch;
+	return ppi;
+}
+
 export function useTablePPI(): number | null {
   const [tableResolution] = useTableResolution();
   const [tableSize] = useTableSize();
@@ -80,9 +101,10 @@ export function useTablePPI(): number | null {
 const ScreenSizeSettings: React.FunctionComponent = () => {
   const [tableResolution, setTableResolution] = useTableResolution();
   const [tableSize, setTableSize] = useTableSize();
+  const tablePPI = useTablePPI();
   const [playAudioOnTable, setPlayAudioOnTable] = usePlayAudioOnTable();
 
-  if (tableResolution === undefined || tableSize === undefined) {
+  if (tableResolution === undefined || tableSize === undefined || tablePPI === null) {
     return null;
   }
 
@@ -145,6 +167,8 @@ const ScreenSizeSettings: React.FunctionComponent = () => {
           }
           label="Play Audio on Table"
         />
+
+        <Button onClick={() => migrate()}>Migrate Scenes</Button>
       </InputGroup>
     </>
   );
