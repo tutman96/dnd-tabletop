@@ -1,37 +1,19 @@
 import { v4 } from "uuid";
 
 import globalStorage from "../storage";
-import { ILayer, createNewLayer } from "./layer";
-import LayerType from "./layer/layerType";
-import Konva from 'konva';
-import { IAssetLayer } from "./layer/assetLayer";
-import { deleteAsset } from "./asset";
-import { migrate, newSceneFromOldScene, oldSceneFromNewScene } from "./migrate";
-import { Scene } from "../protos/scene";
+import { createNewLayer, unflattenLayer } from "./layer";
+import { deleteAsset, fileStorage } from "./asset";
+import * as Types from "../protos/scene";
+import { oldStorage } from './oldStorage';
+import { useCallback, useEffect, useState } from "react";
 
-export interface TableOptions {
-	displayGrid: boolean,
-	offset: Konva.Vector2d,
-	rotation: number,
-	scale: number,
-}
-
-export interface IScene {
-	id: string;
-	name: string;
-	version: number;
-	table: TableOptions,
-	layers: Array<ILayer>;
-}
-
-export const oldStorage = globalStorage<IScene>('scene');
 export const newStorage = globalStorage<Uint8Array>('scene_2')
-
-
-
 export function sceneDatabase() {
 	return {
-		...oldStorage,
+		...newStorage,
+		createItem: async (key: string, item: Types.Scene) => {
+			await newStorage.createItem(key, Types.Scene.encode(item).finish());
+		},
 		useAllValues: () => {
 			const oldValues = oldStorage.useAllValues();
 			const newValues = newStorage.useAllValues();
@@ -40,42 +22,67 @@ export function sceneDatabase() {
 				return undefined;
 			}
 
-			if (newValues.size < oldValues.size) {
-				migrate();
-				return undefined;
-			}
-
 			return new Map(
 				Array.from(newValues.entries())
-					.map(([sceneId, buf]) => [sceneId, oldSceneFromNewScene(Scene.decode(buf))])
+					.map(([sceneId, buf]) => [sceneId, Types.Scene.decode(buf)])
 			)
 		},
-		useOneValue: (key: string): [IScene | null | undefined, (newData: IScene) => Promise<void>] => {
-			const [oldValue, setOldValue] = oldStorage.useOneValue(key);
+		useOneValue: (key: string): [Types.Scene | null | undefined, (newData: Types.Scene) => void] => {
 			const [newValue, setNewValue] = newStorage.useOneValue(key);
+			const [localValue, setLocalValue] = useState<Types.Scene>()
 
-			if (oldValue === undefined || newValue === undefined) {
-				return [oldValue, setOldValue];
+			useEffect(() => {
+				setLocalValue(undefined);
+			}, [key])
+
+			useEffect(() => {
+				if (!newValue) return;
+				const decodedNewValue = Types.Scene.decode(newValue);
+				
+				// Initial load
+				if (!localValue) {
+					setLocalValue(decodedNewValue);
+					return;
+				}
+
+				// Storage updates
+				if (decodedNewValue && (
+					decodedNewValue.id !== localValue.id ||
+					decodedNewValue.version > localValue.version
+				)) {
+					setLocalValue(decodedNewValue);
+					return;
+				}
+
+				// Local updates
+				if (decodedNewValue.id === localValue.id && decodedNewValue.version < localValue.version) {
+					setNewValue(Types.Scene.encode(localValue).finish());
+					return;
+				}
+			}, [localValue, newValue, setNewValue])
+
+			const updateScene = useCallback((scene: Types.Scene) => {
+				scene.version++;
+				console.log('Updating scene ' + scene.name + ' to v' + scene.version, scene);
+				setLocalValue({ ...scene }); // TODO: this deref should be unnecessary
+			}, [])
+
+			if (newValue === undefined) {
+				return [undefined, updateScene];
 			}
 
-			if (newValue === undefined || newValue === null) {
-				migrate();
-				return [undefined, setOldValue];
+			if (newValue === null) {
+				return [null, updateScene];
 			}
 
-			return [oldSceneFromNewScene(Scene.decode(newValue)), async (scene) => {
-				await Promise.all([
-					// setOldValue(scene),
-					setNewValue(Scene.encode(newSceneFromOldScene(scene)).finish())
-				])
-			}]
+			return [localValue, updateScene]
 		},
 		deleteItem: async (key: string) => {
-			const scene = await oldStorage.storage.getItem(key);
+			const scene = Types.Scene.decode(await newStorage.storage.getItem(key));
 			for (const layer of scene.layers) {
-				if (layer.type !== LayerType.ASSETS) continue;
+				if (!layer.assetLayer) continue;
 
-				for (const asset of Array.from((layer as IAssetLayer).assets.values())) {
+				for (const asset of Object.values((layer.assetLayer as Types.AssetLayer).assets)) {
 					await deleteAsset(asset)
 				}
 			}
@@ -85,8 +92,8 @@ export function sceneDatabase() {
 	};
 }
 
-export function createNewScene(): IScene {
-	const defaultLayer = createNewLayer(LayerType.ASSETS);
+export function createNewScene(): Types.Scene {
+	const defaultLayer = createNewLayer(Types.Layer_LayerType.ASSETS);
 	defaultLayer.name = 'Layer 1';
 
 	return {
@@ -100,7 +107,33 @@ export function createNewScene(): IScene {
 			displayGrid: true
 		},
 		layers: [
-			defaultLayer
+			unflattenLayer(defaultLayer)
 		]
 	};
+}
+
+
+window['garbageCollect'] = async function () {
+	const sceneIds = await newStorage.storage.keys();
+
+	const foundAssets = new Set<string>();
+	for (const sceneId of sceneIds) {
+		const encodedScene = await newStorage.storage.getItem(sceneId);
+		const scene = Types.Scene.decode(encodedScene);
+
+		for (const layer of scene.layers) {
+			if (!layer.assetLayer) continue;
+			for (const asset of Object.values(layer.assetLayer.assets)) {
+				foundAssets.add(asset.id);
+			}
+		}
+	}
+
+	const allAssets = new Set(await fileStorage.keys());
+	console.warn('Removing ' + (allAssets.size - foundAssets.size) + ' assets');
+	for (const asset of Array.from(allAssets.keys())) {
+		if (foundAssets.has(asset)) continue;
+
+		await fileStorage.removeItem(asset)
+	}
 }

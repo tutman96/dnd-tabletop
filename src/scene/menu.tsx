@@ -10,10 +10,10 @@ import Modal from '@mui/material/Modal'
 import Link from '@mui/material/Link'
 
 import theme from '../theme';
-import { IScene } from '.';
 import SceneList from './list';
 import FloatingIcon from '../partials/floatingIcon';
 import SettingsPanel from '../settings';
+import * as Types from '../protos/scene';
 
 enum TabOptions {
 	SCENES,
@@ -35,7 +35,7 @@ const Menu: React.FunctionComponent<Props> = () => {
 
 	const currentSelectedSceneId = useCurrentSelectedSceneId();
 
-	function onSceneSelect(scene: IScene) {
+	function onSceneSelect(scene: Types.Scene) {
 		navigate(`/scenes/${scene.id}`)
 	}
 

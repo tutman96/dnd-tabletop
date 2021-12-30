@@ -10,11 +10,11 @@ import Button from "@mui/material/Button";
 
 import BrightnessMediumOutlinedIcon from '@mui/icons-material/BrightnessMediumOutlined';
 
-import { ILightSource } from './rayCastRevealPolygon';
 import ToolbarItem from '../toolbarItem';
 import InputGroup from '../../../partials/inputGroup';
 import InputWithUnit from '../../../partials/inputWithUnit';
 import theme from '../../../theme';
+import * as Types from '../../../protos/scene';
 
 const DEFAULT_LIGHT_SOURCES = [
   {
@@ -42,12 +42,12 @@ const DEFAULT_LIGHT_SOURCES = [
     brightLightDistance: 60 / 5,
     dimLightDistance: 120 / 5
   },
-] as Array<Partial<ILightSource> & { name: string }>;
+] as Array<Partial<Types.FogLayer_LightSource> & { name: string }>;
 
-type Props = { light: ILightSource | null, onUpdate: (light: ILightSource) => void };
+type Props = { light: Types.FogLayer_LightSource | null, onUpdate: (light: Types.FogLayer_LightSource) => void };
 const EditLightToolbarItem: React.FunctionComponent<Props> = ({ light, onUpdate }) => {
   const [showModal, setShowModal] = useState(false);
-  const [localLight, setLocalLight] = useState<ILightSource | null>(light);
+  const [localLight, setLocalLight] = useState<Types.FogLayer_LightSource | null>(light);
 
   useEffect(() => {
     setLocalLight(light);
@@ -106,8 +106,8 @@ const EditLightToolbarItem: React.FunctionComponent<Props> = ({ light, onUpdate 
                   onClick={() => {
                     setLocalLight({
                       ...localLight,
-                      brightLightDistance: lightSource.brightLightDistance,
-                      dimLightDistance: lightSource.dimLightDistance
+                      brightLightDistance: lightSource.brightLightDistance!,
+                      dimLightDistance: lightSource.dimLightDistance!
                     });
                   }}
                 >

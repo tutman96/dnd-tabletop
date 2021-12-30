@@ -3,13 +3,11 @@ import React from "react";
 import Box from '@mui/material/Box'
 import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import Button from '@mui/material/Button'
 
 import globalStorage from "../storage";
 import theme from "../theme";
 import InputWithUnit from "../partials/inputWithUnit";
 import InputGroup from "../partials/inputGroup";
-import { migrate } from '../scene/migrate';
 
 export enum Settings {
   DISPLAYED_SCENE = 'displayed_scene',
@@ -94,8 +92,6 @@ export async function tablePPI() {
   if (!size) {
     size = 45;
   }
-
-  console.log({resolution,size})
 
 	const theta = Math.atan(resolution.height / resolution.width);
   const widthInch = size * Math.cos(theta);
@@ -186,8 +182,6 @@ const ScreenSizeSettings: React.FunctionComponent = () => {
           }
           label="Play Audio on Table"
         />
-
-        <Button onClick={() => migrate()}>Migrate Scenes</Button>
       </InputGroup>
     </>
   );

@@ -9,33 +9,32 @@ import Button from '@mui/material/Button';
 
 import AspectRatioOutlinedIcon from '@mui/icons-material/AspectRatioOutlined';
 
-import { IAsset, IAssetCalibration } from '../../asset';
 import ToolbarItem from '../toolbarItem';
 import AdvancedAssetSizer from './advancedAssetSizer';
-import { AssetTransform } from '../../canvas/transformableAsset';
 import VisualAssetSizer from './visualAssetSizer';
 import { VISUAL_ASSET_SIZER_SIZE } from '../../../theme';
+import * as Types from '../../../protos/scene';
 
-export function calculateCalibratedTransform(asset: IAsset): AssetTransform {
+export function calculateCalibratedTransform(asset: Types.AssetLayer_Asset): Types.AssetLayer_Asset_AssetTransform {
   if (!asset.calibration) {
-    return asset.transform;
+    return asset.transform!;
   }
 
   return {
-    ...asset.transform,
-    width: (asset.size.width / asset.calibration.ppiX),
-    height: (asset.size.height / asset.calibration.ppiY)
+    ...asset.transform!,
+    width: (asset.size!.width / asset.calibration.ppiX),
+    height: (asset.size!.height / asset.calibration.ppiY)
   }
 }
 
 type Props = {
-  asset?: IAsset,
-  onUpdate: (asset: IAsset) => void
+  asset?: Types.AssetLayer_Asset,
+  onUpdate: (asset: Types.AssetLayer_Asset) => void
 };
 
 const AssetSizer: React.SFC<Props> = ({ asset, onUpdate }) => {
   const [showModal, setShowModal] = useState(false);
-  const [calibration, setCalibration] = useState<IAssetCalibration>();
+  const [calibration, setCalibration] = useState<Types.AssetLayer_Asset_AssetCalibration>();
 
   useEffect(() => {
     if (asset) {

@@ -1,5 +1,8 @@
 import ReactDOM from 'react-dom';
 
 import App from './App';
+import { migrate } from './scene/migrate';
 
-ReactDOM.render(<App/>, document.getElementById('root'));
+migrate().then(() => {
+  ReactDOM.render(<App/>, document.getElementById('root'));
+})

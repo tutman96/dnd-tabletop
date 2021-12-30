@@ -2,15 +2,15 @@ import React from 'react';
 import { Layer, Rect } from 'react-konva';
 import Konva from 'konva';
 
-import { IAssetCalibration, IAsset } from '../../asset';
 import DraggableStage from '../../canvas/draggableStage';
 import Asset from './asset';
 import theme, { VISUAL_ASSET_SIZER_SIZE } from '../../../theme';
 import TransformableAsset from '../../canvas/transformableAsset';
+import * as Types from '../../../protos/scene';
 
 const RESIZE_SQUARES = 3;
 
-const VisualAssetSizer: React.FunctionComponent<{ asset: IAsset; onUpdate: (calibration: IAssetCalibration) => void; }> = ({ asset, onUpdate }) => {
+const VisualAssetSizer: React.FunctionComponent<{ asset: Types.AssetLayer_Asset; onUpdate: (calibration: Types.AssetLayer_Asset_AssetCalibration) => void; }> = ({ asset, onUpdate }) => {
   if (!asset.calibration) {
     return null;
   }
@@ -38,14 +38,14 @@ const VisualAssetSizer: React.FunctionComponent<{ asset: IAsset; onUpdate: (cali
       sx={{
         marginLeft: `-1.5rem`
       }}
-      initialZoom={(VISUAL_ASSET_SIZER_SIZE / asset.size.width)}
+      initialZoom={(VISUAL_ASSET_SIZER_SIZE / asset.size!.width)}
     >
       <Layer>
         <Asset
           asset={{
             ...asset,
             transform: {
-              ...asset.size,
+              ...asset.size!,
               rotation: 0,
               x: 0,
               y: 0

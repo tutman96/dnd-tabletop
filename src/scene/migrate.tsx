@@ -1,11 +1,7 @@
-import { Scene, AssetLayer_Asset, FogLayer_LightSource, FogLayer_Polygon_PolygonType, AssetLayer_Asset_AssetType, FogLayer_Polygon } from '../protos/scene';
-import { IScene, newStorage, oldStorage } from './'
-import LayerType from "./layer/layerType";
-import { IAssetLayer } from "./layer/assetLayer";
-import { IFogLayer } from "./layer/fogLayer";
+import { Scene, AssetLayer_Asset, FogLayer_LightSource, FogLayer_Polygon_PolygonType, FogLayer_Polygon, Layer_LayerType } from '../protos/scene';
+import { newStorage } from './'
+import { oldStorage, OldIScene, OldIAssetLayer, OldLayerType, OldIPolygon, OldPolygonType, OldIFogLayer } from './oldStorage';
 import { defaultLightSource } from "./layer/fogLayer/rayCastRevealPolygon";
-import { IPolygon, PolygonType } from "./layer/editablePolygon";
-import { AssetType } from "./asset";
 import { tablePPI } from '../settings';
 
 function scaleAsset(asset: AssetLayer_Asset, scale: number): AssetLayer_Asset {
@@ -30,7 +26,6 @@ function scalePolygon(polygon: FogLayer_Polygon, scale: number): FogLayer_Polygo
 }
 
 function scaleScene(scene: Scene, scale: number): Scene {
-  console.log('scaling by ' + scale);
   scene.table!.offset!.x = scene.table!.offset!.x * scale;
   scene.table!.offset!.y = scene.table!.offset!.y * scale;
 
@@ -53,20 +48,21 @@ function scaleScene(scene: Scene, scale: number): Scene {
   return scene;
 }
 
-let migrating = false;
+export let migrated = false;
 export async function migrate() {
   const newSceneIds = await newStorage.storage.keys();
-  if (newSceneIds.length > 0 || migrating) {
+  const ppi = await tablePPI();
+  const scale = 1 / ppi;
+
+  if (newSceneIds.length > 0 || migrated) {
     console.log('Not migrating as it has already been migrated');
     return;
   }
-  
-  const ppi = await tablePPI();  
-  const scale = 1 / ppi;
-  
-  migrating = true;
+
+  console.warn('Migrating ' + newSceneIds.length + ' scenes and scaling down by ' + scale);
+
+  migrated = true;
   const sceneIds = await oldStorage.storage.keys();
-  console.time('Done migrating ' + sceneIds.keys + ' scenes')
   for (const sceneId of sceneIds) {
     const oldScene = await oldStorage.storage.getItem(sceneId);
 
@@ -75,14 +71,13 @@ export async function migrate() {
 
     await newStorage.createItem(sceneId, Scene.encode(scaledScene).finish());
   }
-  console.timeEnd('Done migrating ' + sceneIds.keys + ' scenes')
 }
 
-export function newSceneFromOldScene(oldScene: IScene): Scene {
-  function polygonConvert(newPolygon: IPolygon): FogLayer_Polygon {
+export function newSceneFromOldScene(oldScene: OldIScene): Scene {
+  function polygonConvert(newPolygon: OldIPolygon): FogLayer_Polygon {
     return {
       ...newPolygon,
-      type: FogLayer_Polygon_PolygonType[PolygonType[newPolygon.type]]
+      type: FogLayer_Polygon_PolygonType[OldPolygonType[newPolygon.type]]
     }
   }
 
@@ -92,24 +87,26 @@ export function newSceneFromOldScene(oldScene: IScene): Scene {
     version: oldScene.version ?? 0,
     table: oldScene.table,
     layers: oldScene.layers.map((layer) => {
-      if (layer.type === LayerType.ASSETS) {
-        const oldLayer = layer as IAssetLayer;
+      if (layer.type === OldLayerType.ASSETS) {
+        const oldLayer = layer as OldIAssetLayer;
         return {
           assetLayer: {
             id: oldLayer.id,
             name: oldLayer.name,
+            type: Layer_LayerType.ASSETS,
             visible: oldLayer.visible,
             assets: Array.from(oldLayer.assets.values()).reduce((a, c) => ({ [c.id]: c, ...a }), {})
           },
           fogLayer: undefined
         };
       }
-      else if (layer.type === LayerType.FOG) {
-        const oldLayer = layer as IFogLayer;
+      else if (layer.type === OldLayerType.FOG) {
+        const oldLayer = layer as OldIFogLayer;
         return {
           fogLayer: {
             id: oldLayer.id,
             name: oldLayer.name,
+            type: Layer_LayerType.FOG,
             visible: oldLayer.visible,
             lightSources: oldLayer.lightSources.map((l) => defaultLightSource(l) as FogLayer_LightSource),
             obstructionPolygons: oldLayer.obstructionPolygons.map(polygonConvert),
@@ -124,50 +121,4 @@ export function newSceneFromOldScene(oldScene: IScene): Scene {
       }
     })
   }
-}
-
-export function oldSceneFromNewScene(newScene: Scene): IScene {
-  function polygonConvert(newPolygon: FogLayer_Polygon): IPolygon {
-    return {
-      ...newPolygon,
-      type: PolygonType[FogLayer_Polygon_PolygonType[newPolygon.type]]
-    }
-  }
-
-  return {
-    id: newScene.id,
-    name: newScene.name,
-    version: newScene.version ?? 0,
-    table: newScene.table,
-    layers: newScene.layers.map((l) => {
-      if (l.assetLayer) {
-        return {
-          ...l.assetLayer,
-          type: LayerType.ASSETS,
-          assets: new Map(Object.entries(l.assetLayer.assets).map(([assetId, asset]) =>
-            [
-              assetId,
-              {
-                ...asset,
-                type: AssetType[AssetLayer_Asset_AssetType[asset.type]]
-              }
-            ]
-          ))
-        } as IAssetLayer;
-      }
-      else if (l.fogLayer) {
-
-        return {
-          ...l.fogLayer,
-          obstructionPolygons: l.fogLayer.obstructionPolygons.map(polygonConvert),
-          fogPolygons: l.fogLayer.fogPolygons.map(polygonConvert),
-          fogClearPolygons: l.fogLayer.fogClearPolygons.map(polygonConvert),
-          type: LayerType.FOG
-        } as IFogLayer
-      }
-      else {
-        throw new Error('Got a layer without it being asset or fog')
-      }
-    })
-  } as IScene;
 }

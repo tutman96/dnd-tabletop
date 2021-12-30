@@ -13,37 +13,31 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 
-import { ILayerComponentProps, ILayer } from '..';
+import { ILayerComponentProps } from '..';
 import ToolbarPortal from '../toolbarPortal';
 import ToolbarItem from '../toolbarItem';
-import EditablePolygon, { IPolygon, PolygonType } from '../editablePolygon';
+import EditablePolygon from './editablePolygon';
 import { useTablePPI } from '../../../settings';
-import RayCastRevealPolygon, { ILightSource, defaultLightSource } from './rayCastRevealPolygon';
+import RayCastRevealPolygon, { defaultLightSource } from './rayCastRevealPolygon';
 import { calculateViewportCenter } from '../../canvas';
 import EditLightToolbarItem from './editLightToolbarItem';
+import * as Types from '../../../protos/scene';
 
 export const BLUR_RADIUS = 1 / 20;
 
-export interface IFogLayer extends ILayer {
-  lightSources: Array<ILightSource>;
-  obstructionPolygons: Array<IPolygon>;
-  fogPolygons: Array<IPolygon>;
-  fogClearPolygons: Array<IPolygon>;
-}
-
-interface Props extends ILayerComponentProps<IFogLayer> { };
+interface Props extends ILayerComponentProps<Types.FogLayer> { };
 const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, active }) => {
   const layerRef = useRef<Konva.Layer>();
   const tablePPI = useTablePPI();
 
-  const [addingPolygon, setAddingPolygon] = useState<IPolygon | null>(null)
-  const [selectedPolygon, setSelectedPolygon] = useState<IPolygon | null>(null)
-  const [selectedLight, setSelectedLight] = useState<ILightSource | null>(null)
+  const [addingPolygon, setAddingPolygon] = useState<Types.FogLayer_Polygon | null>(null)
+  const [selectedPolygon, setSelectedPolygon] = useState<Types.FogLayer_Polygon | null>(null)
+  const [selectedLight, setSelectedLight] = useState<Types.FogLayer_LightSource | null>(null)
 
   const collections = useMemo(() => ({
-    [PolygonType.FOG]: layer.fogPolygons,
-    [PolygonType.FOG_CLEAR]: layer.fogClearPolygons,
-    [PolygonType.LIGHT_OBSTRUCTION]: layer.obstructionPolygons
+    [Types.FogLayer_Polygon_PolygonType.FOG]: layer.fogPolygons,
+    [Types.FogLayer_Polygon_PolygonType.FOG_CLEAR]: layer.fogClearPolygons,
+    [Types.FogLayer_Polygon_PolygonType.LIGHT_OBSTRUCTION]: layer.obstructionPolygons
   }), [layer]);
 
   useEffect(() => {
@@ -78,9 +72,9 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
           onClick={() => {
             const poly = {
               verticies: [],
-              type: PolygonType.FOG,
+              type: Types.FogLayer_Polygon_PolygonType.FOG,
               visibleOnTable: true
-            } as IPolygon;
+            } as Types.FogLayer_Polygon;
             setSelectedPolygon(poly);
             setAddingPolygon(poly);
             setSelectedLight(null);
@@ -93,9 +87,9 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
           onClick={() => {
             const poly = {
               verticies: [],
-              type: PolygonType.FOG_CLEAR,
+              type: Types.FogLayer_Polygon_PolygonType.FOG_CLEAR,
               visibleOnTable: true
-            } as IPolygon;
+            } as Types.FogLayer_Polygon;
             setSelectedPolygon(poly);
             setAddingPolygon(poly);
             setSelectedLight(null);
@@ -106,10 +100,10 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
           icon={<LightbulbOutlinedIcon />}
           onClick={() => {
             const viewportCenter = calculateViewportCenter(layerRef);
-            const light = {
-              position: viewportCenter
-            } as ILightSource;
-            layer.lightSources.push(light);
+            const light = defaultLightSource({
+              position: viewportCenter,
+            });
+            layer.lightSources = [...layer.lightSources, light]
             setSelectedLight(light);
             onUpdate({ ...layer });
           }}
@@ -121,9 +115,9 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
           onClick={() => {
             const poly = {
               verticies: [],
-              type: PolygonType.LIGHT_OBSTRUCTION,
+              type: Types.FogLayer_Polygon_PolygonType.LIGHT_OBSTRUCTION,
               visibleOnTable: true
-            } as IPolygon;
+            } as Types.FogLayer_Polygon;
             setSelectedPolygon(poly);
             setAddingPolygon(poly);
             setSelectedLight(null);
@@ -193,8 +187,7 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
     if (addingPolygon) {
       const collection = collections[addingPolygon.type];
 
-      if (addingPolygon.type !== PolygonType.LIGHT_OBSTRUCTION && addingPolygon?.verticies && addingPolygon.verticies.length < 3) {
-        console.log('removing polygon because < 3 verticies');
+      if (addingPolygon.type !== Types.FogLayer_Polygon_PolygonType.LIGHT_OBSTRUCTION && addingPolygon?.verticies && addingPolygon.verticies.length < 3) {
         setAddingPolygon(null);
         setSelectedPolygon(null);
         return;
@@ -208,25 +201,21 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
     }
   }, [setAddingPolygon, layer, onUpdate, addingPolygon, collections])
 
-  const onPolygonUpdated = useCallback(() => {
-    onUpdate({ ...layer });
-  }, [onUpdate, layer])
-
-  const getPolygonStyle = useCallback((poly: IPolygon): Partial<Konva.LineConfig> => {
+  const getPolygonStyle = useCallback((poly: Types.FogLayer_Polygon): Partial<Konva.LineConfig> => {
     if (isTable) {
       switch (poly.type) {
-        case PolygonType.FOG:
+        case Types.FogLayer_Polygon_PolygonType.FOG:
           return {
             fill: 'black',
             closed: true
           }
-        case PolygonType.FOG_CLEAR:
+        case Types.FogLayer_Polygon_PolygonType.FOG_CLEAR:
           return {
             fill: 'black',
             globalCompositeOperation: "destination-out",
             closed: true
           };
-        case PolygonType.LIGHT_OBSTRUCTION:
+        case Types.FogLayer_Polygon_PolygonType.LIGHT_OBSTRUCTION:
           return {
             closed: false
           }
@@ -234,20 +223,20 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
     }
     else {
       switch (poly.type) {
-        case PolygonType.FOG:
+        case Types.FogLayer_Polygon_PolygonType.FOG:
           return {
             opacity: poly.visibleOnTable ? (active ? 0.7 : 0.4) : 0.3,
             fill: 'black',
             closed: true
           }
-        case PolygonType.FOG_CLEAR:
+        case Types.FogLayer_Polygon_PolygonType.FOG_CLEAR:
           return {
             opacity: poly.visibleOnTable ? (active ? 0.3 : 1) : 0.6,
             fill: deepPurple[200],
             globalCompositeOperation: active ? undefined : "destination-out",
             closed: true
           };
-        case PolygonType.LIGHT_OBSTRUCTION:
+        case Types.FogLayer_Polygon_PolygonType.LIGHT_OBSTRUCTION:
           return {
             stroke: active ? (poly.visibleOnTable ? deepPurple[700] : deepPurple[400]) : undefined,
             strokeWidth: active ? 10 : undefined,
@@ -258,10 +247,11 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
           }
       }
     }
+    return {}
   }, [isTable, active])
 
-  const polyToEditablePolygon = (type: PolygonType) => {
-    return (poly: IPolygon, i: number) => {
+  const polyToEditablePolygon = (type: Types.FogLayer_Polygon_PolygonType) => {
+    return (poly: Types.FogLayer_Polygon, i: number) => {
       poly.type = type;
       if (isTable && !poly.visibleOnTable) return null;
 
@@ -284,7 +274,9 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
 
           adding={false}
 
-          onUpdate={onPolygonUpdated}
+          onUpdate={() => {
+            onUpdate(layer);
+          }}
         />
       )
     }
@@ -299,8 +291,8 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
     >
       {active && <ToolbarPortal>{toolbar}</ToolbarPortal>}
 
-      {layer.fogPolygons.map(polyToEditablePolygon(PolygonType.FOG))}
-      {layer.fogClearPolygons.map(polyToEditablePolygon(PolygonType.FOG_CLEAR))}
+      {layer.fogPolygons.map(polyToEditablePolygon(Types.FogLayer_Polygon_PolygonType.FOG))}
+      {layer.fogClearPolygons.map(polyToEditablePolygon(Types.FogLayer_Polygon_PolygonType.FOG_CLEAR))}
 
       {layer.lightSources.map((light, i) => (
         <RayCastRevealPolygon
@@ -312,7 +304,7 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
           fogPolygons={layer.fogPolygons}
           onUpdate={(light) => {
             layer.lightSources[i] = light;
-            onUpdate({ ...layer });
+            onUpdate(layer);
           }}
           selected={selectedLight === light}
           onSelected={() => {
@@ -322,7 +314,7 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
         />
       ))}
 
-      {layer.obstructionPolygons.map(polyToEditablePolygon(PolygonType.LIGHT_OBSTRUCTION))}
+      {layer.obstructionPolygons.map(polyToEditablePolygon(Types.FogLayer_Polygon_PolygonType.LIGHT_OBSTRUCTION))}
 
       {addingPolygon && (() => {
         const style = getPolygonStyle(addingPolygon);
@@ -340,7 +332,9 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
             adding={true}
             onAdded={onPolygonAdded}
 
-            onUpdate={onPolygonUpdated}
+            onUpdate={() => {
+              onUpdate(layer);
+            }}
           />
         );
       })()}

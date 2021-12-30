@@ -17,15 +17,16 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DriveFileRenameOutlineOutlinedIcon from '@mui/icons-material/DriveFileRenameOutlineOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 
-import { IScene, sceneDatabase } from ".";
+import { sceneDatabase } from ".";
 import { settingsDatabase, Settings } from "../settings";
 import ConfirmDialog from "../partials/confirmDialog";
 import RenameDialog from "../partials/renameDialog";
+import * as Types from '../protos/scene';
 
 const { deleteItem, useOneValue } = sceneDatabase();
 const { useOneValue: useOneSettingValue } = settingsDatabase();
 
-const SceneStatusIcon: React.FunctionComponent<{ scene: IScene }> = ({ scene }) => {
+const SceneStatusIcon: React.FunctionComponent<{ scene: Types.Scene }> = ({ scene }) => {
   const [displayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
   const [tableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
 
@@ -42,7 +43,7 @@ const SceneStatusIcon: React.FunctionComponent<{ scene: IScene }> = ({ scene }) 
   }
 }
 
-export const SceneListItem: React.FunctionComponent<{ scene: IScene; selected: boolean; onSelect: () => void; }> = ({ scene, selected, onSelect }) => {
+export const SceneListItem: React.FunctionComponent<{ scene: Types.Scene; selected: boolean; onSelect: () => void; }> = ({ scene, selected, onSelect }) => {
   const navigate = useNavigate();
 
   const anchorEl = useRef<HTMLElement>();
@@ -98,9 +99,9 @@ export const SceneListItem: React.FunctionComponent<{ scene: IScene; selected: b
         open={inEdit}
         name={scene.name}
         onConfirm={(name) => {
-          updateScene({ ...scene, name }).then(() => {
-            setInEdit(false);
-          })
+          scene.name = name;
+          updateScene(scene);
+          setInEdit(false);
         }}
         onCancel={() => setInEdit(false)}
       />

@@ -29,10 +29,43 @@ export interface Layer {
   fogLayer: FogLayer | undefined;
 }
 
+export enum Layer_LayerType {
+  ASSETS = 0,
+  FOG = 1,
+  UNRECOGNIZED = -1,
+}
+
+export function layer_LayerTypeFromJSON(object: any): Layer_LayerType {
+  switch (object) {
+    case 0:
+    case "ASSETS":
+      return Layer_LayerType.ASSETS;
+    case 1:
+    case "FOG":
+      return Layer_LayerType.FOG;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return Layer_LayerType.UNRECOGNIZED;
+  }
+}
+
+export function layer_LayerTypeToJSON(object: Layer_LayerType): string {
+  switch (object) {
+    case Layer_LayerType.ASSETS:
+      return "ASSETS";
+    case Layer_LayerType.FOG:
+      return "FOG";
+    default:
+      return "UNKNOWN";
+  }
+}
+
 export interface AssetLayer {
   id: string;
   name: string;
   visible: boolean;
+  type: Layer_LayerType;
   assets: { [key: string]: AssetLayer_Asset };
 }
 
@@ -46,7 +79,6 @@ export interface AssetLayer_Asset {
   type: AssetLayer_Asset_AssetType;
   size: AssetLayer_Asset_AssetSize | undefined;
   transform: AssetLayer_Asset_AssetTransform | undefined;
-  overrideCalibration?: boolean | undefined;
   calibration?: AssetLayer_Asset_AssetCalibration | undefined;
   snapToGrid?: boolean | undefined;
 }
@@ -111,6 +143,7 @@ export interface FogLayer {
   id: string;
   name: string;
   visible: boolean;
+  type: Layer_LayerType;
   lightSources: FogLayer_LightSource[];
   obstructionPolygons: FogLayer_Polygon[];
   fogPolygons: FogLayer_Polygon[];
@@ -517,7 +550,7 @@ export const Layer = {
 };
 
 function createBaseAssetLayer(): AssetLayer {
-  return { id: "", name: "", visible: false, assets: {} };
+  return { id: "", name: "", visible: false, type: 0, assets: {} };
 }
 
 export const AssetLayer = {
@@ -534,10 +567,13 @@ export const AssetLayer = {
     if (message.visible === true) {
       writer.uint32(32).bool(message.visible);
     }
+    if (message.type !== 0) {
+      writer.uint32(40).int32(message.type);
+    }
     Object.entries(message.assets).forEach(([key, value]) => {
       AssetLayer_AssetsEntry.encode(
         { key: key as any, value },
-        writer.uint32(42).fork()
+        writer.uint32(50).fork()
       ).ldelim();
     });
     return writer;
@@ -560,9 +596,12 @@ export const AssetLayer = {
           message.visible = reader.bool();
           break;
         case 5:
-          const entry5 = AssetLayer_AssetsEntry.decode(reader, reader.uint32());
-          if (entry5.value !== undefined) {
-            message.assets[entry5.key] = entry5.value;
+          message.type = reader.int32() as any;
+          break;
+        case 6:
+          const entry6 = AssetLayer_AssetsEntry.decode(reader, reader.uint32());
+          if (entry6.value !== undefined) {
+            message.assets[entry6.key] = entry6.value;
           }
           break;
         default:
@@ -585,6 +624,10 @@ export const AssetLayer = {
       object.visible !== undefined && object.visible !== null
         ? Boolean(object.visible)
         : false;
+    message.type =
+      object.type !== undefined && object.type !== null
+        ? layer_LayerTypeFromJSON(object.type)
+        : 0;
     message.assets = Object.entries(object.assets ?? {}).reduce<{
       [key: string]: AssetLayer_Asset;
     }>((acc, [key, value]) => {
@@ -599,6 +642,8 @@ export const AssetLayer = {
     message.id !== undefined && (obj.id = message.id);
     message.name !== undefined && (obj.name = message.name);
     message.visible !== undefined && (obj.visible = message.visible);
+    message.type !== undefined &&
+      (obj.type = layer_LayerTypeToJSON(message.type));
     obj.assets = {};
     if (message.assets) {
       Object.entries(message.assets).forEach(([k, v]) => {
@@ -615,6 +660,7 @@ export const AssetLayer = {
     message.id = object.id ?? "";
     message.name = object.name ?? "";
     message.visible = object.visible ?? false;
+    message.type = object.type ?? 0;
     message.assets = Object.entries(object.assets ?? {}).reduce<{
       [key: string]: AssetLayer_Asset;
     }>((acc, [key, value]) => {
@@ -709,7 +755,6 @@ function createBaseAssetLayer_Asset(): AssetLayer_Asset {
     type: 0,
     size: undefined,
     transform: undefined,
-    overrideCalibration: undefined,
     calibration: undefined,
     snapToGrid: undefined,
   };
@@ -738,17 +783,14 @@ export const AssetLayer_Asset = {
         writer.uint32(34).fork()
       ).ldelim();
     }
-    if (message.overrideCalibration !== undefined) {
-      writer.uint32(40).bool(message.overrideCalibration);
-    }
     if (message.calibration !== undefined) {
       AssetLayer_Asset_AssetCalibration.encode(
         message.calibration,
-        writer.uint32(50).fork()
+        writer.uint32(42).fork()
       ).ldelim();
     }
     if (message.snapToGrid !== undefined) {
-      writer.uint32(56).bool(message.snapToGrid);
+      writer.uint32(48).bool(message.snapToGrid);
     }
     return writer;
   },
@@ -779,15 +821,12 @@ export const AssetLayer_Asset = {
           );
           break;
         case 5:
-          message.overrideCalibration = reader.bool();
-          break;
-        case 6:
           message.calibration = AssetLayer_Asset_AssetCalibration.decode(
             reader,
             reader.uint32()
           );
           break;
-        case 7:
+        case 6:
           message.snapToGrid = reader.bool();
           break;
         default:
@@ -814,11 +853,6 @@ export const AssetLayer_Asset = {
       object.transform !== undefined && object.transform !== null
         ? AssetLayer_Asset_AssetTransform.fromJSON(object.transform)
         : undefined;
-    message.overrideCalibration =
-      object.overrideCalibration !== undefined &&
-      object.overrideCalibration !== null
-        ? Boolean(object.overrideCalibration)
-        : undefined;
     message.calibration =
       object.calibration !== undefined && object.calibration !== null
         ? AssetLayer_Asset_AssetCalibration.fromJSON(object.calibration)
@@ -843,8 +877,6 @@ export const AssetLayer_Asset = {
       (obj.transform = message.transform
         ? AssetLayer_Asset_AssetTransform.toJSON(message.transform)
         : undefined);
-    message.overrideCalibration !== undefined &&
-      (obj.overrideCalibration = message.overrideCalibration);
     message.calibration !== undefined &&
       (obj.calibration = message.calibration
         ? AssetLayer_Asset_AssetCalibration.toJSON(message.calibration)
@@ -867,7 +899,6 @@ export const AssetLayer_Asset = {
       object.transform !== undefined && object.transform !== null
         ? AssetLayer_Asset_AssetTransform.fromPartial(object.transform)
         : undefined;
-    message.overrideCalibration = object.overrideCalibration ?? undefined;
     message.calibration =
       object.calibration !== undefined && object.calibration !== null
         ? AssetLayer_Asset_AssetCalibration.fromPartial(object.calibration)
@@ -1154,6 +1185,7 @@ function createBaseFogLayer(): FogLayer {
     id: "",
     name: "",
     visible: false,
+    type: 0,
     lightSources: [],
     obstructionPolygons: [],
     fogPolygons: [],
@@ -1175,17 +1207,20 @@ export const FogLayer = {
     if (message.visible === true) {
       writer.uint32(32).bool(message.visible);
     }
+    if (message.type !== 0) {
+      writer.uint32(40).int32(message.type);
+    }
     for (const v of message.lightSources) {
-      FogLayer_LightSource.encode(v!, writer.uint32(42).fork()).ldelim();
+      FogLayer_LightSource.encode(v!, writer.uint32(50).fork()).ldelim();
     }
     for (const v of message.obstructionPolygons) {
-      FogLayer_Polygon.encode(v!, writer.uint32(50).fork()).ldelim();
-    }
-    for (const v of message.fogPolygons) {
       FogLayer_Polygon.encode(v!, writer.uint32(58).fork()).ldelim();
     }
-    for (const v of message.fogClearPolygons) {
+    for (const v of message.fogPolygons) {
       FogLayer_Polygon.encode(v!, writer.uint32(66).fork()).ldelim();
+    }
+    for (const v of message.fogClearPolygons) {
+      FogLayer_Polygon.encode(v!, writer.uint32(74).fork()).ldelim();
     }
     return writer;
   },
@@ -1207,21 +1242,24 @@ export const FogLayer = {
           message.visible = reader.bool();
           break;
         case 5:
+          message.type = reader.int32() as any;
+          break;
+        case 6:
           message.lightSources.push(
             FogLayer_LightSource.decode(reader, reader.uint32())
           );
           break;
-        case 6:
+        case 7:
           message.obstructionPolygons.push(
             FogLayer_Polygon.decode(reader, reader.uint32())
           );
           break;
-        case 7:
+        case 8:
           message.fogPolygons.push(
             FogLayer_Polygon.decode(reader, reader.uint32())
           );
           break;
-        case 8:
+        case 9:
           message.fogClearPolygons.push(
             FogLayer_Polygon.decode(reader, reader.uint32())
           );
@@ -1246,6 +1284,10 @@ export const FogLayer = {
       object.visible !== undefined && object.visible !== null
         ? Boolean(object.visible)
         : false;
+    message.type =
+      object.type !== undefined && object.type !== null
+        ? layer_LayerTypeFromJSON(object.type)
+        : 0;
     message.lightSources = (object.lightSources ?? []).map((e: any) =>
       FogLayer_LightSource.fromJSON(e)
     );
@@ -1266,6 +1308,8 @@ export const FogLayer = {
     message.id !== undefined && (obj.id = message.id);
     message.name !== undefined && (obj.name = message.name);
     message.visible !== undefined && (obj.visible = message.visible);
+    message.type !== undefined &&
+      (obj.type = layer_LayerTypeToJSON(message.type));
     if (message.lightSources) {
       obj.lightSources = message.lightSources.map((e) =>
         e ? FogLayer_LightSource.toJSON(e) : undefined
@@ -1302,6 +1346,7 @@ export const FogLayer = {
     message.id = object.id ?? "";
     message.name = object.name ?? "";
     message.visible = object.visible ?? false;
+    message.type = object.type ?? 0;
     message.lightSources =
       object.lightSources?.map((e) => FogLayer_LightSource.fromPartial(e)) ||
       [];

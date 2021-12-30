@@ -1,5 +1,5 @@
-import React, { useCallback } from "react";
-import { useMatch } from "react-router-dom";
+import React from "react";
+import { useMatch, useNavigate } from "react-router-dom";
 
 import Toolbar from '@mui/material/Toolbar';
 import Box from '@mui/material/Box';
@@ -12,15 +12,16 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 
-import { sceneDatabase, IScene } from ".";
+import { sceneDatabase } from ".";
 import Canvas from "./canvas";
 import { settingsDatabase, Settings } from "../settings";
 import theme from "../theme";
+import * as Types from '../protos/scene';
 
 const { useOneValue } = sceneDatabase();
 const { useOneValue: useOneSettingValue } = settingsDatabase();
 
-function TableDisplayButton({ scene }: { scene: IScene }) {
+const TableDisplayButton: React.FunctionComponent<{ scene: Types.Scene }> = ({ scene }) => {
 	const [displayedScene, updateDisplayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
 	const [tableFreeze, updateTableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
 
@@ -56,23 +57,15 @@ function TableDisplayButton({ scene }: { scene: IScene }) {
 type Props = {};
 const SceneEditor: React.FunctionComponent<Props> = () => {
 	const match = useMatch('/scenes/:id');
-	const [scene, updateSceneLocal] = useOneValue(match!.params.id!);
-
-	const updateScene = useCallback((s: IScene) => {
-		s.version = scene!.version + 1;
-		updateSceneLocal(s)
-	}, [scene, updateSceneLocal])
+	const navigate = useNavigate();
+	let [scene, updateScene] = useOneValue(match!.params.id!);
 
 	if (!match?.params.id) {
 		return null;
 	}
 
-	if (scene === undefined) {
-		// TODO make prettier
-		return <CircularProgress />
-	}
-
 	if (scene === null) {
+		navigate('/')
 		return null;
 	}
 
@@ -87,21 +80,35 @@ const SceneEditor: React.FunctionComponent<Props> = () => {
 				overflow: 'hidden'
 			}}
 		>
-			{/* Header */}
-			<Toolbar sx={{
-				zIndex: theme.zIndex.appBar,
-				backgroundColor: theme.palette.grey[900],
+			<Box sx={{
+				background: '#3f3f3f',
+				position: 'absolute', top: 0, bottom: 0, right: 0, left: 0,
 				display: 'flex',
+				flexDirection: 'column',
 				alignItems: 'center',
-				justifyContent: 'space-between'
+				justifyContent: 'center',
+				zIndex: -1
 			}}>
-				<Typography variant="h6" sx={{ marginLeft: theme.spacing(5) }}>{scene.name}</Typography>
-				<Box />
-				<Box><TableDisplayButton scene={scene} /></Box>
-			</Toolbar>
+				<Typography sx={{ marginBottom: theme.spacing(2) }}>Loading scene...</Typography>
+				<CircularProgress color="secondary" variant={scene ? 'determinate' : 'indeterminate'} value={50}/>
+			</Box>
 
-			{/* Canvas */}
-			<Canvas scene={scene} onUpdate={updateScene} />
+			{scene && (<>
+				<Toolbar sx={{
+					zIndex: theme.zIndex.appBar,
+					backgroundColor: theme.palette.grey[900],
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'space-between'
+				}}>
+					<Typography variant="h6" sx={{ marginLeft: theme.spacing(5) }}>{scene.name}</Typography>
+					<Box />
+					<Box><TableDisplayButton scene={scene} /></Box>
+				</Toolbar>
+
+				<Canvas scene={scene} onUpdate={updateScene} />
+			</>
+			)}
 		</Box >
 	);
 }

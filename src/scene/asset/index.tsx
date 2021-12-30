@@ -1,34 +1,12 @@
 import LRU from 'lru-cache';
 import { useState, useEffect } from 'react';
-
-import { getImageSize, getVideoSize } from "./assetSize";
-import { AssetTransform } from "../canvas/transformableAsset";
-import { assetFileDatabase } from './storage';
 import { v4 } from 'uuid';
 
-const { storage: fileStorage } = assetFileDatabase();
+import { getImageSize, getVideoSize } from "./assetSize";
+import { assetFileDatabase } from './storage';
+import * as Types from '../../protos/scene';
 
-export enum AssetType {
-	IMAGE,
-	VIDEO
-}
-
-export interface IAssetCalibration {
-	xOffset: number;
-	yOffset: number;
-	ppiX: number;
-	ppiY: number;
-}
-
-export interface IAsset {
-	id: string;
-	size: { width: number, height: number };
-	transform: AssetTransform;
-	overrideCalibration?: boolean;
-	calibration?: IAssetCalibration
-	type: AssetType;
-	snapToGrid?: boolean
-}
+export const { storage: fileStorage } = assetFileDatabase();
 
 export function getNewAssets() {
 	const fileDialogInput = document.createElement('input');
@@ -37,14 +15,14 @@ export function getNewAssets() {
 	fileDialogInput.accept = 'image/*,video/*';
 
 	fileDialogInput.click();
-	return new Promise<Array<IAsset>>((res) => {
+	return new Promise<Array<Types.AssetLayer_Asset>>((res) => {
 		fileDialogInput.onchange = async (e) => {
 			const files = (e!.target as HTMLInputElement).files;
 			if (!files) {
 				return;
 			}
 
-			const assets = new Array<IAsset>();
+			const assets = new Array<Types.AssetLayer_Asset>();
 			for (let i = 0; i < files.length; i++) {
 				const file = files.item(i);
 				if (!file) continue;
@@ -59,22 +37,22 @@ export function getNewAssets() {
 export async function createAsset(file: File) {
 	const asset = {
 		id: v4(),
-		type: AssetType.IMAGE,
+		type: Types.AssetLayer_Asset_AssetType.IMAGE,
 		transform: {
 			x: 0, y: 0,
 			width: 0, height: 0,
 			rotation: 0
 		}
-	} as IAsset;
+	} as Types.AssetLayer_Asset;
 
 	let res: { width: number, height: number };
 	if (file.type.indexOf('image') === 0) {
 		res = await getImageSize(file);
-		asset.type = AssetType.IMAGE;
+		asset.type = Types.AssetLayer_Asset_AssetType.IMAGE;
 	}
 	else if (file.type.indexOf('video') === 0) {
 		res = await getVideoSize(file)
-		asset.type = AssetType.VIDEO;
+		asset.type = Types.AssetLayer_Asset_AssetType.VIDEO;
 	}
 	else {
 		throw new Error('Unknown file type');
@@ -84,14 +62,15 @@ export async function createAsset(file: File) {
 		width: res.width,
 		height: res.height
 	}
-	asset.transform.width = res.width;
-	asset.transform.height = res.height;
+	asset.transform!.width = res.width;
+	asset.transform!.height = res.height;
 
 	await fileStorage.setItem(asset.id, file);
 	return asset;
 }
 
-export async function deleteAsset(asset: IAsset) {
+export async function deleteAsset(asset: Types.AssetLayer_Asset) {
+	console.log('Deleting asset ' + asset.id);
 	await fileStorage.removeItem(asset.id);
 }
 
@@ -127,14 +106,14 @@ async function getVideoElement(file: File) {
 	return video;
 }
 
-export function useAssetElement(asset: IAsset) {
+export function useAssetElement(asset: Types.AssetLayer_Asset) {
 	const [entry, setEntry] = useState<CacheEntry | null | undefined>(assetCache.get(asset.id));
 
 	useEffect(() => {
 		if (entry === undefined) {
 			fileStorage.getItem(asset.id)
 				.then(async (file) => {
-					const element = await (asset.type === AssetType.IMAGE ? getImageElement(file) : getVideoElement(file));
+					const element = await (asset.type === Types.AssetLayer_Asset_AssetType.IMAGE ? getImageElement(file) : getVideoElement(file));
 					const entry = { file, element };
 					assetCache.set(asset.id, entry)
 					setEntry(entry);

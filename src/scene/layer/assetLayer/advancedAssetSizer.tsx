@@ -7,13 +7,13 @@ import Tooltip from '@mui/material/Tooltip';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import LockOpenOutlinedIcon from '@mui/icons-material/LockOpenOutlined';
 
-import { IAssetCalibration } from '../../asset';
 import theme from '../../../theme';
 import InputWithUnit from '../../../partials/inputWithUnit';
 import InputGroup from '../../../partials/inputGroup';
+import * as Types from '../../../protos/scene';
 
-const AdvancedAssetSizer: React.FunctionComponent<{ calibration: IAssetCalibration; onUpdate: (calibration: IAssetCalibration) => void; }> = ({ calibration, onUpdate }) => {
-  function updateCalibrationValue(keys: Array<keyof IAssetCalibration>, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+const AdvancedAssetSizer: React.FunctionComponent<{ calibration: Types.AssetLayer_Asset_AssetCalibration; onUpdate: (calibration: Types.AssetLayer_Asset_AssetCalibration) => void; }> = ({ calibration, onUpdate }) => {
+  function updateCalibrationValue(keys: Array<keyof Types.AssetLayer_Asset_AssetCalibration>, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const value = Number(e.target.value);
     if (!isNaN(value)) {
       const newCal = { ...calibration! };

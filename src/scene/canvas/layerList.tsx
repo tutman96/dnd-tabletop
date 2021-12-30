@@ -18,30 +18,29 @@ import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined
 import ArrowUpwardOutlinedIcon from '@mui/icons-material/ArrowUpwardOutlined';
 import ArrowDownwardOutlinedIcon from '@mui/icons-material/ArrowDownwardOutlined';
 
-import { IScene } from "..";
 import { ILayer } from "../layer";
-import LayerType from "../layer/layerType";
-import { TableViewLayer } from "../layer/tableView";
 import EditLayerButton from "./editLayerButton";
 import DeleteLayerButton from "./deleteLayerButton";
 import AddLayerButton from "./addLayerButton";
 import theme from "../../theme";
+import * as Types from "../../protos/scene";
+import { TABLEVIEW_LAYER_ID } from "../layer/tableView";
 
 type Props = {
-	scene: IScene,
+	layers: Array<ILayer>,
 	activeLayerId: string | null,
-	setActiveLayer: (layer: string) => void,
+	setActiveLayer: (layerId: string) => void,
 	updateLayer: (layer: ILayer) => void,
-	addLayer: (type: LayerType) => void,
+	addLayer: (type: Types.Layer_LayerType) => void,
 	editActiveLayerName: (name: string) => void, // TODO
 	moveActiveLayer: (direction: "up" | "down") => void;
 	deleteActiveLayer: () => void
 };
-const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, addLayer, updateLayer, moveActiveLayer, deleteActiveLayer }) => {
-	const layerIndex = scene.layers.findIndex((l) => l.id === activeLayerId);
-	const isActiveLayerTop = layerIndex === scene.layers.length - 1;
+const LayerList: React.FunctionComponent<Props> = ({ layers, activeLayerId, setActiveLayer, addLayer, updateLayer, moveActiveLayer, deleteActiveLayer }) => {
+	const layerIndex = layers.findIndex((l) => l.id === activeLayerId);
+	const isActiveLayerTop = layerIndex === layers.length - 1;
 	const isActiveLayerBottom = layerIndex === 0;
-	const activeLayer = scene.layers.find((l) => l.id === activeLayerId);
+	const activeLayer = layers.find((l) => l.id === activeLayerId);
 
 	return (
 		<Card sx={{
@@ -52,18 +51,18 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, add
 		}}	>
 			<List dense={true}>
 				<ListItemButton
-					selected={activeLayerId === TableViewLayer.id}
-					onClick={() => setActiveLayer(TableViewLayer.id)}
+					selected={activeLayerId === TABLEVIEW_LAYER_ID}
+					onClick={() => setActiveLayer(TABLEVIEW_LAYER_ID)}
 				>
 					<ListItemIcon><IconButton size="small" disabled><TvOutlinedIcon /></IconButton></ListItemIcon>
-					<ListItemText primary={TableViewLayer.name} secondary=" " />
+					<ListItemText primary="TV/Table View" secondary=" " />
 				</ListItemButton>
 
-				{Array.from(scene.layers).reverse().map((layer) => (
+				{Array.from(layers).reverse().map((layer) => (
 					<ListItem
 						key={layer.id}
 						disablePadding
-						secondaryAction={<Typography color={theme.palette.text.disabled} variant="overline">{LayerType[layer.type]}</Typography>}
+						secondaryAction={<Typography color={theme.palette.text.disabled} variant="overline">{Types.Layer_LayerType[layer.type]}</Typography>}
 					>
 						<ListItemButton
 							selected={activeLayer === layer}
@@ -73,7 +72,8 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, add
 								<IconButton
 									size="small"
 									onClick={(e) => {
-										updateLayer({ ...layer, visible: !layer.visible })
+										layer.visible = !layer.visible;
+										updateLayer(layer)
 										e.stopPropagation() // to prevent the layer from becoming active
 									}}
 									disableRipple
@@ -96,7 +96,7 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, add
 				<Box>
 					{/* Move Layer Up */}
 					<IconButton
-						disabled={activeLayerId === null || activeLayerId === TableViewLayer.id || isActiveLayerTop}
+						disabled={activeLayerId === null || activeLayerId === TABLEVIEW_LAYER_ID || isActiveLayerTop}
 						onClick={() => moveActiveLayer('up')}
 						size="small"
 					>
@@ -108,7 +108,7 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, add
 
 					{/* Move Layer Down */}
 					<IconButton
-						disabled={activeLayerId === null || activeLayerId === TableViewLayer.id || isActiveLayerBottom}
+						disabled={activeLayerId === null || activeLayerId === TABLEVIEW_LAYER_ID || isActiveLayerBottom}
 						onClick={() => moveActiveLayer('down')}
 						size="small"
 					>
@@ -124,7 +124,7 @@ const LayerList: React.SFC<Props> = ({ scene, activeLayerId, setActiveLayer, add
 					/>
 				</Box>
 
-				<AddLayerButton onAdd={(type) => addLayer(type)} />
+				<AddLayerButton onAdd={addLayer} />
 			</CardActions>
 		</Card>
 	);

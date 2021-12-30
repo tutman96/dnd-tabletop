@@ -6,14 +6,14 @@ import Tooltip from '@mui/material/Tooltip';
 import DriveFileRenameOutlineOutlinedIcon from '@mui/icons-material/DriveFileRenameOutlineOutlined';
 
 import { ILayer } from "../layer";
-import { TableViewLayer } from "../layer/tableView";
 import RenameDialog from "../../partials/renameDialog";
+import { TABLEVIEW_LAYER_ID } from "../layer/tableView";
 
 type Props = { layer?: ILayer; onUpdate: (layer: ILayer) => void; };
 const EditLayerButton: React.FunctionComponent<Props> = ({ layer, onUpdate }) => {
   const [showModal, setShowModal] = useState(false);
 
-  const disabled = !layer || layer.id === TableViewLayer.id;
+  const disabled = !layer || layer.id === TABLEVIEW_LAYER_ID;
 
   return (
     <>

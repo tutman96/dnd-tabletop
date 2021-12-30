@@ -1,13 +1,13 @@
 import React, { useRef, useEffect } from 'react';
 import { Group, Transformer } from 'react-konva';
 import Konva from 'konva';
-import theme from '../../theme';
 
-export type AssetTransform = Konva.RectConfig & { rotation: number };
+import theme from '../../theme';
+import * as Types from '../../protos/scene';
 
 type Props = {
-	rectTransform: AssetTransform,
-	onTransform: (newRect: AssetTransform) => void,
+	rectTransform: Types.AssetLayer_Asset_AssetTransform,
+	onTransform: (newRect: Types.AssetLayer_Asset_AssetTransform) => void,
 	isSelected: boolean,
 	onSelected: () => void,
 	snapOffset?: { x: number, y: number },

@@ -25,14 +25,19 @@ message Layer {
     AssetLayer assetLayer = 1;
     FogLayer fogLayer = 2;
   }
+  enum LayerType {
+    ASSETS = 0;
+    FOG = 1;
+  }
 }
 
 message AssetLayer {
   string id = 1;
   string name = 3;
   bool visible = 4;
+  Layer.LayerType type = 5;
 
-  map<string, Asset> assets = 5;
+  map<string, Asset> assets = 6;
   message Asset {
     string id = 1;
 
@@ -57,9 +62,7 @@ message AssetLayer {
       double height = 5;
     }
 
-    optional bool overrideCalibration = 5;
-
-    optional AssetCalibration calibration = 6;
+    optional AssetCalibration calibration = 5;
     message AssetCalibration {
       float xOffset = 1;
       float yOffset = 2;
@@ -67,7 +70,7 @@ message AssetLayer {
       float ppiY = 4;
     }
 
-    optional bool snapToGrid = 7;
+    optional bool snapToGrid = 6;
   }
 }
 
@@ -75,17 +78,18 @@ message FogLayer {
   string id = 1;
   string name = 3;
   bool visible = 4;
+  Layer.LayerType type = 5;
 
-  repeated LightSource lightSources = 5;
+  repeated LightSource lightSources = 6;
   message LightSource {
     Vector2d position = 1;
     float brightLightDistance = 2;
     float dimLightDistance = 3;
   }
 
-  repeated Polygon obstructionPolygons = 6;
-  repeated Polygon fogPolygons = 7;
-  repeated Polygon fogClearPolygons = 8;
+  repeated Polygon obstructionPolygons = 7;
+  repeated Polygon fogPolygons = 8;
+  repeated Polygon fogClearPolygons = 9;
   message Polygon {
     PolygonType type = 1;
     enum PolygonType {
