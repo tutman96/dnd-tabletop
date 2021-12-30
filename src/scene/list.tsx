@@ -41,8 +41,9 @@ const SceneList: React.FunctionComponent<Props> = ({ onSceneSelect, selectedScen
     if (allScenes) {
       scene.name = `Scene ${allScenes.size + 1}`;
     }
-    createItem(scene.id, scene);
-    onSceneSelect(scene);
+    createItem(scene.id, scene).then(() => {
+      onSceneSelect(scene);
+    });
   }
 
   if (allScenes === undefined) {

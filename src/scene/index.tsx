@@ -87,6 +87,7 @@ export function sceneDatabase() {
 				}
 			}
 
+			await newStorage.deleteItem(key);
 			await oldStorage.deleteItem(key);
 		}
 	};
