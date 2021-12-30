@@ -8,7 +8,7 @@ import AnchorOutlinedIcon from '@mui/icons-material/AnchorOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 
-import { useTableResolution, useTablePPI } from '../../../settings';
+import { useTableDimensions } from '../../../settings';
 import { TableOptions } from '../..';
 import { ILayerComponentProps, ILayer } from '..';
 import LayerType from "../layerType";
@@ -34,14 +34,13 @@ interface Props extends ILayerComponentProps<ITableViewLayer> {
 }
 
 const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showBorder, showGrid, onUpdate }) => {
-  const [tableResolution] = useTableResolution();
-  const ppi = useTablePPI();
+  const tableDimensions = useTableDimensions();
 
   const [localOptions, setLocalOptions] = useState(layer.options);
 
   useEffect(() => {
     setLocalOptions(layer.options);
-  }, [layer.options, setLocalOptions])
+  }, [layer.options])
 
   const groupRef = useRef<Konva.Group>();
   const trRef = useRef<Konva.Transformer>();
@@ -101,25 +100,25 @@ const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showB
 
   // Only recalculate the line components when the position/size changes
   const lines = useMemo(() => {
-    if (!tableResolution || !ppi) {
+    if (!tableDimensions) {
       return null;
     }
 
-    const width = tableResolution.width / localOptions.scale;
-    const height = tableResolution.height / localOptions.scale;
+    const width = tableDimensions.width / localOptions.scale;
+    const height = tableDimensions.height / localOptions.scale;
 
     const l = new Array<{ start: Konva.Vector2d; end: Konva.Vector2d; }>();
     if (showGrid) {
-      const startX = Math.floor(localOptions.offset.x / ppi) * ppi;
-      for (let xOffset = startX; xOffset <= localOptions.offset.x + width; xOffset += ppi) {
+      const startX = Math.floor(localOptions.offset.x);
+      for (let xOffset = startX; xOffset <= localOptions.offset.x + width; xOffset++) {
         l.push({
           start: { x: xOffset, y: localOptions.offset.y },
           end: { x: xOffset, y: localOptions.offset.y + height }
         });
       }
 
-      const startY = Math.floor(localOptions.offset.y / ppi) * ppi;
-      for (let yOffset = startY; yOffset <= localOptions.offset.y + height; yOffset += ppi) {
+      const startY = Math.floor(localOptions.offset.y);
+      for (let yOffset = startY; yOffset <= localOptions.offset.y + height; yOffset++) {
         l.push({
           start: { x: localOptions.offset.x, y: yOffset },
           end: { x: localOptions.offset.x + width, y: yOffset }
@@ -160,14 +159,14 @@ const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showB
         ))}
       </Group>
     );
-  }, [showGrid, localOptions, active, tableResolution, ppi])
+  }, [showGrid, localOptions, active, tableDimensions])
 
-  if (!tableResolution || ppi === null) {
+  if (!tableDimensions) {
     return null;
   }
 
-  const width = tableResolution.width;
-  const height = tableResolution.height;
+  const width = tableDimensions.width;
+  const height = tableDimensions.height;
 
   return (
     <Layer
@@ -231,7 +230,8 @@ const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showB
               height={height}
               stroke={active ? theme.palette.primary.dark : grey[300]}
               dash={[10, 10]}
-              strokeWidth={5}
+              strokeWidth={3}
+              strokeScaleEnabled={false}
               listening={active}
             />
           </Group>
@@ -242,6 +242,7 @@ const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showB
               enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
               ref={trRef as any}
               borderStrokeWidth={0}
+              ignoreStroke={true}
               anchorFill={theme.palette.primary.contrastText}
               anchorStroke={theme.palette.primary.dark}
             />

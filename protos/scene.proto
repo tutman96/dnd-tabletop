@@ -3,8 +3,9 @@ syntax = "proto3";
 message Scene {
   string id = 1;
   string name = 2;
-  TableOptions table = 3;
-  repeated Layer layers = 4;
+  uint64 version = 3;
+  TableOptions table = 4;
+  repeated Layer layers = 5;
 }
 
 message TableOptions {

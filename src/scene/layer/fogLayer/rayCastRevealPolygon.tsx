@@ -6,7 +6,6 @@ import { yellow } from '@mui/material/colors';
 
 import { IPolygon, PolygonType } from "../editablePolygon";
 import { getVisibilityPolygon } from './rayCastingUtils';
-import { useTablePPI } from '../../../settings';
 import theme from '../../../theme';
 
 export interface ILightSource {
@@ -71,7 +70,6 @@ type Props = {
   onSelected: () => void
 };
 const RayCastRevealPolygon: React.FunctionComponent<Props> = ({ light, displayIcon, fogPolygons, obstructionPolygons, onUpdate, selected, onSelected }) => {
-  const ppi = useTablePPI() || 86;
   const iconRef = useRef<Konva.Shape>();
 
   const [localPosition, setLocalPosition] = useState(light.position);
@@ -109,7 +107,7 @@ const RayCastRevealPolygon: React.FunctionComponent<Props> = ({ light, displayIc
         fillRadialGradientStartPoint={localPosition}
         fillRadialGradientEndPoint={localPosition}
         fillRadialGradientStartRadius={0}
-        fillRadialGradientEndRadius={ppi * Math.max(defaultedLight.brightLightDistance!, defaultedLight.dimLightDistance!)}
+        fillRadialGradientEndRadius={Math.max(defaultedLight.brightLightDistance!, defaultedLight.dimLightDistance!)}
         fillRadialGradientColorStops={[
           0, 'rgba(255,255,255,1)',
           dimlightBrightLightRatio, 'rgba(255,255,255,0.30)',

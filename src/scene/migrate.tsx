@@ -11,10 +11,6 @@ import { tablePPI } from '../settings';
 function scaleAsset(asset: AssetLayer_Asset, scale: number): AssetLayer_Asset {
   return {
     ...asset,
-    size: {
-      width: asset.size!.width * scale,
-      height: asset.size!.height * scale
-    },
     transform: {
       x: asset.transform!.x! * scale,
       y: asset.transform!.y! * scale,
@@ -37,7 +33,6 @@ function scaleScene(scene: Scene, scale: number): Scene {
   console.log('scaling by ' + scale);
   scene.table!.offset!.x = scene.table!.offset!.x * scale;
   scene.table!.offset!.y = scene.table!.offset!.y * scale;
-  scene.table!.scale = scene.table!.scale / scale;
 
   for (const layer of scene.layers) {
     if (layer.assetLayer) {
@@ -60,12 +55,14 @@ function scaleScene(scene: Scene, scale: number): Scene {
 
 let migrating = false;
 export async function migrate() {
-  const scale = 1 / (await tablePPI());
   const newSceneIds = await newStorage.storage.keys();
   if (newSceneIds.length > 0 || migrating) {
     console.log('Not migrating as it has already been migrated');
     return;
   }
+  
+  const ppi = await tablePPI();  
+  const scale = 1 / ppi;
   
   migrating = true;
   const sceneIds = await oldStorage.storage.keys();
@@ -92,6 +89,7 @@ export function newSceneFromOldScene(oldScene: IScene): Scene {
   return {
     id: oldScene.id,
     name: oldScene.name,
+    version: oldScene.version ?? 0,
     table: oldScene.table,
     layers: oldScene.layers.map((layer) => {
       if (layer.type === LayerType.ASSETS) {
@@ -139,6 +137,7 @@ export function oldSceneFromNewScene(newScene: Scene): IScene {
   return {
     id: newScene.id,
     name: newScene.name,
+    version: newScene.version ?? 0,
     table: newScene.table,
     layers: newScene.layers.map((l) => {
       if (l.assetLayer) {

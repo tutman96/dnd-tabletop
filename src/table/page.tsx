@@ -6,7 +6,6 @@ import { Helmet } from 'react-helmet';
 import { LayerTypeToComponent } from '../scene/layer';
 import TableViewOverlay, { TableViewLayer } from '../scene/layer/tableView';
 import { CurrentSceneContext } from '../scene/canvas';
-import { BLUR_RADIUS } from '../scene/layer/fogLayer';
 
 const { useOneValue } = sceneDatabase();
 const { useOneValue: useOneSettingValue } = settingsDatabase();
@@ -22,15 +21,16 @@ const TablePage: React.FunctionComponent<Props> = () => {
 
 	const tablePPI = useTablePPI();
 
-	const BLUR_OFFSET = (tablePPI || 100) * BLUR_RADIUS * 2;
-
 	useEffect(() => {
 		if (!tableFreeze && scene !== undefined) {
-			setTableScene(scene);
+			if (scene === null) setTableScene(null)
+			else if (scene.version !== tableScene?.version) {
+				setTableScene(scene);
+			}
 		}
-	}, [scene, tableFreeze])
+	}, [scene, tableScene, tableFreeze])
 
-	if (!tableResolution) {
+	if (!tableResolution || !tablePPI) {
 		return null;
 	}
 
@@ -39,18 +39,12 @@ const TablePage: React.FunctionComponent<Props> = () => {
 			<Helmet title="D&amp;D Table View" />
 			{tableScene &&
 				<Stage
-					width={tableResolution.width + BLUR_OFFSET * 2}
-					height={tableResolution.height + BLUR_OFFSET * 2}
-					offsetX={tableScene.table.offset.x - BLUR_OFFSET}
-					offsetY={tableScene.table.offset.y - BLUR_OFFSET}
-					scaleX={tableScene.table.scale}
-					scaleY={tableScene.table.scale}
-					style={{
-						position: 'relative',
-						top: `${-BLUR_OFFSET}px`,
-						left: `${-BLUR_OFFSET}px`,
-						backgroundColor: 'black'
-					}}
+					width={tableResolution.width}
+					height={tableResolution.height}
+					offsetX={tableScene.table.offset.x}
+					offsetY={tableScene.table.offset.y}
+					scaleX={tableScene.table.scale * tablePPI}
+					scaleY={tableScene.table.scale * tablePPI}
 				>
 					<CurrentSceneContext.Provider value={tableScene}>
 						{

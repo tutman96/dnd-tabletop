@@ -6,15 +6,12 @@ import { IAssetCalibration, IAsset } from '../../asset';
 import DraggableStage from '../../canvas/draggableStage';
 import Asset from './asset';
 import theme, { VISUAL_ASSET_SIZER_SIZE } from '../../../theme';
-import { useTablePPI } from '../../../settings';
 import TransformableAsset from '../../canvas/transformableAsset';
 
 const RESIZE_SQUARES = 3;
 
-const VisualAssetSizer: React.SFC<{ asset: IAsset; onUpdate: (calibration: IAssetCalibration) => void; }> = ({ asset, onUpdate }) => {
-  const tablePPI = useTablePPI();
-
-  if (!tablePPI || !asset.calibration) {
+const VisualAssetSizer: React.FunctionComponent<{ asset: IAsset; onUpdate: (calibration: IAssetCalibration) => void; }> = ({ asset, onUpdate }) => {
+  if (!asset.calibration) {
     return null;
   }
 

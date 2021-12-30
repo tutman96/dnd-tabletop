@@ -16,15 +16,15 @@ import { AssetTransform } from '../../canvas/transformableAsset';
 import VisualAssetSizer from './visualAssetSizer';
 import { VISUAL_ASSET_SIZER_SIZE } from '../../../theme';
 
-export function calculateCalibratedTransform(asset: IAsset, screenPPI: number): AssetTransform {
+export function calculateCalibratedTransform(asset: IAsset): AssetTransform {
   if (!asset.calibration) {
     return asset.transform;
   }
 
   return {
     ...asset.transform,
-    width: (asset.size.width / asset.calibration.ppiX) * screenPPI,
-    height: (asset.size.height / asset.calibration.ppiY) * screenPPI
+    width: (asset.size.width / asset.calibration.ppiX),
+    height: (asset.size.height / asset.calibration.ppiY)
   }
 }
 

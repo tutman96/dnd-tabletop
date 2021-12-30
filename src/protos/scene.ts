@@ -7,6 +7,7 @@ export const protobufPackage = "";
 export interface Scene {
   id: string;
   name: string;
+  version: number;
   table: TableOptions | undefined;
   layers: Layer[];
 }
@@ -171,7 +172,7 @@ export function fogLayer_Polygon_PolygonTypeToJSON(
 }
 
 function createBaseScene(): Scene {
-  return { id: "", name: "", table: undefined, layers: [] };
+  return { id: "", name: "", version: 0, table: undefined, layers: [] };
 }
 
 export const Scene = {
@@ -182,11 +183,14 @@ export const Scene = {
     if (message.name !== "") {
       writer.uint32(18).string(message.name);
     }
+    if (message.version !== 0) {
+      writer.uint32(24).uint64(message.version);
+    }
     if (message.table !== undefined) {
-      TableOptions.encode(message.table, writer.uint32(26).fork()).ldelim();
+      TableOptions.encode(message.table, writer.uint32(34).fork()).ldelim();
     }
     for (const v of message.layers) {
-      Layer.encode(v!, writer.uint32(34).fork()).ldelim();
+      Layer.encode(v!, writer.uint32(42).fork()).ldelim();
     }
     return writer;
   },
@@ -205,9 +209,12 @@ export const Scene = {
           message.name = reader.string();
           break;
         case 3:
-          message.table = TableOptions.decode(reader, reader.uint32());
+          message.version = longToNumber(reader.uint64() as Long);
           break;
         case 4:
+          message.table = TableOptions.decode(reader, reader.uint32());
+          break;
+        case 5:
           message.layers.push(Layer.decode(reader, reader.uint32()));
           break;
         default:
@@ -226,6 +233,10 @@ export const Scene = {
       object.name !== undefined && object.name !== null
         ? String(object.name)
         : "";
+    message.version =
+      object.version !== undefined && object.version !== null
+        ? Number(object.version)
+        : 0;
     message.table =
       object.table !== undefined && object.table !== null
         ? TableOptions.fromJSON(object.table)
@@ -238,6 +249,8 @@ export const Scene = {
     const obj: any = {};
     message.id !== undefined && (obj.id = message.id);
     message.name !== undefined && (obj.name = message.name);
+    message.version !== undefined &&
+      (obj.version = Math.round(message.version));
     message.table !== undefined &&
       (obj.table = message.table
         ? TableOptions.toJSON(message.table)
@@ -254,6 +267,7 @@ export const Scene = {
     const message = createBaseScene();
     message.id = object.id ?? "";
     message.name = object.name ?? "";
+    message.version = object.version ?? 0;
     message.table =
       object.table !== undefined && object.table !== null
         ? TableOptions.fromPartial(object.table)
@@ -1485,6 +1499,17 @@ export const FogLayer_Polygon = {
   },
 };
 
+declare var self: any | undefined;
+declare var window: any | undefined;
+declare var global: any | undefined;
+var globalThis: any = (() => {
+  if (typeof globalThis !== "undefined") return globalThis;
+  if (typeof self !== "undefined") return self;
+  if (typeof window !== "undefined") return window;
+  if (typeof global !== "undefined") return global;
+  throw "Unable to locate global object";
+})();
+
 type Builtin =
   | Date
   | Function
@@ -1511,6 +1536,13 @@ export type Exact<P, I extends P> = P extends Builtin
         Exclude<keyof I, KeysOfUnion<P>>,
         never
       >;
+
+function longToNumber(long: Long): number {
+  if (long.gt(Number.MAX_SAFE_INTEGER)) {
+    throw new globalThis.Error("Value is larger than Number.MAX_SAFE_INTEGER");
+  }
+  return long.toNumber();
+}
 
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;

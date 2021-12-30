@@ -11,7 +11,7 @@ type Props = {
 	onSelected: () => void;
 	playAudio: boolean;
 };
-const Asset: React.SFC<Props> = ({ asset, onUpdate, selected, onSelected, playAudio }) => {
+const Asset: React.FunctionComponent<Props> = ({ asset, onUpdate, selected, onSelected, playAudio }) => {
 	const el = useAssetElement(asset);
 
 	useEffect(() => {

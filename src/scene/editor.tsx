@@ -1,4 +1,4 @@
-import React, { } from "react";
+import React, { useCallback } from "react";
 import { useMatch } from "react-router-dom";
 
 import Toolbar from '@mui/material/Toolbar';
@@ -56,7 +56,12 @@ function TableDisplayButton({ scene }: { scene: IScene }) {
 type Props = {};
 const SceneEditor: React.FunctionComponent<Props> = () => {
 	const match = useMatch('/scenes/:id');
-	const [scene, updateScene] = useOneValue(match!.params.id!);
+	const [scene, updateSceneLocal] = useOneValue(match!.params.id!);
+
+	const updateScene = useCallback((s: IScene) => {
+		s.version = scene!.version + 1;
+		updateSceneLocal(s)
+	}, [scene, updateSceneLocal])
 
 	if (!match?.params.id) {
 		return null;

@@ -19,6 +19,7 @@ export interface TableOptions {
 export interface IScene {
 	id: string;
 	name: string;
+	version: number;
 	table: TableOptions,
 	layers: Array<ILayer>;
 }
@@ -91,6 +92,7 @@ export function createNewScene(): IScene {
 	return {
 		id: v4(),
 		name: 'Untitled',
+		version: 0,
 		table: {
 			offset: { x: 0, y: 0 },
 			rotation: 0,

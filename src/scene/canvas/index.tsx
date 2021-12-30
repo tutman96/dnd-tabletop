@@ -12,7 +12,7 @@ import { deleteLayer } from '../layer';
 import LayerList from './layerList';
 import { ToolbarPortalProvider } from '../layer/toolbarPortal';
 import TableViewOverlay, { TableViewLayer } from '../layer/tableView';
-import { useTableResolution } from '../../settings';
+import { useTableDimensions } from '../../settings';
 
 export const CurrentSceneContext = React.createContext<IScene | null>(null);
 export function useCurrentScene() {
@@ -38,12 +38,30 @@ export function calculateViewportCenter(layerRef: React.MutableRefObject<Konva.L
 	}
 }
 
+export function calculateViewportDimensions(layerRef: React.MutableRefObject<Konva.Layer | undefined>) {
+	if (layerRef.current) {
+		const konvaStage = layerRef.current.parent!;
+		const stageSize = konvaStage.getSize();
+		const stageZoom = konvaStage.getAbsoluteScale();
+		return {
+			width: stageSize.width / stageZoom.x,
+			height: stageSize.height / stageZoom.y
+		};
+	}
+	else {
+		return {
+			width: 0,
+			height: 0
+		}
+	}
+}
+
 type Props = { scene: IScene, onUpdate: (scene: IScene) => void };
 const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 	const [activeLayerId, setActiveLayerId] = useState<string | null>(null);
 	const containerRef = useRef<HTMLDivElement>();
 	const containerSize = useComponentSize(containerRef);
-	const [tableResolution] = useTableResolution();
+	const tableDimensions = useTableDimensions();
 
 	// Default selected layer to the first layer
 	useEffect(() => {
@@ -124,10 +142,10 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 		}
 	}
 
-	const initialZoom = tableResolution ?
+	const initialZoom = tableDimensions ?
 		Math.min(
-			containerSize.height / tableResolution.height,
-			containerSize.width / tableResolution.width
+			containerSize.height / tableDimensions.height,
+			containerSize.width / tableDimensions.width
 		) :
 		1;
 
@@ -142,7 +160,7 @@ const Canvas: React.SFC<Props> = ({ scene, onUpdate }) => {
 						height: '100%'
 					}}
 				>
-					{containerSize.height !== 0 && tableResolution ? (
+					{containerSize.height !== 0 && tableDimensions ? (
 						<DraggableStage
 							width={containerSize.width || 1}
 							height={containerSize.height || 1}

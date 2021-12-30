@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Group, Transformer } from 'react-konva';
 import Konva from 'konva';
-import { useTablePPI } from '../../settings';
 import theme from '../../theme';
 
 export type AssetTransform = Konva.RectConfig & { rotation: number };
@@ -26,7 +25,6 @@ const TransformableAsset: React.FunctionComponent<Props> = ({
 }) => {
 	const groupRef = useRef<Konva.Group>();
 	const trRef = useRef<Konva.Transformer>();
-	const ppi = useTablePPI();
 
 	useEffect(() => {
 		if (isSelected) {
@@ -66,11 +64,11 @@ const TransformableAsset: React.FunctionComponent<Props> = ({
 					let x = e.target.x();
 					let y = e.target.y();
 
-					if (snapOffset && ppi && rotation % 90 === 0) {
-						const xOffset = snapOffset.x % ppi;
-						const yOffset = snapOffset.y % ppi;
-						x = Math.round((x + xOffset) / ppi) * ppi - xOffset;
-						y = Math.round((y + yOffset) / ppi) * ppi - yOffset;
+					if (snapOffset && rotation % 90 === 0) {
+						const xOffset = snapOffset.x;
+						const yOffset = snapOffset.y;
+						x = Math.round((x + xOffset)) - xOffset;
+						y = Math.round((y + yOffset)) - yOffset;
 
 						e.target.x(x);
 						e.target.y(y);
@@ -111,6 +109,7 @@ const TransformableAsset: React.FunctionComponent<Props> = ({
 					enabledAnchors={skewEnabled === false ? ['top-left', 'top-right', 'bottom-left', 'bottom-right'] : undefined}
 					ref={trRef as any}
 					borderStrokeWidth={strokeEnabled === false ? 0 : undefined}
+					ignoreStroke={true}
 					anchorFill={theme.palette.primary.contrastText}
 					anchorStroke={theme.palette.primary.dark}
 					rotationSnaps={[0, 45, 90, 135, 180, 225, 270, 315]}

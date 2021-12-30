@@ -15,8 +15,8 @@ import { IAsset, AssetType, deleteAsset, getNewAssets } from '../../asset';
 import ToolbarItem from '../toolbarItem';
 import ToolbarPortal from '../toolbarPortal';
 import AssetSizer, { calculateCalibratedTransform } from './assetSizer';
-import { useTablePPI, usePlayAudioOnTable } from '../../../settings';
-import { calculateViewportCenter } from '../../canvas';
+import { usePlayAudioOnTable } from '../../../settings';
+import { calculateViewportCenter, calculateViewportDimensions } from '../../canvas';
 
 export interface IAssetLayer extends ILayer {
 	assets: Map<string, IAsset>
@@ -26,7 +26,6 @@ interface Props extends ILayerComponentProps<IAssetLayer> { }
 const AssetLayer: React.FunctionComponent<Props> = ({ layer, onUpdate, active: layerActive, isTable }) => {
 	const [selectedAssetId, setSelectedAssetId] = useState<string | null>(null);
 	const layerRef = useRef<Konva.Layer>();
-	const tablePPI = useTablePPI();
 	const [playAudioOnTable] = usePlayAudioOnTable();
 
 	const deleteSelectedAsset = useCallback(async () => {
@@ -84,9 +83,14 @@ const AssetLayer: React.FunctionComponent<Props> = ({ layer, onUpdate, active: l
 					onClick={async () => {
 						const assets = await getNewAssets();
 						const viewportCenter = calculateViewportCenter(layerRef);
+						const viewportDimensions = calculateViewportDimensions(layerRef);
 						for (const asset of assets) {
+							const aspectRatio = asset.size.width / asset.size.height;	
+							asset.transform.height = viewportDimensions.height / 2;
+							asset.transform.width = asset.transform.height * aspectRatio;
 							asset.transform.x = viewportCenter.x - (asset.transform.width ?? 0) / 2;
 							asset.transform.y = viewportCenter.y - (asset.transform.height ?? 0) / 2;
+							console.log({asset})
 							layer.assets.set(asset.id, asset);
 						}
 						onUpdate({ ...layer })
@@ -95,15 +99,15 @@ const AssetLayer: React.FunctionComponent<Props> = ({ layer, onUpdate, active: l
 				<AssetSizer
 					asset={selectedAsset}
 					onUpdate={(asset) => {
-						asset.transform = calculateCalibratedTransform(asset, tablePPI!);
+						asset.transform = calculateCalibratedTransform(asset);
 						layer.assets.set(asset.id, asset);
 						onUpdate({ ...layer });
 					}}
 				/>
 				<ToolbarItem
-          label={!!selectedAsset?.snapToGrid ? 'Snap to Grid' : 'Free Move' }
+          label={!!selectedAsset?.snapToGrid ? 'Free Move' : 'Snap to Grid' }
           disabled={!selectedAsset}
-          icon={!!selectedAsset?.snapToGrid ? <GridOnOutlinedIcon /> : <GridOffOutlinedIcon />}
+          icon={!!selectedAsset?.snapToGrid ? <GridOffOutlinedIcon /> : <GridOnOutlinedIcon />}
           onClick={() => {
             if (!selectedAsset) return;
             selectedAsset.snapToGrid = !selectedAsset.snapToGrid;
@@ -120,7 +124,7 @@ const AssetLayer: React.FunctionComponent<Props> = ({ layer, onUpdate, active: l
 				/>
 			</>
 		);
-	}, [layer, layerRef, tablePPI, selectedAssetId, onUpdate, deleteSelectedAsset]);
+	}, [layer, layerRef, selectedAssetId, onUpdate, deleteSelectedAsset]);
 
 	return (
 		<>
