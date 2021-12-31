@@ -204,6 +204,16 @@ export function fogLayer_Polygon_PolygonTypeToJSON(
   }
 }
 
+export interface SceneExport {
+  scene: Scene | undefined;
+  files: SceneExport_File[];
+}
+
+export interface SceneExport_File {
+  id: string;
+  payload: Uint8Array;
+}
+
 function createBaseScene(): Scene {
   return { id: "", name: "", version: 0, table: undefined, layers: [] };
 }
@@ -1544,6 +1554,155 @@ export const FogLayer_Polygon = {
   },
 };
 
+function createBaseSceneExport(): SceneExport {
+  return { scene: undefined, files: [] };
+}
+
+export const SceneExport = {
+  encode(
+    message: SceneExport,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
+    if (message.scene !== undefined) {
+      Scene.encode(message.scene, writer.uint32(10).fork()).ldelim();
+    }
+    for (const v of message.files) {
+      SceneExport_File.encode(v!, writer.uint32(18).fork()).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): SceneExport {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSceneExport();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.scene = Scene.decode(reader, reader.uint32());
+          break;
+        case 2:
+          message.files.push(SceneExport_File.decode(reader, reader.uint32()));
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SceneExport {
+    const message = createBaseSceneExport();
+    message.scene =
+      object.scene !== undefined && object.scene !== null
+        ? Scene.fromJSON(object.scene)
+        : undefined;
+    message.files = (object.files ?? []).map((e: any) =>
+      SceneExport_File.fromJSON(e)
+    );
+    return message;
+  },
+
+  toJSON(message: SceneExport): unknown {
+    const obj: any = {};
+    message.scene !== undefined &&
+      (obj.scene = message.scene ? Scene.toJSON(message.scene) : undefined);
+    if (message.files) {
+      obj.files = message.files.map((e) =>
+        e ? SceneExport_File.toJSON(e) : undefined
+      );
+    } else {
+      obj.files = [];
+    }
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<SceneExport>, I>>(
+    object: I
+  ): SceneExport {
+    const message = createBaseSceneExport();
+    message.scene =
+      object.scene !== undefined && object.scene !== null
+        ? Scene.fromPartial(object.scene)
+        : undefined;
+    message.files =
+      object.files?.map((e) => SceneExport_File.fromPartial(e)) || [];
+    return message;
+  },
+};
+
+function createBaseSceneExport_File(): SceneExport_File {
+  return { id: "", payload: new Uint8Array() };
+}
+
+export const SceneExport_File = {
+  encode(
+    message: SceneExport_File,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.payload.length !== 0) {
+      writer.uint32(18).bytes(message.payload);
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): SceneExport_File {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseSceneExport_File();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.id = reader.string();
+          break;
+        case 2:
+          message.payload = reader.bytes();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): SceneExport_File {
+    const message = createBaseSceneExport_File();
+    message.id =
+      object.id !== undefined && object.id !== null ? String(object.id) : "";
+    message.payload =
+      object.payload !== undefined && object.payload !== null
+        ? bytesFromBase64(object.payload)
+        : new Uint8Array();
+    return message;
+  },
+
+  toJSON(message: SceneExport_File): unknown {
+    const obj: any = {};
+    message.id !== undefined && (obj.id = message.id);
+    message.payload !== undefined &&
+      (obj.payload = base64FromBytes(
+        message.payload !== undefined ? message.payload : new Uint8Array()
+      ));
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<SceneExport_File>, I>>(
+    object: I
+  ): SceneExport_File {
+    const message = createBaseSceneExport_File();
+    message.id = object.id ?? "";
+    message.payload = object.payload ?? new Uint8Array();
+    return message;
+  },
+};
+
 declare var self: any | undefined;
 declare var window: any | undefined;
 declare var global: any | undefined;
@@ -1554,6 +1713,29 @@ var globalThis: any = (() => {
   if (typeof global !== "undefined") return global;
   throw "Unable to locate global object";
 })();
+
+const atob: (b64: string) => string =
+  globalThis.atob ||
+  ((b64) => globalThis.Buffer.from(b64, "base64").toString("binary"));
+function bytesFromBase64(b64: string): Uint8Array {
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; ++i) {
+    arr[i] = bin.charCodeAt(i);
+  }
+  return arr;
+}
+
+const btoa: (bin: string) => string =
+  globalThis.btoa ||
+  ((bin) => globalThis.Buffer.from(bin, "binary").toString("base64"));
+function base64FromBytes(arr: Uint8Array): string {
+  const bin: string[] = [];
+  for (const byte of arr) {
+    bin.push(String.fromCharCode(byte));
+  }
+  return btoa(bin.join(""));
+}
 
 type Builtin =
   | Date

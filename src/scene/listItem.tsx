@@ -8,6 +8,7 @@ import ListItemText from '@mui/material/ListItemText';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import Divider from '@mui/material/Divider';
 import { green } from '@mui/material/colors';
 
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -16,8 +17,9 @@ import PauseIcon from '@mui/icons-material/Pause';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import DriveFileRenameOutlineOutlinedIcon from '@mui/icons-material/DriveFileRenameOutlineOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 
-import { sceneDatabase } from ".";
+import { exportScene, sceneDatabase } from ".";
 import { settingsDatabase, Settings } from "../settings";
 import ConfirmDialog from "../partials/confirmDialog";
 import RenameDialog from "../partials/renameDialog";
@@ -46,6 +48,7 @@ const SceneStatusIcon: React.FunctionComponent<{ scene: Types.Scene }> = ({ scen
 export const SceneListItem: React.FunctionComponent<{ scene: Types.Scene; selected: boolean; onSelect: () => void; }> = ({ scene, selected, onSelect }) => {
   const navigate = useNavigate();
 
+  const [displayedScene, setDisplayedScene] = useOneSettingValue<string | null>(Settings.DISPLAYED_SCENE);
   const anchorEl = useRef<HTMLElement>();
   const [, updateScene] = useOneValue(scene.id);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -66,7 +69,7 @@ export const SceneListItem: React.FunctionComponent<{ scene: Types.Scene; select
         disablePadding
         selected={selected}
       >
-        <ListItemButton onClick={onSelect} sx={{justifyContent: 'space-between'}}>
+        <ListItemButton onClick={onSelect} sx={{ justifyContent: 'space-between' }}>
           <ListItemIcon><SceneStatusIcon scene={scene} /></ListItemIcon>
           <ListItemText primary={scene.name} />
         </ListItemButton>
@@ -85,6 +88,13 @@ export const SceneListItem: React.FunctionComponent<{ scene: Types.Scene; select
           <ListItemIcon><DriveFileRenameOutlineOutlinedIcon /></ListItemIcon>
           <ListItemText>Edit Name</ListItemText>
         </MenuItem>
+
+        <MenuItem onClick={() => exportScene(scene)}>
+          <ListItemIcon><FileDownloadOutlinedIcon /></ListItemIcon>
+          <ListItemText>Download</ListItemText>
+        </MenuItem>
+
+        <Divider/>
 
         <MenuItem onClick={() => {
           setInDelete(true);
@@ -110,8 +120,11 @@ export const SceneListItem: React.FunctionComponent<{ scene: Types.Scene; select
         open={inDelete}
         onConfirm={() => {
           deleteItem(scene.id).then(() => {
+            if (displayedScene === scene.id) {
+              setDisplayedScene(null);
+            }
             if (selected) {
-              navigate('/')
+              navigate('/');
             }
           });
         }}

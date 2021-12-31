@@ -1,18 +1,19 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 
-import Tooltip from '@mui/material/Tooltip'
 import Skeleton from '@mui/material/Skeleton'
 import Input from '@mui/material/Input'
 import IconButton from '@mui/material/IconButton'
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
-import { sceneDatabase, createNewScene } from ".";
+import { sceneDatabase, createNewScene, importScene } from ".";
 import * as Types from '../protos/scene';
 
 import { SceneListItem } from "./listItem";
@@ -31,10 +32,11 @@ function LoadingScenes() {
   );
 }
 
-type Props = { onSceneSelect: (scene: Types.Scene) => any, selectedSceneId: string };
-const SceneList: React.FunctionComponent<Props> = ({ onSceneSelect, selectedSceneId }) => {
+const AddButton: React.FunctionComponent<{ onAdd: (scene: Types.Scene) => void }> = ({ onAdd }) => {
+  const anchorEl = useRef<HTMLElement>();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [importing, setImporting] = useState(false);
   const allScenes = useAllValues();
-  const [searchText, setSearchText] = useState("");
 
   function addNewScene() {
     const scene = createNewScene();
@@ -42,9 +44,46 @@ const SceneList: React.FunctionComponent<Props> = ({ onSceneSelect, selectedScen
       scene.name = `Scene ${allScenes.size + 1}`;
     }
     createItem(scene.id, scene).then(() => {
-      onSceneSelect(scene);
+      onAdd(scene);
     });
   }
+
+  async function importNewScene() {
+    try {
+      setImporting(true);
+      const scene = await importScene();
+      onAdd(scene);
+    }
+    catch (e) { console.error('Error importing scene', e) }
+    finally {
+      setImporting(false);
+    }
+  }
+
+  return (
+    <>
+      <IconButton
+        ref={anchorEl as any}
+        onClick={() => setMenuOpen(true)}
+      >
+        <AddCircleOutlineIcon />
+      </IconButton>
+      <Menu
+        anchorEl={anchorEl.current}
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+      >
+        <MenuItem onClick={addNewScene}>Blank Scene</MenuItem>
+        <MenuItem onClick={importNewScene} disabled={importing}>{importing ? 'Importing...' : 'Import Scene'}</MenuItem>
+      </Menu>
+    </>
+  )
+}
+
+type Props = { onSceneSelect: (scene: Types.Scene) => any, selectedSceneId: string };
+const SceneList: React.FunctionComponent<Props> = ({ onSceneSelect, selectedSceneId }) => {
+  const allScenes = useAllValues();
+  const [searchText, setSearchText] = useState("");
 
   if (allScenes === undefined) {
     return <LoadingScenes />
@@ -60,9 +99,7 @@ const SceneList: React.FunctionComponent<Props> = ({ onSceneSelect, selectedScen
     <>
       <Box sx={{ display: 'flex' }}>
         <Input placeholder="Find a scene..." onChange={(e) => setSearchText(e.target.value)} value={searchText} fullWidth />
-        <Tooltip title="Add Scene">
-          <IconButton onClick={addNewScene}><AddCircleOutlineIcon /></IconButton>
-        </Tooltip>
+        <AddButton onAdd={onSceneSelect} />
       </Box>
       <List sx={{ marginX: -2 }}>
         <Box sx={{ overflow: 'auto' }}>

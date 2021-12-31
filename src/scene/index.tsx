@@ -38,7 +38,7 @@ export function sceneDatabase() {
 			useEffect(() => {
 				if (!newValue) return;
 				const decodedNewValue = Types.Scene.decode(newValue);
-				
+
 				// Initial load
 				if (!localValue) {
 					setLocalValue(decodedNewValue);
@@ -113,6 +113,102 @@ export function createNewScene(): Types.Scene {
 	};
 }
 
+export async function exportScene(scene: Types.Scene) {
+	const assetIds = new Set<string>();
+	for (const layer of scene.layers) {
+		if (!layer.assetLayer) continue;
+		for (const assetId of Object.keys(layer.assetLayer.assets)) {
+			assetIds.add(assetId);
+		}
+	}
+
+	const files = new Array<Types.SceneExport_File>();
+
+	for (const assetId of Array.from(assetIds.keys())) {
+		const asset = await fileStorage.getItem(assetId);
+		files.push({
+			id: assetId,
+			payload: new Uint8Array(await asset.arrayBuffer())
+		})
+	}
+
+	const exp = Types.SceneExport.encode({ scene, files }).finish();
+
+	const blob = new Blob([exp], { type: 'application/octet-stream' });
+	const objectUrl = URL.createObjectURL(blob);
+	const link = document.createElement('a');
+	link.download = scene.name + '.scene';
+	link.href = objectUrl;
+	link.click();
+}
+
+export async function importScene() {
+	const fileDialogInput = document.createElement('input');
+	fileDialogInput.type = "file";
+	fileDialogInput.accept = '.scene';
+
+	fileDialogInput.click();
+	const file = await new Promise<File>((res, rej) => {
+		fileDialogInput.onchange = (e) => {
+			const files = (e!.target as HTMLInputElement).files;
+			if (!files || files.length === 0) {
+				return rej(new Error('Cancelled'));
+			}
+			res(files.item(0)!);
+		}
+	});
+
+	const exportBinary = await new Promise<ArrayBuffer>((res, rej) => {
+		const fr = new FileReader();
+		fr.onload = () => {
+			if (fr.result) {
+				res(fr.result as ArrayBuffer)
+			}
+		}
+		fr.onerror = (e) => {
+			rej(e);
+		}
+		fr.readAsArrayBuffer(file);
+	})
+
+	const exp = Types.SceneExport.decode(new Uint8Array(exportBinary));
+	const scene = exp.scene!;
+	scene.id = v4();
+
+	const existingScenes = (await Promise.all(
+		(await newStorage.storage.keys())
+			.map(k => newStorage.storage.getItem(k))
+	)).map((b) => Types.Scene.decode(b))
+
+	let nameCollisions = 1;
+	const originalName = scene.name;
+	for (const existingScene of existingScenes) {
+		if (existingScene.name === scene.name) {
+			scene.name = originalName + ` (${++nameCollisions})`;
+		}
+	}
+
+	const assetMap = new Map<string,string>();
+	for (const layer of scene.layers) {
+		if (!layer.assetLayer) continue;
+		for (const assetId of Object.keys(layer.assetLayer.assets)) {
+			const newAssetId = v4();
+			assetMap.set(assetId, newAssetId);
+			
+			layer.assetLayer.assets[assetId].id = newAssetId;
+			layer.assetLayer.assets[newAssetId] = layer.assetLayer.assets[assetId];
+			delete layer.assetLayer.assets[assetId];
+		}
+	}
+
+	for (const file of exp.files) {
+		const newAssetId = assetMap.get(file.id)!;
+		await fileStorage.setItem(newAssetId, new File([file.payload], newAssetId))
+	}
+	
+	await newStorage.storage.setItem(scene.id, Types.Scene.encode(scene).finish());
+	return scene;
+}
 
 window['garbageCollect'] = async function () {
 	const sceneIds = await newStorage.storage.keys();

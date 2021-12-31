@@ -102,3 +102,12 @@ message FogLayer {
     bool visibleOnTable = 3;
   }
 }
+
+message SceneExport {
+  Scene scene = 1;
+  repeated File files = 2;
+  message File {
+    string id = 1;
+    bytes payload = 2;
+  }
+}
