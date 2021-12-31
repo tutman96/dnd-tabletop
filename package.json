@@ -11,6 +11,7 @@
     "@rehooks/component-size": "^1.0.3",
     "konva": "^8.3.1",
     "lru-cache": "^6.0.0",
+    "protobufjs": "^6.11.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0",
@@ -26,7 +27,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "gen-proto": "protoc --plugin=./node_modules/.bin/protoc-gen-ts_proto --ts_proto_out=./src/ --ts_proto_opt=esModuleInterop=true ./protos/*"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -50,6 +52,7 @@
     "@types/react-dom": "^16.9.8",
     "@types/react-helmet": "^6.0.0",
     "@types/react-router-dom": "^5.1.5",
-    "@types/uuid": "^8.0.0"
+    "@types/uuid": "^8.0.0",
+    "ts-proto": "^1.96.1"
   }
 }

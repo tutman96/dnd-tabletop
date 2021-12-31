@@ -51,6 +51,24 @@ export function useTableSize(): [number | undefined, (newValue: number) => Promi
   return [tableSize, setTableSize];
 }
 
+export function useTableDimensions() {
+  const [size] = useTableSize();
+  const [resolution] = useTableResolution();
+
+  if (!resolution || !size) {
+    return undefined;
+  }
+
+  const theta = Math.atan(resolution.height / resolution.width);
+  const widthInch = size * Math.cos(theta);
+  const heightInch = size * Math.sin(theta);
+
+  return {
+    width: widthInch,
+    height: heightInch
+  }
+}
+
 export function usePlayAudioOnTable(): [boolean | undefined, (newValue: boolean) => Promise<void>] {
   const [playAudio, setPlayAudio] = useOneSettingValue<boolean>(Settings.PLAY_AUDIO_ON_TABLE);
   if (playAudio === null) {
@@ -62,27 +80,46 @@ export function usePlayAudioOnTable(): [boolean | undefined, (newValue: boolean)
   return [playAudio, setPlayAudio];
 }
 
+export async function tablePPI() {
+	let [resolution, size] = await Promise.all([
+		storage.storage.getItem<{width:number, height: number}>(Settings.TABLE_RESOLUTION),
+		storage.storage.getItem<number>(Settings.TABLE_SIZE)
+	])
+
+	if (!resolution || !size) {
+		resolution = { width: 3840, height: 2160 };
+	}
+  if (!size) {
+    size = 45;
+  }
+
+	const theta = Math.atan(resolution.height / resolution.width);
+  const widthInch = size * Math.cos(theta);
+  // const heightInch = tableSize * Math.sin(theta);
+
+  const ppi = resolution.width / widthInch;
+	return ppi;
+}
+
 export function useTablePPI(): number | null {
-  const [tableResolution] = useTableResolution();
-  const [tableSize] = useTableSize();
-  if (!tableResolution || !tableSize) {
+  const [resolution] = useTableResolution();
+  const tableDimensions = useTableDimensions();
+
+  if (!resolution || !tableDimensions) {
     return null;
   }
 
-  const theta = Math.atan(tableResolution.height / tableResolution.width);
-  const widthInch = tableSize * Math.cos(theta);
-  // const heightInch = tableSize * Math.sin(theta);
-
-  const ppi = tableResolution.width / widthInch;
+  const ppi = resolution.width / tableDimensions.width;
   return ppi;
 }
 
 const ScreenSizeSettings: React.FunctionComponent = () => {
   const [tableResolution, setTableResolution] = useTableResolution();
   const [tableSize, setTableSize] = useTableSize();
+  const tablePPI = useTablePPI();
   const [playAudioOnTable, setPlayAudioOnTable] = usePlayAudioOnTable();
 
-  if (tableResolution === undefined || tableSize === undefined) {
+  if (tableResolution === undefined || tableSize === undefined || tablePPI === null) {
     return null;
   }
 

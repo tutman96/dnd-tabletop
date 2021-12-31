@@ -6,13 +6,13 @@ import Tooltip from '@mui/material/Tooltip';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 
 import { ILayer } from "../layer";
-import { TableViewLayer } from "../layer/tableView";
 import ConfirmDialog from "../../partials/confirmDialog";
+import { TABLEVIEW_LAYER_ID } from "../layer/tableView";
 
 type Props = { layer?: ILayer; onDelete: () => void; };
 const DeleteLayerButton: React.FunctionComponent<Props> = ({ layer, onDelete }) => {
   const [showModal, setShowModal] = useState(false);
-  const disabled = !layer || layer.id === TableViewLayer.id;
+  const disabled = !layer || layer.id === TABLEVIEW_LAYER_ID;
 
   return (
     <>

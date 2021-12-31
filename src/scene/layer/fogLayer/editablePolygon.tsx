@@ -2,8 +2,9 @@ import React, { useRef, useEffect, useState } from 'react';
 import { KonvaNodeEvents, Line, Group, Shape } from 'react-konva';
 import Konva from 'konva';
 
-import { useKeyPress } from '../../utils';
-import theme from '../../theme';
+import { useKeyPress } from '../../../utils';
+import theme from '../../../theme';
+import * as Types from '../../../protos/scene';
 
 const ANCHOR_RADIUS = 7;
 const Anchor: React.FunctionComponent<{
@@ -52,21 +53,9 @@ const Anchor: React.FunctionComponent<{
   )
 }
 
-export enum PolygonType {
-  FOG,
-  FOG_CLEAR,
-  LIGHT_OBSTRUCTION
-}
-
-export interface IPolygon {
-  type: PolygonType,
-  verticies: Array<Konva.Vector2d>
-  visibleOnTable: boolean;
-}
-
 interface Props {
-  polygon: IPolygon
-  onUpdate: (polygon: IPolygon) => void
+  polygon: Types.FogLayer_Polygon
+  onUpdate: (polygon: Types.FogLayer_Polygon) => void
 
   adding: boolean
   onAdded?: () => void

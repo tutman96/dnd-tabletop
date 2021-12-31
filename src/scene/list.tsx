@@ -12,7 +12,8 @@ import IconButton from '@mui/material/IconButton'
 
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 
-import { IScene, sceneDatabase, createNewScene } from ".";
+import { sceneDatabase, createNewScene } from ".";
+import * as Types from '../protos/scene';
 
 import { SceneListItem } from "./listItem";
 
@@ -30,9 +31,7 @@ function LoadingScenes() {
   );
 }
 
-export
-
-  type Props = { onSceneSelect: (scene: IScene) => any, selectedSceneId: string };
+type Props = { onSceneSelect: (scene: Types.Scene) => any, selectedSceneId: string };
 const SceneList: React.FunctionComponent<Props> = ({ onSceneSelect, selectedSceneId }) => {
   const allScenes = useAllValues();
   const [searchText, setSearchText] = useState("");
@@ -42,8 +41,9 @@ const SceneList: React.FunctionComponent<Props> = ({ onSceneSelect, selectedScen
     if (allScenes) {
       scene.name = `Scene ${allScenes.size + 1}`;
     }
-    createItem(scene.id, scene);
-    onSceneSelect(scene);
+    createItem(scene.id, scene).then(() => {
+      onSceneSelect(scene);
+    });
   }
 
   if (allScenes === undefined) {

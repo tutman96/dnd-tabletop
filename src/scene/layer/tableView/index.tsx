@@ -8,40 +8,30 @@ import AnchorOutlinedIcon from '@mui/icons-material/AnchorOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 
-import { useTableResolution, useTablePPI } from '../../../settings';
-import { TableOptions } from '../..';
-import { ILayerComponentProps, ILayer } from '..';
-import LayerType from "../layerType";
+import { useTableDimensions } from '../../../settings';
 import ToolbarItem from '../toolbarItem';
 import ToolbarPortal from '../toolbarPortal';
 import ZoomToolbarItem from './zoomToolbarItem';
 import theme from '../../../theme';
+import * as Types from "../../../protos/scene";
 
-export const TableViewLayer = {
-  id: 'TABLE_VIEW',
-  name: 'TV/Table View',
-  type: LayerType.TABLE_VIEW,
-  visible: true
-} as ILayer;
+export const TABLEVIEW_LAYER_ID = 'TABLE_VIEW';
 
-export interface ITableViewLayer extends ILayer {
-  options: TableOptions
-}
-
-interface Props extends ILayerComponentProps<ITableViewLayer> {
+type Props = {
+  options: Types.TableOptions,
+  active: boolean;
   showBorder: boolean;
   showGrid: boolean;
+  onUpdate: (options: Types.TableOptions) => void
 }
+const TableViewOverlay: React.FunctionComponent<Props> = ({ options, active, showBorder, showGrid, onUpdate }) => {
+  const tableDimensions = useTableDimensions();
 
-const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showBorder, showGrid, onUpdate }) => {
-  const [tableResolution] = useTableResolution();
-  const ppi = useTablePPI();
-
-  const [localOptions, setLocalOptions] = useState(layer.options);
+  const [localOptions, setLocalOptions] = useState(options);
 
   useEffect(() => {
-    setLocalOptions(layer.options);
-  }, [layer.options, setLocalOptions])
+    setLocalOptions(options);
+  }, [options])
 
   const groupRef = useRef<Konva.Group>();
   const trRef = useRef<Konva.Transformer>();
@@ -62,67 +52,61 @@ const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showB
           label="Reset View"
           onClick={() => {
             onUpdate({
-              ...layer,
-              options: {
-                ...layer.options,
-                offset: { x: 0, y: 0 },
-                rotation: 0,
-                scale: 1
-              }
+              ...options,
+              offset: { x: 0, y: 0 },
+              rotation: 0,
+              scale: 1
             })
           }}
         />
         <ToolbarItem
-          label={layer.options.displayGrid ? 'Hide Grid' : 'Show Grid'}
-          icon={layer.options.displayGrid ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+          label={options.displayGrid ? 'Hide Grid' : 'Show Grid'}
+          icon={options.displayGrid ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
           onClick={() => {
             onUpdate({
-              ...layer,
-              options: {
-                ...layer.options,
-                displayGrid: !layer.options.displayGrid
-              }
+              ...options,
+              displayGrid: !options.displayGrid
             })
           }}
         />
         <ZoomToolbarItem
-          zoom={layer.options.scale}
+          zoom={options.scale}
           onUpdate={(zoom) => {
-            layer.options = {
-              ...layer.options,
+            onUpdate({
+              ...options,
               scale: zoom
-            }
-            onUpdate(layer);
+            });
           }}
         />
       </>
     );
-  }, [layer, onUpdate]);
+  }, [options, onUpdate]);
 
   // Only recalculate the line components when the position/size changes
   const lines = useMemo(() => {
-    if (!tableResolution || !ppi) {
+    if (!tableDimensions) {
       return null;
     }
 
-    const width = tableResolution.width / localOptions.scale;
-    const height = tableResolution.height / localOptions.scale;
+    const width = tableDimensions.width / localOptions.scale;
+    const height = tableDimensions.height / localOptions.scale;
+    const offset = localOptions.offset!;
 
     const l = new Array<{ start: Konva.Vector2d; end: Konva.Vector2d; }>();
     if (showGrid) {
-      const startX = Math.floor(localOptions.offset.x / ppi) * ppi;
-      for (let xOffset = startX; xOffset <= localOptions.offset.x + width; xOffset += ppi) {
+      const startX = Math.floor(offset.x);
+      for (let xOffset = startX; xOffset <= offset.x + width; xOffset++) {
         l.push({
-          start: { x: xOffset, y: localOptions.offset.y },
-          end: { x: xOffset, y: localOptions.offset.y + height }
+          start: { x: xOffset, y: offset.y },
+          end: { x: xOffset, y: offset.y + height }
         });
       }
 
-      const startY = Math.floor(localOptions.offset.y / ppi) * ppi;
-      for (let yOffset = startY; yOffset <= localOptions.offset.y + height; yOffset += ppi) {
+      const startY = Math.floor(offset.y);
+      for (let yOffset = startY; yOffset <= offset.y + height; yOffset++) {
         l.push({
-          start: { x: localOptions.offset.x, y: yOffset },
-          end: { x: localOptions.offset.x + width, y: yOffset }
+          start: { x: offset.x, y: yOffset },
+          end: { x: offset.x + width, y: yOffset }
         });
       }
     }
@@ -131,11 +115,11 @@ const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showB
       <Group
         clipFunc={(ctx: CanvasRenderingContext2D) => {
           ctx.beginPath();
-          ctx.rect(localOptions.offset.x, localOptions.offset.y, width, height);
+          ctx.rect(offset.x, offset.y, width, height);
           ctx.rotate(localOptions.rotation);
           ctx.closePath();
         }}
-        opacity={localOptions.displayGrid ? 1 : (active ? 0.5 : 0)}
+        opacity={localOptions.displayGrid ? (active ? 1 : 0.75) : (active ? 0.5 : 0)}
       >
         {l.map((line, i) => (
           <React.Fragment key={i}>
@@ -160,14 +144,14 @@ const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showB
         ))}
       </Group>
     );
-  }, [showGrid, localOptions, active, tableResolution, ppi])
+  }, [showGrid, localOptions, active, tableDimensions])
 
-  if (!tableResolution || ppi === null) {
+  if (!tableDimensions) {
     return null;
   }
 
-  const width = tableResolution.width;
-  const height = tableResolution.height;
+  const width = tableDimensions.width;
+  const height = tableDimensions.height;
 
   return (
     <Layer
@@ -179,8 +163,8 @@ const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showB
         <>
           <Group
             ref={groupRef as any}
-            x={localOptions.offset.x}
-            y={localOptions.offset.y}
+            x={localOptions.offset?.x ?? 0}
+            y={localOptions.offset?.y ?? 0}
             width={width}
             height={height}
             scaleX={1 / localOptions.scale}
@@ -206,8 +190,9 @@ const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showB
               });
             }}
             onDragEnd={() => {
-              layer.options = { ...localOptions };
-              onUpdate(layer)
+              onUpdate({
+                ...localOptions
+              })
             }}
             onTransform={() => {
               const node = groupRef.current!;
@@ -222,8 +207,7 @@ const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showB
               });
             }}
             onTransformEnd={() => {
-              layer.options = { ...localOptions };
-              onUpdate(layer);
+              onUpdate({ ...localOptions });
             }}
           >
             <Rect
@@ -231,7 +215,8 @@ const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showB
               height={height}
               stroke={active ? theme.palette.primary.dark : grey[300]}
               dash={[10, 10]}
-              strokeWidth={5}
+              strokeWidth={3}
+              strokeScaleEnabled={false}
               listening={active}
             />
           </Group>
@@ -242,6 +227,7 @@ const TableViewOverlay: React.FunctionComponent<Props> = ({ layer, active, showB
               enabledAnchors={['top-left', 'top-right', 'bottom-left', 'bottom-right']}
               ref={trRef as any}
               borderStrokeWidth={0}
+              ignoreStroke={true}
               anchorFill={theme.palette.primary.contrastText}
               anchorStroke={theme.palette.primary.dark}
             />

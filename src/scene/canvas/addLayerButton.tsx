@@ -11,14 +11,14 @@ import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import CloudOutlinedIcon from '@mui/icons-material/CloudOutlined';
 
-import LayerType from "../layer/layerType";
+import { Layer_LayerType } from "../../protos/scene";
 
-type Props = { onAdd: (type: LayerType) => void; };
+type Props = { onAdd: (type: Layer_LayerType) => void; };
 const AddLayerButton: React.FunctionComponent<Props> = ({ onAdd }) => {
   const [showMenu, setShowMenu] = useState(false);
   const anchorEl = useRef<HTMLElement>();
 
-  const addLayer = (type: LayerType) => () => {
+  const addLayer = (type: Layer_LayerType) => () => {
     setShowMenu(false);
     onAdd(type);
   }
@@ -39,11 +39,11 @@ const AddLayerButton: React.FunctionComponent<Props> = ({ onAdd }) => {
         open={showMenu}
         onClose={() => setShowMenu(false)}
       >
-        <MenuItem onClick={addLayer(LayerType.ASSETS)}>
+        <MenuItem onClick={addLayer(Layer_LayerType.ASSETS)}>
           <ListItemIcon><ImageOutlinedIcon /></ListItemIcon>
           <ListItemText primary="Asset Layer" />
         </MenuItem>
-        <MenuItem onClick={addLayer(LayerType.FOG)}>
+        <MenuItem onClick={addLayer(Layer_LayerType.FOG)}>
           <ListItemIcon><CloudOutlinedIcon /></ListItemIcon>
           <ListItemText primary="Fog Layer" />
         </MenuItem>

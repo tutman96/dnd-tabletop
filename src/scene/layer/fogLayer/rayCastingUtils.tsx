@@ -1,5 +1,6 @@
 import Konva from 'konva';
-import { IPolygon, PolygonType } from "../editablePolygon";
+
+import * as Types from '../../../protos/scene';
 
 type Segment = {
   a: Konva.Vector2d,
@@ -56,7 +57,7 @@ export function getIntersection(ray: Segment, segment: Segment): Intersection | 
   };
 }
 
-export function getVisibilityPolygon(position: Konva.Vector2d, polygons: Array<IPolygon>): IPolygon {
+export function getVisibilityPolygon(position: Konva.Vector2d, polygons: Array<Types.FogLayer_Polygon>): Types.FogLayer_Polygon {
   // Get all unique points
   const points = new Array<Konva.Vector2d & { angle?: number }>();
   const segments = new Array<Segment>();
@@ -121,7 +122,7 @@ export function getVisibilityPolygon(position: Konva.Vector2d, polygons: Array<I
 
   // Sort intersects by angle
   return {
-    type: PolygonType.FOG_CLEAR, // TODO: change
+    type: Types.FogLayer_Polygon_PolygonType.FOG_CLEAR, // TODO: change
     visibleOnTable: true,
     verticies: intersects.sort(function (a, b) {
       return a.angle! - b.angle!;

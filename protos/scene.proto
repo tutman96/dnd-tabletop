@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+message Scene {
+  string id = 1;
+  string name = 2;
+  uint64 version = 3;
+  TableOptions table = 4;
+  repeated Layer layers = 5;
+}
+
+message TableOptions {
+  bool displayGrid = 1;
+  Vector2d offset = 2;
+  double rotation = 3;
+  double scale = 4;
+}
+
+message Vector2d {
+  double x = 1;
+  double y = 2;
+}
+
+message Layer {
+  oneof layerType {
+    AssetLayer assetLayer = 1;
+    FogLayer fogLayer = 2;
+  }
+  enum LayerType {
+    ASSETS = 0;
+    FOG = 1;
+  }
+}
+
+message AssetLayer {
+  string id = 1;
+  string name = 3;
+  bool visible = 4;
+  Layer.LayerType type = 5;
+
+  map<string, Asset> assets = 6;
+  message Asset {
+    string id = 1;
+
+    AssetType type = 2;
+    enum AssetType {
+      IMAGE = 0;
+      VIDEO = 1;
+    }
+
+    AssetSize size = 3;
+    message AssetSize {
+      double width = 1;
+      double height = 2;
+    }
+
+    AssetTransform transform = 4;
+    message AssetTransform {
+      double x = 1;
+      double y = 2;
+      double rotation = 3;
+      double width = 4;
+      double height = 5;
+    }
+
+    optional AssetCalibration calibration = 5;
+    message AssetCalibration {
+      float xOffset = 1;
+      float yOffset = 2;
+      float ppiX = 3;
+      float ppiY = 4;
+    }
+
+    optional bool snapToGrid = 6;
+  }
+}
+
+message FogLayer {
+  string id = 1;
+  string name = 3;
+  bool visible = 4;
+  Layer.LayerType type = 5;
+
+  repeated LightSource lightSources = 6;
+  message LightSource {
+    Vector2d position = 1;
+    float brightLightDistance = 2;
+    float dimLightDistance = 3;
+  }
+
+  repeated Polygon obstructionPolygons = 7;
+  repeated Polygon fogPolygons = 8;
+  repeated Polygon fogClearPolygons = 9;
+  message Polygon {
+    PolygonType type = 1;
+    enum PolygonType {
+      FOG = 0;
+      FOG_CLEAR = 1;
+      LIGHT_OBSTRUCTION = 2;
+    }
+
+    repeated Vector2d verticies = 2;
+    bool visibleOnTable = 3;
+  }
+}
