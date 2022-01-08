@@ -57,7 +57,9 @@ const Menu: React.FunctionComponent<Props> = () => {
 					position: 'absolute',
 					top: 0, left: 0,
 					margin: theme.spacing(1),
-					width: '100%', maxWidth: theme.spacing(64)
+					width: '100%', maxWidth: theme.spacing(64),
+					height: '100%',
+					display: 'flex', flexDirection: 'column'
 				}}
 					elevation={2}
 				>
@@ -71,7 +73,7 @@ const Menu: React.FunctionComponent<Props> = () => {
 							<Tab label="Settings" value={TabOptions.SETTINGS} />
 						</Tabs>
 					</Box>
-					<CardContent>
+					<CardContent sx={{overflow: 'auto'}}>
 						<Box sx={{ display: selectedTab === TabOptions.SCENES ? 'block' : 'none' }}>
 							<SceneList onSceneSelect={onSceneSelect} selectedSceneId={currentSelectedSceneId} />
 						</Box>
