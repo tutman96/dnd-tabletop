@@ -58,7 +58,7 @@ const Menu: React.FunctionComponent<Props> = () => {
 					top: 0, left: 0,
 					margin: theme.spacing(1),
 					width: '100%', maxWidth: theme.spacing(64),
-					height: '100%',
+					maxHeight: '100%',
 					display: 'flex', flexDirection: 'column'
 				}}
 					elevation={2}
