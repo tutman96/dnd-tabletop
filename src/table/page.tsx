@@ -2,53 +2,90 @@ import React, { useState, useEffect } from 'react';
 import { Stage } from 'react-konva';
 import { Helmet } from 'react-helmet';
 
-import { settingsDatabase, Settings, useTableResolution, useTablePPI } from '../settings';
-import { sceneDatabase } from '../scene';
 import { flattenLayer, LayerTypeToComponent } from '../scene/layer';
 import TableViewOverlay from '../scene/layer/tableView';
 import * as Types from '../protos/scene';
+import * as ExternalTypes from '../protos/external';
 
-const { useOneValue } = sceneDatabase();
-const { useOneValue: useOneSettingValue } = settingsDatabase();
+import { useConnection, useConnectionState, useRequestHandler } from '../external/hooks';
+import { ChannelState } from '../external/abstractChannel';
+import { useTableResolution, useTableSize } from '../settings';
+
+function useDisplayedScene() {
+	const [scene, setScene] = useState<Types.Scene | null>(null);
+	const connection = useConnection();
+	useEffect(() => {
+		connection.connect().then(() => console.log('connected'))
+		return () => { connection.disconnect() }
+	}, [connection])
+
+	useRequestHandler(async (request) => {
+		if (request.displaySceneRequest) {
+			setScene(request.displaySceneRequest.scene!);
+			return {
+				ackResponse: {},
+				getAssetResponse: undefined
+			}
+		}
+		return null;
+	})
+
+	return scene;
+}
+
+function useTableConfiguration(): ExternalTypes.GetTableConfigurationResponse | undefined {
+	const connection = useConnection();
+	const connectionState = useConnectionState();
+	const [, setStoredTableResolution] = useTableResolution();
+	const [, setStoredTableSize] = useTableSize();
+	const [tableConfiguration, setTableConfiguration] = useState<ExternalTypes.GetTableConfigurationResponse>();
+
+	useEffect(() => {
+		if (tableConfiguration) return;
+		
+		if (connectionState === ChannelState.CONNECTED) {
+			connection.request({ getTableConfigurationRequest: {} }).then((res) => {
+				setTableConfiguration(res.getTableConfigurationResponse!)
+				setStoredTableResolution(res.getTableConfigurationResponse!.resolution!);
+				setStoredTableSize(res.getTableConfigurationResponse!.size);
+			})
+		}
+		else if (connectionState === ChannelState.CONNECTING) {
+			connection.request({ helloRequest: {} })
+		}
+	}, [connection, connectionState, tableConfiguration, setStoredTableResolution, setStoredTableSize])
+
+	return tableConfiguration;
+}
 
 type Props = {};
 const TablePage: React.FunctionComponent<Props> = () => {
-	const [displayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
-	const [tableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
-	const [tableResolution] = useTableResolution();
+	const tableConfiguration = useTableConfiguration();
+	const tableScene = useDisplayedScene();
 
-	const [scene] = useOneValue(displayedScene as string);
-	const [tableScene, setTableScene] = useState<Types.Scene | null>(null);
-
-	const tablePPI = useTablePPI();
-
-	useEffect(() => {
-		if (scene === null || displayedScene === null) {
-			setTableScene(null)
-		}
-		else if (!tableFreeze && scene !== undefined) {
-			if (scene === null) setTableScene(null)
-			else if (scene.version !== tableScene?.version) {
-				setTableScene(scene);
-			}
-		}
-	}, [displayedScene, scene, tableScene, tableFreeze])
-
-	if (!tableResolution || !tablePPI) {
+	if (!tableConfiguration) {
 		return null;
 	}
+
+	console.log(tableConfiguration.resolution)
+
+	const theta = Math.atan(tableConfiguration.resolution!.height / tableConfiguration.resolution!.width);
+	const widthInch = tableConfiguration.size * Math.cos(theta);
+	// const heightInch = tableSize * Math.sin(theta);
+
+	const ppi = tableConfiguration.resolution!.width / widthInch;
 
 	return (
 		<>
 			<Helmet title="D&amp;D Table View" />
 			{tableScene &&
 				<Stage
-					width={tableResolution.width}
-					height={tableResolution.height}
+					width={tableConfiguration.resolution!.width}
+					height={tableConfiguration.resolution!.height}
 					offsetX={tableScene.table!.offset!.x}
 					offsetY={tableScene.table!.offset!.y}
-					scaleX={tableScene.table!.scale * tablePPI}
-					scaleY={tableScene.table!.scale * tablePPI}
+					scaleX={tableScene.table!.scale * ppi}
+					scaleY={tableScene.table!.scale * ppi}
 				>
 					{tableScene.layers.map(flattenLayer).map((layer) => {
 						const Component = LayerTypeToComponent[layer.type];

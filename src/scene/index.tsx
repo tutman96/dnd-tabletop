@@ -27,7 +27,7 @@ export function sceneDatabase() {
 					.map(([sceneId, buf]) => [sceneId, Types.Scene.decode(buf)])
 			)
 		},
-		useOneValue: (key: string): [Types.Scene | null | undefined, (newData: Types.Scene) => void] => {
+		useOneValue: (key: string | null): [Types.Scene | null | undefined, (newData: Types.Scene) => void] => {
 			const [newValue, setNewValue] = newStorage.useOneValue(key);
 			const [localValue, setLocalValue] = useState<Types.Scene>()
 
