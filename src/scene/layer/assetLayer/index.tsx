@@ -4,8 +4,8 @@ import Konva from 'konva';
 
 import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
-import GridOnOutlinedIcon from '@mui/icons-material/GridOnOutlined';
-import GridOffOutlinedIcon from '@mui/icons-material/GridOffOutlined';
+import GridGoldenratioOutlinedIcon from '@mui/icons-material/GridGoldenratioOutlined';
+import Grid3x3OutlinedIcon from '@mui/icons-material/Grid3x3Outlined';
 
 import { ILayerComponentProps } from '..';
 import AssetComponent from './asset';
@@ -94,6 +94,7 @@ const AssetLayer: React.FunctionComponent<Props> = ({ layer, onUpdate, active: l
 						onUpdate(layer);
 					}}
 				/>
+				<ToolbarSeparator />
 				<AssetSizer
 					asset={selectedAsset}
 					onUpdate={(asset) => {
@@ -105,7 +106,7 @@ const AssetLayer: React.FunctionComponent<Props> = ({ layer, onUpdate, active: l
 				<ToolbarItem
 					label={!!selectedAsset?.snapToGrid ? 'Free Move' : 'Snap to Grid'}
 					disabled={!selectedAsset}
-					icon={!!selectedAsset?.snapToGrid ? <GridOffOutlinedIcon /> : <GridOnOutlinedIcon />}
+					icon={!!selectedAsset?.snapToGrid ? <Grid3x3OutlinedIcon /> : <GridGoldenratioOutlinedIcon />}
 					onClick={() => {
 						if (!selectedAsset) return;
 						selectedAsset.snapToGrid = !selectedAsset.snapToGrid;

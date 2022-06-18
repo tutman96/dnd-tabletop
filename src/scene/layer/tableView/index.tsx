@@ -5,8 +5,8 @@ import { Layer, Rect, Line, Group, Transformer } from 'react-konva';
 import { grey } from '@mui/material/colors';
 
 import AnchorOutlinedIcon from '@mui/icons-material/AnchorOutlined';
-import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+import GridOnOutlined from '@mui/icons-material/GridOnOutlined';
+import GridOffOutlined from '@mui/icons-material/GridOffOutlined';
 
 import { useTableDimensions } from '../../../settings';
 import ToolbarItem from '../toolbarItem';
@@ -61,7 +61,7 @@ const TableViewOverlay: React.FunctionComponent<Props> = ({ options, active, sho
         />
         <ToolbarItem
           label={options.displayGrid ? 'Hide Grid' : 'Show Grid'}
-          icon={options.displayGrid ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+          icon={options.displayGrid ? <GridOffOutlined /> : <GridOnOutlined />}
           onClick={() => {
             onUpdate({
               ...options,

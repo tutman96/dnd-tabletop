@@ -123,6 +123,7 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
           }}
           keyboardShortcuts={['w']}
         />
+        <ToolbarSeparator />
         <ToolbarItem
           label={selectedPolygon && selectedPolygon.visibleOnTable ? 'Hide on Table' : 'Show on Table'}
           disabled={!selectedPolygon}

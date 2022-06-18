@@ -8,7 +8,7 @@ import DialogActions from '@mui/material/DialogActions';
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 
-import BrightnessMediumOutlinedIcon from '@mui/icons-material/BrightnessMediumOutlined';
+import SettingsBrightnessOutlinedIcon from '@mui/icons-material/SettingsBrightnessOutlined';
 
 import ToolbarItem from '../toolbarItem';
 import InputGroup from '../../../partials/inputGroup';
@@ -66,7 +66,7 @@ const EditLightToolbarItem: React.FunctionComponent<Props> = ({ light, onUpdate 
   return (
     <>
       <ToolbarItem
-        icon={<BrightnessMediumOutlinedIcon />}
+        icon={<SettingsBrightnessOutlinedIcon />}
         label="Configure"
         keyboardShortcuts={['r']}
         disabled={!light}
