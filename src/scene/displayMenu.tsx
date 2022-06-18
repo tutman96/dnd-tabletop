@@ -4,6 +4,7 @@ import Button from '@mui/material/Button'
 
 import { useConnection, useConnectionState } from '../external/hooks';
 import { ChannelState } from '../external/abstractChannel';
+import Link from '@mui/material/Link';
 
 const DisplayMenu: React.FunctionComponent = () => {
   const connection = useConnection();
@@ -14,13 +15,18 @@ const DisplayMenu: React.FunctionComponent = () => {
   }, [connection])
 
   if (connectionState === ChannelState.CONNECTED) {
-    return <Button onClick={() => connection.disconnect()}>Disconnect Local Display</Button>
+    return <Button onClick={() => connection.disconnect()}>Disconnect Fullscreen Display</Button>
   }
 
   if (connectionState === ChannelState.CONNECTING) {
     return <Button disabled>Connecting...</Button>
   }
-  return <Button onClick={connect}>Open Local Display</Button>
+  return (
+    <>
+      <Link href="#/table" target="_blank" >Open Display as Tab</Link>
+      <Button onClick={connect}>Open Fullscreen Display</Button>
+    </>
+  );
 }
 
 export default DisplayMenu;

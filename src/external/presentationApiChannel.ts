@@ -39,7 +39,7 @@ export default class PresentationApiChannel extends AbstractChannel {
       }
     }
     else {
-      const request = new PresentationRequest(window.location.pathname + '#/table');
+      const request = new PresentationRequest(window.location.pathname + '#/table/presentation');
       const availability = await request.getAvailability();
       if (!availability.value) {
         await Promise.race([

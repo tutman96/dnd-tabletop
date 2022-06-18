@@ -2,9 +2,10 @@ import React, { useEffect } from "react";
 import { Routes as ReactRouterRoutes, Route, useNavigate } from "react-router-dom";
 
 import ScenePage from "./scene/page";
-import TablePage from "./table/page";
+import PresentationPage from "./table/presentation";
 import { createNewScene, sceneDatabase } from "./scene";
 import { Settings, settingsDatabase } from "./settings";
+import TablePage from './table/table';
 
 const { useAllValues: useAllScenes, createItem } = sceneDatabase();
 const { useOneValue: useOneSettingValue } = settingsDatabase();
@@ -43,6 +44,7 @@ const Routes: React.FunctionComponent = () => {
 			<Route path="/" element={<Redirect />} />
 			<Route path="/scenes/*" element={<ScenePage />} />
 			<Route path="/table" element={<TablePage />} />
+			<Route path="/table/presentation" element={<PresentationPage />} />
 		</ReactRouterRoutes>
 	)
 }

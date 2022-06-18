@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Stage } from 'react-konva';
-import { Helmet } from 'react-helmet';
 
-import { flattenLayer, LayerTypeToComponent } from '../scene/layer';
-import TableViewOverlay from '../scene/layer/tableView';
 import * as Types from '../protos/scene';
 import * as ExternalTypes from '../protos/external';
 
 import { useConnection, useConnectionState, useRequestHandler } from '../external/hooks';
 import { ChannelState } from '../external/abstractChannel';
 import { useTableResolution, useTableSize } from '../settings';
+import TableCanvas from './canvas';
 
 function useDisplayedScene() {
 	const [scene, setScene] = useState<Types.Scene | null>(null);
@@ -59,7 +56,7 @@ function useTableConfiguration(): ExternalTypes.GetTableConfigurationResponse | 
 }
 
 type Props = {};
-const TablePage: React.FunctionComponent<Props> = () => {
+const PresentationPage: React.FunctionComponent<Props> = () => {
 	const tableConfiguration = useTableConfiguration();
 	const tableScene = useDisplayedScene();
 
@@ -67,50 +64,9 @@ const TablePage: React.FunctionComponent<Props> = () => {
 		return null;
 	}
 
-	console.log(tableConfiguration.resolution)
-
-	const theta = Math.atan(tableConfiguration.resolution!.height / tableConfiguration.resolution!.width);
-	const widthInch = tableConfiguration.size * Math.cos(theta);
-	// const heightInch = tableSize * Math.sin(theta);
-
-	const ppi = tableConfiguration.resolution!.width / widthInch;
-
 	return (
-		<>
-			<Helmet title="D&amp;D Table View" />
-			{tableScene &&
-				<Stage
-					width={tableConfiguration.resolution!.width}
-					height={tableConfiguration.resolution!.height}
-					offsetX={tableScene.table!.offset!.x}
-					offsetY={tableScene.table!.offset!.y}
-					scaleX={tableScene.table!.scale * ppi}
-					scaleY={tableScene.table!.scale * ppi}
-				>
-					{tableScene.layers.map(flattenLayer).map((layer) => {
-						const Component = LayerTypeToComponent[layer.type];
-						if (!Component || layer.visible === false) return null;
-						return (
-							<Component
-								key={layer.id}
-								isTable={true}
-								layer={layer}
-								onUpdate={() => { }}
-								active={false}
-							/>
-						);
-					})
-					}
-					<TableViewOverlay
-						options={tableScene.table!}
-						active={false}
-						onUpdate={() => { }}
-						showBorder={false}
-						showGrid={tableScene.table!.displayGrid}
-					/>
-				</Stage>
-			}
-		</>
+		<TableCanvas tableConfiguration={tableConfiguration} tableScene={tableScene} />
 	)
 }
-export default TablePage;
+export default PresentationPage;
+
