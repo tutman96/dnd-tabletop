@@ -8,7 +8,6 @@ import DraggableStage from './draggableStage';
 import { LayerTypeToComponent, ILayer, createNewLayer, flattenLayer, unflattenLayer } from '../layer';
 import { deleteLayer } from '../layer';
 import LayerList from './layerList';
-import { ToolbarPortalProvider } from '../layer/toolbarPortal';
 import TableViewOverlay, { TABLEVIEW_LAYER_ID } from '../layer/tableView';
 import { useTableDimensions } from '../../settings';
 import * as Types from '../../protos/scene';
@@ -134,52 +133,50 @@ const Canvas: React.FunctionComponent<Props> = ({ scene, onUpdate }) => {
 
 	return (
 		<>
-			<ToolbarPortalProvider>
-				<Box
-					ref={containerRef as any}
-					sx={{
-						display: 'flex',
-						flexGrow: 2,
-						height: '100%'
-					}}
-				>
-					{containerSize.height !== 0 && tableDimensions ? (
-						<DraggableStage
-							width={containerSize.width || 1}
-							height={containerSize.height || 1}
-							initialZoom={initialZoom}
-						>
-							{
-								scene.layers.map(flattenLayer).map((layer) => {
-									const Component = LayerTypeToComponent[layer.type];
-									if (!Component || layer.visible === false) return null;
-									return (
-										<Component
-											key={layer.id}
-											layer={layer}
-											isTable={false}
-											onUpdate={onLayerUpdate}
-											active={activeLayerId === layer.id}
-										/>
-									);
+			<Box
+				ref={containerRef as any}
+				sx={{
+					display: 'flex',
+					flexGrow: 2,
+					height: '100%'
+				}}
+			>
+				{containerSize.height !== 0 && tableDimensions ? (
+					<DraggableStage
+						width={containerSize.width || 1}
+						height={containerSize.height || 1}
+						initialZoom={initialZoom}
+					>
+						{
+							scene.layers.map(flattenLayer).map((layer) => {
+								const Component = LayerTypeToComponent[layer.type];
+								if (!Component || layer.visible === false) return null;
+								return (
+									<Component
+										key={layer.id}
+										layer={layer}
+										isTable={false}
+										onUpdate={onLayerUpdate}
+										active={activeLayerId === layer.id}
+									/>
+								);
+							})
+						}
+						<TableViewOverlay
+							options={scene.table!}
+							active={activeLayerId === TABLEVIEW_LAYER_ID}
+							onUpdate={(options) => {
+								onUpdate({
+									...scene,
+									table: options
 								})
-							}
-							<TableViewOverlay
-								options={scene.table!}
-								active={activeLayerId === TABLEVIEW_LAYER_ID}
-								onUpdate={(options) => {
-									onUpdate({
-										...scene,
-										table: options
-									})
-								}}
-								showBorder={true}
-								showGrid={true}
-							/>
-						</DraggableStage>
-					) : null}
-				</Box>
-			</ToolbarPortalProvider>
+							}}
+							showBorder={true}
+							showGrid={true}
+						/>
+					</DraggableStage>
+				) : null}
+			</Box>
 
 			<LayerList
 				layers={layers}

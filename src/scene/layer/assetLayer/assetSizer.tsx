@@ -32,7 +32,7 @@ type Props = {
   onUpdate: (asset: Types.AssetLayer_Asset) => void
 };
 
-const AssetSizer: React.SFC<Props> = ({ asset, onUpdate }) => {
+const AssetSizer: React.FunctionComponent<Props> = ({ asset, onUpdate }) => {
   const [showModal, setShowModal] = useState(false);
   const [calibration, setCalibration] = useState<Types.AssetLayer_Asset_AssetCalibration>();
 

@@ -25,3 +25,9 @@ export const theme = createTheme({
   }
 });
 export default theme;
+
+export const BACKDROP_STYLE = {
+  backgroundColor: 'rgba(0,0,0,0.7)',
+  backdropFilter: 'blur(2px)',
+  boxShadow: theme.shadows[10]
+}

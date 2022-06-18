@@ -12,7 +12,7 @@ import HomeOutlinedIcon from '@mui/icons-material/HomeOutlined';
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
 import RemoveOutlinedIcon from '@mui/icons-material/RemoveOutlined';
 
-import theme from '../../theme';
+import theme, { BACKDROP_STYLE } from '../../theme';
 
 const PAN_CONTROL_RADIUS = theme.spacing(10);
 
@@ -55,11 +55,10 @@ const PanButton: React.FunctionComponent<{ onActivateRepeat?: (multiplier: numbe
 
 type Vector3d = Konva.Vector2d & { z: number };
 type Props = { onPanZoom: (direction: Vector3d) => void, onHome: () => void };
-const PanZoomControl: React.SFC<Props> = ({ onPanZoom, onHome }) => {
+const PanZoomControl: React.FunctionComponent<Props> = ({ onPanZoom, onHome }) => {
   const controlBase = {
     display: 'flex',
-    backgroundColor: theme.palette.grey[900],
-    boxShadow: theme.shadows[10]
+    ...BACKDROP_STYLE
   };
 
   const controlButtonBase = {
@@ -75,7 +74,8 @@ const PanZoomControl: React.SFC<Props> = ({ onPanZoom, onHome }) => {
         padding: theme.spacing(2),
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center'
+        alignItems: 'center',
+        top: theme.spacing(7)
       }}
     >
       {/* Cardinal Directions (X/Y) and Home */}

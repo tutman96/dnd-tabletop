@@ -5,7 +5,7 @@ import SceneEditor from "../scene/editor";
 import Menu from "./menu";
 
 type Props = {};
-const ScenePage: React.SFC<Props> = () => {
+const ScenePage: React.FunctionComponent<Props> = () => {
 
   return (
     <>

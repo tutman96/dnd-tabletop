@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Layer } from "react-konva";
 import Konva from 'konva';
 
-import Box from '@mui/material/Box';
-
 import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import GridOnOutlinedIcon from '@mui/icons-material/GridOnOutlined';
@@ -12,7 +10,7 @@ import GridOffOutlinedIcon from '@mui/icons-material/GridOffOutlined';
 import { ILayerComponentProps } from '..';
 import AssetComponent from './asset';
 import { deleteAsset, getNewAssets } from '../../asset';
-import ToolbarItem from '../toolbarItem';
+import ToolbarItem, { ToolbarSeparator } from '../toolbarItem';
 import ToolbarPortal from '../toolbarPortal';
 import AssetSizer, { calculateCalibratedTransform } from './assetSizer';
 import { usePlayAudioOnTable } from '../../../settings';
@@ -114,7 +112,7 @@ const AssetLayer: React.FunctionComponent<Props> = ({ layer, onUpdate, active: l
 						onUpdate(layer)
 					}}
 				/>
-				<Box sx={{ flexGrow: 2 }} />
+				<ToolbarSeparator />
 				<ToolbarItem
 					icon={<DeleteOutlinedIcon />}
 					label="Delete Asset"

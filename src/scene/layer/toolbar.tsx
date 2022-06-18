@@ -8,19 +8,26 @@ const Toolbar: React.FunctionComponent = ({ children }) => {
 	return (
 		<Box
 			sx={{
-				position: 'relative',
+				position: 'absolute',
 				top: 0, left: 0, right: 0,
-				minHeight: theme.spacing(5),
-				backgroundColor: theme.palette.grey[800],
-				boxShadow: theme.shadows[5],
-				paddingX: theme.spacing(1),
+				display: 'flex',
+				justifyContent: 'center',
+				alignItems: 'center',
 				zIndex: theme.zIndex.appBar,
-				'> span': {
-					display: 'flex'
-				}
+				height: theme.spacing(8),
+				pointerEvents: 'none',
 			}}
 		>
-			{children}
+			<Box
+				sx={{
+					pointerEvents: 'initial',
+					'> span': {
+						display: 'flex'
+					}
+				}}
+			>
+				{children}
+			</Box>
 		</Box>
 	);
 }

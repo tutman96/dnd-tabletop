@@ -1,13 +1,15 @@
 import React, { useEffect, MouseEvent, ReactNode } from "react";
 
-import Button, { ButtonProps } from "@mui/material/Button";
+import Divider from "@mui/material/Divider";
+import IconButton, { IconButtonProps } from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import theme from "../../theme";
 
 const SHORTCUT_ICON_MAPPING = {
 	'Delete': '\u232B'
 } as { [key: string]: string };
 
-type Props = Partial<ButtonProps> & { keyboardShortcuts?: string[], label: string, icon: ReactNode, onClick?: (e: MouseEvent<HTMLButtonElement> | KeyboardEvent) => void };
+type Props = Partial<IconButtonProps> & { keyboardShortcuts?: string[], label: string, icon: ReactNode, onClick?: (e: MouseEvent<HTMLButtonElement> | KeyboardEvent) => void };
 const ToolbarItem: React.FunctionComponent<Props> = ({ label, icon, keyboardShortcuts, ...otherProps }) => {
 
 	useEffect(() => {
@@ -25,17 +27,27 @@ const ToolbarItem: React.FunctionComponent<Props> = ({ label, icon, keyboardShor
 	}, [keyboardShortcuts, otherProps.onClick])
 
 	return (
-		<Button {...otherProps} startIcon={icon} size="large"
-			sx={{
-				height: theme.spacing(5),
-				color: theme.palette.grey[200],
-				'&.Mui-disabled': {
-					color: theme.palette.grey[600]
-				}
-			}}
-		>
-			{label + (keyboardShortcuts && keyboardShortcuts.length ? ` (${SHORTCUT_ICON_MAPPING[keyboardShortcuts[0]] || keyboardShortcuts[0]})` : '')}
-		</Button>
+		<Tooltip title={label + (keyboardShortcuts && keyboardShortcuts.length ? ` (${SHORTCUT_ICON_MAPPING[keyboardShortcuts[0]] || keyboardShortcuts[0]})` : '')}>
+			<IconButton
+				{...otherProps}
+				size="medium"
+				sx={{
+					height: theme.spacing(5),
+					color: theme.palette.grey[200],
+					'&.Mui-disabled': {
+						color: theme.palette.grey[600]
+					}
+				}}
+			>
+				{icon}
+			</IconButton>
+		</Tooltip>
 	)
 }
 export default ToolbarItem;
+
+export const ToolbarSeparator: React.FunctionComponent = () => {
+	return (
+		<Divider sx={{height: theme.spacing(5)}} orientation='vertical' />
+	)
+}

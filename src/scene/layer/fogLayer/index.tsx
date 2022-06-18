@@ -2,7 +2,6 @@ import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import { Layer } from 'react-konva';
 import Konva from 'konva';
 
-import Box from '@mui/material/Box';
 import { deepPurple } from '@mui/material/colors';
 
 import CloudOutlinedIcon from '@mui/icons-material/CloudOutlined';
@@ -15,7 +14,7 @@ import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 
 import { ILayerComponentProps } from '..';
 import ToolbarPortal from '../toolbarPortal';
-import ToolbarItem from '../toolbarItem';
+import ToolbarItem, { ToolbarSeparator } from '../toolbarItem';
 import EditablePolygon from './editablePolygon';
 import { useTablePPI } from '../../../settings';
 import RayCastRevealPolygon, { defaultLightSource } from './rayCastRevealPolygon';
@@ -144,7 +143,7 @@ const FogLayer: React.FunctionComponent<Props> = ({ layer, isTable, onUpdate, ac
             onUpdate({ ...layer });
           }}
         />
-        <Box sx={{ flexGrow: 2 }} />
+        <ToolbarSeparator />
         <ToolbarItem
           icon={<DeleteOutlinedIcon />}
           label="Delete"

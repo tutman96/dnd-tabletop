@@ -22,7 +22,7 @@ import { ILayer } from "../layer";
 import EditLayerButton from "./editLayerButton";
 import DeleteLayerButton from "./deleteLayerButton";
 import AddLayerButton from "./addLayerButton";
-import theme from "../../theme";
+import theme, { BACKDROP_STYLE } from "../../theme";
 import * as Types from "../../protos/scene";
 import { TABLEVIEW_LAYER_ID } from "../layer/tableView";
 
@@ -46,8 +46,8 @@ const LayerList: React.FunctionComponent<Props> = ({ layers, activeLayerId, setA
 		<Card sx={{
 			width: theme.spacing(38),
 			position: 'absolute',
+			...BACKDROP_STYLE,
 			right: theme.spacing(2), bottom: theme.spacing(2),
-			boxShadow: theme.shadows[10]
 		}}	>
 			<List dense={true}>
 				<ListItemButton

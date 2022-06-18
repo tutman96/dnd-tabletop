@@ -15,7 +15,7 @@ const PAN_SPEED = 1 / 1;
 const KEYBOARD_ZOOM_SPEED = 1.15;
 
 type Props = { initialZoom?: number, width: number, height: number, sx?: SxProps };
-const DraggableStage: React.SFC<Props> = ({ initialZoom = 1, width, height, sx, children }) => {
+const DraggableStage: React.FunctionComponent<Props> = ({ initialZoom = 1, width, height, sx, children }) => {
 	const stageRef = useRef<Konva.Stage>();
 
 	const zoomStageFromMiddle = useCallback((deltaZ: number) => {

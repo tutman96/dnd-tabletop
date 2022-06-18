@@ -15,11 +15,12 @@ import PauseIcon from '@mui/icons-material/Pause';
 import { sceneDatabase } from ".";
 import Canvas from "./canvas";
 import { settingsDatabase, Settings, useTableResolution, useTableSize } from "../settings";
-import theme from "../theme";
+import theme, { BACKDROP_STYLE } from "../theme";
 import * as Types from '../protos/scene';
 import { useConnection, useConnectionState, useRequestHandler } from "../external/hooks";
 import { ChannelState } from "../external/abstractChannel";
 import { fileStorage } from "./asset";
+import { ToolbarPortalProvider } from './layer/toolbarPortal';
 
 const { useOneValue } = sceneDatabase();
 const { useOneValue: useOneSettingValue } = settingsDatabase();
@@ -152,8 +153,10 @@ const SceneEditor: React.FunctionComponent<Props> = () => {
 			{scene && (<>
 				<Toolbar sx={{
 					zIndex: theme.zIndex.appBar,
-					backgroundColor: theme.palette.grey[900],
-					display: 'flex',
+					...BACKDROP_STYLE,
+					position: 'absolute',
+					top: 0, left: 0,
+					width: '100%',
 					alignItems: 'center',
 					justifyContent: 'space-between'
 				}}>
@@ -162,7 +165,9 @@ const SceneEditor: React.FunctionComponent<Props> = () => {
 					<Box><TableDisplayButton scene={scene} /></Box>
 				</Toolbar>
 
-				<Canvas scene={scene} onUpdate={updateScene} />
+				<ToolbarPortalProvider>
+					<Canvas scene={scene} onUpdate={updateScene} />
+				</ToolbarPortalProvider>
 			</>
 			)}
 		</Box >
