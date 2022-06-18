@@ -2,11 +2,14 @@ import React, { useCallback } from 'react';
 
 import Button from '@mui/material/Button'
 
+import TabIcon from '@mui/icons-material/Tab'
+import CancelPresentation from '@mui/icons-material/CancelPresentation'
+import PresentToAll from '@mui/icons-material/PresentToAll'
+
 import { useConnection, useConnectionState } from '../external/hooks';
 import { ChannelState } from '../external/abstractChannel';
-import Link from '@mui/material/Link';
 
-const DisplayMenu: React.FunctionComponent = () => {
+const FullscreenButton: React.FunctionComponent = () => {
   const connection = useConnection();
   const connectionState = useConnectionState();
 
@@ -15,16 +18,21 @@ const DisplayMenu: React.FunctionComponent = () => {
   }, [connection])
 
   if (connectionState === ChannelState.CONNECTED) {
-    return <Button onClick={() => connection.disconnect()}>Disconnect Fullscreen Display</Button>
+    return <Button onClick={() => connection.disconnect()} fullWidth color='warning' startIcon={<CancelPresentation />}>Disconnect Fullscreen Display</Button>
   }
-
   if (connectionState === ChannelState.CONNECTING) {
-    return <Button disabled>Connecting...</Button>
+    return <Button disabled fullWidth>Connecting to Fullscreen...</Button>
   }
   return (
+    <Button onClick={connect} startIcon={<PresentToAll />} fullWidth>Open Display Fullscreen</Button>
+  );
+}
+
+const DisplayMenu: React.FunctionComponent = () => {
+  return (
     <>
-      <Link href="#/table" target="_blank" >Open Display as Tab</Link>
-      <Button onClick={connect}>Open Fullscreen Display</Button>
+      <FullscreenButton />
+      <Button href="#/table" target="_blank" startIcon={<TabIcon />} fullWidth>Open Display as Tab</Button>
     </>
   );
 }

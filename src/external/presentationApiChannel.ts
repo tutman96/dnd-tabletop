@@ -59,15 +59,15 @@ export default class PresentationApiChannel extends AbstractChannel {
     }
 
     this._presentationConnection.onconnect = () => {
-      console.log('onconnect', this._presentationConnection?.state)
+      // console.log('onconnect', this._presentationConnection?.state)
       this.notifyConnectionStateChange()
     };
     this._presentationConnection.onclose = () => {
-      console.log('onclose', this._presentationConnection?.state)
+      // console.log('onclose', this._presentationConnection?.state)
       this.notifyConnectionStateChange();
     }
     this._presentationConnection.onterminated = () => {
-      console.log('onterminated', this._presentationConnection?.state)
+      // console.log('onterminated', this._presentationConnection?.state)
       this.notifyConnectionStateChange()
     };
     this.notifyConnectionStateChange();
@@ -102,12 +102,6 @@ export default class PresentationApiChannel extends AbstractChannel {
     };
     const encodedPacket = Packet.encode(packet).finish();
     const buffer = encodedPacket.buffer.slice(encodedPacket.byteOffset, encodedPacket.byteOffset + encodedPacket.byteLength)
-    if (packet.request) {
-      console.debug(`Sending Request (${packet.requestId})`, packet.request, buffer)
-    }
-    else if (packet.response) {
-      console.debug(`Sending Response (${packet.requestId})`, packet.response, buffer)
-    }
     this._presentationConnection.send(buffer)
   }
 }

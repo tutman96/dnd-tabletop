@@ -75,12 +75,12 @@ export default abstract class AbstractChannel {
 
   protected async processIncomingPacket(packet: Packet) {
     if (packet.response && this._responseListeners.has(packet.requestId)) {
-      console.debug(`Received Response (${packet.requestId})`, packet.response)
+      // console.debug(`Received Response (${packet.requestId})`, packet.response)
       this._responseListeners.get(packet.requestId)!(packet);
       this._responseListeners.delete(packet.requestId);
     }
     else if (packet.request) {
-      console.debug(`Received Request (${packet.requestId})`, packet.request)
+      // console.debug(`Received Request (${packet.requestId})`, packet.request)
       const requestId = packet.requestId;
       const response = await this.handleRequest(packet.request);
       await this.sendOutgoingPacket({
