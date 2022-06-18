@@ -75,7 +75,7 @@ const PanZoomControl: React.FunctionComponent<Props> = ({ onPanZoom, onHome }) =
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        top: theme.spacing(7)
+        top: theme.spacing(8)
       }}
     >
       {/* Cardinal Directions (X/Y) and Home */}
