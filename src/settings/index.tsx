@@ -1,13 +1,12 @@
 import React from "react";
 
-import Box from '@mui/material/Box'
-import Switch from '@mui/material/Switch'
-import FormControlLabel from '@mui/material/FormControlLabel'
+import Switch from '@mui/material/Switch';
+import FormControlLabel from '@mui/material/FormControlLabel';
+
+import InputGroup from "../partials/inputGroup";
 
 import globalStorage from "../storage";
-import theme from "../theme";
-import InputWithUnit from "../partials/inputWithUnit";
-import InputGroup from "../partials/inputGroup";
+import ScreenSizeSettings from './ScreenSizeSettings';
 
 export enum Settings {
   DISPLAYED_SCENE = 'displayed_scene',
@@ -113,85 +112,22 @@ export function useTablePPI(): number | null {
   return ppi;
 }
 
-const ScreenSizeSettings: React.FunctionComponent = () => {
-  const [tableResolution, setTableResolution] = useTableResolution();
-  const [tableSize, setTableSize] = useTableSize();
-  const tablePPI = useTablePPI();
-  const [playAudioOnTable, setPlayAudioOnTable] = usePlayAudioOnTable();
-
-  if (tableResolution === undefined || tableSize === undefined || tablePPI === null) {
-    return null;
-  }
-
-  return (
-    <>
-      <InputGroup header="Resolution">
-        <InputWithUnit
-          type="number"
-          inputProps={{ min: 1 }}
-          unit="px"
-          fullWidth
-          value={tableResolution.width}
-          onChange={(e) => {
-            const value = Number(e.target.value);
-            if (!isNaN(value)) {
-              setTableResolution({ ...tableResolution, width: value })
-            }
-          }}
-        />
-        <Box sx={{ margin: theme.spacing(1) }}>x</Box>
-        <InputWithUnit
-          type="number"
-          inputProps={{ min: 1 }}
-          unit="px"
-          fullWidth
-          value={tableResolution.height}
-          onChange={(e) => {
-            const value = Number(e.target.value);
-            if (!isNaN(value)) {
-              setTableResolution({ ...tableResolution, height: value })
-            }
-          }}
-        />
-      </InputGroup>
-      <InputGroup header="Screen Size">
-        <InputWithUnit
-          type="number"
-          inputProps={{ min: 1, max: 200, step: 0.1 }}
-          unit="in"
-          fullWidth
-          value={tableSize}
-          onChange={(e) => {
-            const value = Number(e.target.value);
-            if (!isNaN(value) && value <= 200 && value > 1) {
-              setTableSize(value)
-            }
-          }}
-        />
-      </InputGroup>
-      <InputGroup header="Other Settings">
-        <FormControlLabel
-          control={
-            <Switch
-              checked={playAudioOnTable ?? true}
-              disabled={playAudioOnTable === undefined}
-              onChange={e => {
-                setPlayAudioOnTable(e.target.checked);
-              }}
-            />
-          }
-          label="Play Audio on Table"
-        />
-      </InputGroup>
-    </>
-  );
-}
-
 const SettingsPanel: React.FunctionComponent = () => {
+  const [playAudioOnTable, setPlayAudioOnTable] = usePlayAudioOnTable();
 
   return (
     <>
       <ScreenSizeSettings />
+      <InputGroup header="Other Settings">
+        <FormControlLabel
+          control={<Switch
+            checked={playAudioOnTable ?? true}
+            disabled={playAudioOnTable === undefined}
+            onChange={e => {
+              setPlayAudioOnTable(e.target.checked);
+            }} />}
+          label="Play Audio on Table" />
+      </InputGroup>
     </>
   );
 }
