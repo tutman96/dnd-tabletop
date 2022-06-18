@@ -1,0 +1,65 @@
+syntax = "proto3";
+import "protos/scene.proto";
+
+message Packet {
+  string requestId = 1;
+  oneof message {
+    Request request = 10;
+    Response response = 11;
+  }
+}
+
+message Request {
+  oneof message {
+    // Respond with AckResponse
+    HelloRequest helloRequest = 1;
+
+    // Respond with AckResponse
+    DisplaySceneRequest displaySceneRequest = 2;
+
+    // Respond with GetAssetResponse
+    GetAssetRequest getAssetRequest = 3;
+
+    // Respond with GetTableConfigurationResponse
+    GetTableConfigurationRequest getTableConfigurationRequest = 4;
+  }
+}
+
+message Response {
+  oneof message {
+    AckResponse ackResponse = 1;
+    GetAssetResponse getAssetResponse = 2;
+    GetTableConfigurationResponse getTableConfigurationResponse = 3;
+  }
+}
+
+message HelloRequest { }
+
+message AckResponse {}
+
+message DisplaySceneRequest {
+  Scene scene = 1;
+}
+
+message GetAssetRequest {
+  string id = 1;
+}
+
+message GetAssetResponse {
+  string id = 1;
+  bytes payload = 2;
+}
+
+message GetTableConfigurationRequest {
+
+}
+
+message GetTableConfigurationResponse {
+  Resolution resolution = 1;
+  message Resolution {
+    double width = 1;
+    double height = 2;
+  }
+
+  double size = 2;
+}

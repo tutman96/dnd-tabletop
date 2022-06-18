@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useMatch, useNavigate } from "react-router-dom";
 
 import Toolbar from '@mui/material/Toolbar';
@@ -14,12 +14,66 @@ import PauseIcon from '@mui/icons-material/Pause';
 
 import { sceneDatabase } from ".";
 import Canvas from "./canvas";
-import { settingsDatabase, Settings } from "../settings";
+import { settingsDatabase, Settings, useTableResolution, useTableSize } from "../settings";
 import theme from "../theme";
 import * as Types from '../protos/scene';
+import { useConnection, useConnectionState, useRequestHandler } from "../external/hooks";
+import { ChannelState } from "../external/abstractChannel";
+import { fileStorage } from "./asset";
 
 const { useOneValue } = sceneDatabase();
 const { useOneValue: useOneSettingValue } = settingsDatabase();
+
+function useRequestHandlers() {
+	const [tableResolution] = useTableResolution();
+	const [tableSize] = useTableSize();
+
+	useRequestHandler(async (req) => {
+		if (req.getAssetRequest) {
+			const file = await fileStorage.getItem(req.getAssetRequest.id);
+			return {
+				getAssetResponse: {
+					id: req.getAssetRequest.id,
+					payload: new Uint8Array(await file.arrayBuffer())
+				},
+				ackResponse: undefined
+			}
+		}
+		else if (req.getTableConfigurationRequest && tableResolution && tableSize) {
+			return {
+				getTableConfigurationResponse: {
+					resolution: tableResolution,
+					size: tableSize
+				}
+			}
+		}
+		return null;
+	})
+}
+
+function useExternalDisplay() {
+	const connection = useConnection();
+	const connectionState = useConnectionState();
+	const [displayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
+	const [tableFreeze] = useOneSettingValue<boolean>(Settings.TABLE_FREEZE);
+	const [scene] = useOneValue(displayedScene as string);
+
+	useRequestHandlers();
+
+	useEffect(() => {
+		if (scene === undefined || tableFreeze === undefined) return;
+
+		if (connectionState !== ChannelState.CONNECTED) return;
+		if (tableFreeze) return;
+
+
+		connection.request({
+			displaySceneRequest: {
+				scene: scene ?? undefined
+			}
+		})
+	}, [scene, connection, connectionState, tableFreeze])
+}
 
 const TableDisplayButton: React.FunctionComponent<{ scene: Types.Scene }> = ({ scene }) => {
 	const [displayedScene, updateDisplayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
@@ -60,6 +114,8 @@ const SceneEditor: React.FunctionComponent<Props> = () => {
 	const navigate = useNavigate();
 	let [scene, updateScene] = useOneValue(match!.params.id!);
 
+	useExternalDisplay()
+
 	if (!match?.params.id) {
 		return null;
 	}
@@ -90,7 +146,7 @@ const SceneEditor: React.FunctionComponent<Props> = () => {
 				zIndex: -1
 			}}>
 				<Typography sx={{ marginBottom: theme.spacing(2) }}>Loading scene...</Typography>
-				<CircularProgress color="secondary" variant={scene ? 'determinate' : 'indeterminate'} value={50}/>
+				<CircularProgress color="secondary" variant={scene ? 'determinate' : 'indeterminate'} value={50} />
 			</Box>
 
 			{scene && (<>

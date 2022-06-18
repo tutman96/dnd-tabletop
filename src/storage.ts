@@ -12,10 +12,11 @@ export interface IRTStorage<T> {
 
 export default function globalStorage<T>(name: string) {
 	const storage = new RTStorage({ name }) as IRTStorage<T>;
-	const useOneValue = <V extends T = T>(key: string) => {
+	const useOneValue = <V extends T = T>(key: string | null) => {
 		const [data, setState] = useState<V | null | undefined>(undefined);
 
 		useEffect(() => {
+			if (!key) return;
 			storage.getItem<V>(key).then((lastData) => {
 				if (lastData) {
 					setState(lastData);
@@ -30,6 +31,10 @@ export default function globalStorage<T>(name: string) {
 				subscription.unsubscribe();
 			};
 		}, [key]);
+
+		if (key === null) {
+			return [null, () => Promise.resolve()] as [V | null | undefined, (newData: V) => Promise<void>];
+		}
 
 		const setData = async (newData: V) => {
 			setState(newData);

@@ -7,13 +7,13 @@ import CardContent from '@mui/material/CardContent'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Modal from '@mui/material/Modal'
-import Link from '@mui/material/Link'
 
 import theme from '../theme';
 import SceneList from './list';
 import FloatingIcon from '../partials/floatingIcon';
 import SettingsPanel from '../settings';
 import * as Types from '../protos/scene';
+import DisplayMenu from './displayMenu';
 
 enum TabOptions {
 	SCENES,
@@ -78,7 +78,7 @@ const Menu: React.FunctionComponent<Props> = () => {
 							<SceneList onSceneSelect={onSceneSelect} selectedSceneId={currentSelectedSceneId} />
 						</Box>
 						<Box sx={{ display: selectedTab === TabOptions.DISPLAYS ? 'block' : 'none' }}>
-							<Link href="#/table" target="_blank" >Open Local Display</Link>
+							<DisplayMenu/>
 						</Box>
 						<Box sx={{ display: selectedTab === TabOptions.SETTINGS ? 'block' : 'none' }}>
 							<SettingsPanel />

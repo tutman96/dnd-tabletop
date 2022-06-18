@@ -5,6 +5,7 @@ import { v4 } from 'uuid';
 import { getImageSize, getVideoSize } from "./assetSize";
 import { assetFileDatabase } from './storage';
 import * as Types from '../../protos/scene';
+import { useConnection } from '../../external/hooks';
 
 export const { storage: fileStorage } = assetFileDatabase();
 
@@ -108,10 +109,26 @@ async function getVideoElement(file: File) {
 
 export function useAssetElement(asset: Types.AssetLayer_Asset) {
 	const [entry, setEntry] = useState<CacheEntry | null | undefined>(assetCache.get(asset.id));
+	const connection = useConnection();
 
 	useEffect(() => {
 		if (entry === undefined) {
 			fileStorage.getItem(asset.id)
+				.then(async (file) => {
+					if (!file) {
+						const response = await connection.request({
+							getAssetRequest: {
+								id: asset.id
+							},
+							displaySceneRequest: undefined
+						})
+
+						return new File([response.getAssetResponse!.payload], asset.id);
+					}
+					else {
+						return file;
+					}
+				})
 				.then(async (file) => {
 					const element = await (asset.type === Types.AssetLayer_Asset_AssetType.IMAGE ? getImageElement(file) : getVideoElement(file));
 					const entry = { file, element };
@@ -119,7 +136,7 @@ export function useAssetElement(asset: Types.AssetLayer_Asset) {
 					setEntry(entry);
 				})
 		}
-	}, [entry, asset.type, asset.id])
+	}, [entry, asset.type, asset.id, connection])
 
 	return entry === null ? null : entry?.element;
 }
