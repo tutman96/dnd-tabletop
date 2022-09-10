@@ -1,7 +1,7 @@
 /* eslint-disable */
 import Long from "long";
-import _m0 from "protobufjs/minimal";
-import { Scene } from "../protos/scene";
+import * as _m0 from "protobufjs/minimal";
+import { Scene } from "./scene";
 
 export const protobufPackage = "";
 
@@ -50,6 +50,7 @@ export interface GetTableConfigurationRequest {}
 export interface GetTableConfigurationResponse {
   resolution: GetTableConfigurationResponse_Resolution | undefined;
   size: number;
+  playAudioOnTable: boolean;
 }
 
 export interface GetTableConfigurationResponse_Resolution {
@@ -103,20 +104,15 @@ export const Packet = {
   },
 
   fromJSON(object: any): Packet {
-    const message = createBasePacket();
-    message.requestId =
-      object.requestId !== undefined && object.requestId !== null
-        ? String(object.requestId)
-        : "";
-    message.request =
-      object.request !== undefined && object.request !== null
+    return {
+      requestId: isSet(object.requestId) ? String(object.requestId) : "",
+      request: isSet(object.request)
         ? Request.fromJSON(object.request)
-        : undefined;
-    message.response =
-      object.response !== undefined && object.response !== null
+        : undefined,
+      response: isSet(object.response)
         ? Response.fromJSON(object.response)
-        : undefined;
-    return message;
+        : undefined,
+    };
   },
 
   toJSON(message: Packet): unknown {
@@ -224,28 +220,22 @@ export const Request = {
   },
 
   fromJSON(object: any): Request {
-    const message = createBaseRequest();
-    message.helloRequest =
-      object.helloRequest !== undefined && object.helloRequest !== null
+    return {
+      helloRequest: isSet(object.helloRequest)
         ? HelloRequest.fromJSON(object.helloRequest)
-        : undefined;
-    message.displaySceneRequest =
-      object.displaySceneRequest !== undefined &&
-      object.displaySceneRequest !== null
+        : undefined,
+      displaySceneRequest: isSet(object.displaySceneRequest)
         ? DisplaySceneRequest.fromJSON(object.displaySceneRequest)
-        : undefined;
-    message.getAssetRequest =
-      object.getAssetRequest !== undefined && object.getAssetRequest !== null
+        : undefined,
+      getAssetRequest: isSet(object.getAssetRequest)
         ? GetAssetRequest.fromJSON(object.getAssetRequest)
-        : undefined;
-    message.getTableConfigurationRequest =
-      object.getTableConfigurationRequest !== undefined &&
-      object.getTableConfigurationRequest !== null
+        : undefined,
+      getTableConfigurationRequest: isSet(object.getTableConfigurationRequest)
         ? GetTableConfigurationRequest.fromJSON(
             object.getTableConfigurationRequest
           )
-        : undefined;
-    return message;
+        : undefined,
+    };
   },
 
   toJSON(message: Request): unknown {
@@ -360,23 +350,19 @@ export const Response = {
   },
 
   fromJSON(object: any): Response {
-    const message = createBaseResponse();
-    message.ackResponse =
-      object.ackResponse !== undefined && object.ackResponse !== null
+    return {
+      ackResponse: isSet(object.ackResponse)
         ? AckResponse.fromJSON(object.ackResponse)
-        : undefined;
-    message.getAssetResponse =
-      object.getAssetResponse !== undefined && object.getAssetResponse !== null
+        : undefined,
+      getAssetResponse: isSet(object.getAssetResponse)
         ? GetAssetResponse.fromJSON(object.getAssetResponse)
-        : undefined;
-    message.getTableConfigurationResponse =
-      object.getTableConfigurationResponse !== undefined &&
-      object.getTableConfigurationResponse !== null
+        : undefined,
+      getTableConfigurationResponse: isSet(object.getTableConfigurationResponse)
         ? GetTableConfigurationResponse.fromJSON(
             object.getTableConfigurationResponse
           )
-        : undefined;
-    return message;
+        : undefined,
+    };
   },
 
   toJSON(message: Response): unknown {
@@ -447,8 +433,7 @@ export const HelloRequest = {
   },
 
   fromJSON(_: any): HelloRequest {
-    const message = createBaseHelloRequest();
-    return message;
+    return {};
   },
 
   toJSON(_: HelloRequest): unknown {
@@ -489,8 +474,7 @@ export const AckResponse = {
   },
 
   fromJSON(_: any): AckResponse {
-    const message = createBaseAckResponse();
-    return message;
+    return {};
   },
 
   toJSON(_: AckResponse): unknown {
@@ -538,12 +522,9 @@ export const DisplaySceneRequest = {
   },
 
   fromJSON(object: any): DisplaySceneRequest {
-    const message = createBaseDisplaySceneRequest();
-    message.scene =
-      object.scene !== undefined && object.scene !== null
-        ? Scene.fromJSON(object.scene)
-        : undefined;
-    return message;
+    return {
+      scene: isSet(object.scene) ? Scene.fromJSON(object.scene) : undefined,
+    };
   },
 
   toJSON(message: DisplaySceneRequest): unknown {
@@ -599,10 +580,9 @@ export const GetAssetRequest = {
   },
 
   fromJSON(object: any): GetAssetRequest {
-    const message = createBaseGetAssetRequest();
-    message.id =
-      object.id !== undefined && object.id !== null ? String(object.id) : "";
-    return message;
+    return {
+      id: isSet(object.id) ? String(object.id) : "",
+    };
   },
 
   toJSON(message: GetAssetRequest): unknown {
@@ -660,14 +640,12 @@ export const GetAssetResponse = {
   },
 
   fromJSON(object: any): GetAssetResponse {
-    const message = createBaseGetAssetResponse();
-    message.id =
-      object.id !== undefined && object.id !== null ? String(object.id) : "";
-    message.payload =
-      object.payload !== undefined && object.payload !== null
+    return {
+      id: isSet(object.id) ? String(object.id) : "",
+      payload: isSet(object.payload)
         ? bytesFromBase64(object.payload)
-        : new Uint8Array();
-    return message;
+        : new Uint8Array(),
+    };
   },
 
   toJSON(message: GetAssetResponse): unknown {
@@ -721,8 +699,7 @@ export const GetTableConfigurationRequest = {
   },
 
   fromJSON(_: any): GetTableConfigurationRequest {
-    const message = createBaseGetTableConfigurationRequest();
-    return message;
+    return {};
   },
 
   toJSON(_: GetTableConfigurationRequest): unknown {
@@ -739,7 +716,7 @@ export const GetTableConfigurationRequest = {
 };
 
 function createBaseGetTableConfigurationResponse(): GetTableConfigurationResponse {
-  return { resolution: undefined, size: 0 };
+  return { resolution: undefined, size: 0, playAudioOnTable: false };
 }
 
 export const GetTableConfigurationResponse = {
@@ -755,6 +732,9 @@ export const GetTableConfigurationResponse = {
     }
     if (message.size !== 0) {
       writer.uint32(17).double(message.size);
+    }
+    if (message.playAudioOnTable === true) {
+      writer.uint32(24).bool(message.playAudioOnTable);
     }
     return writer;
   },
@@ -778,6 +758,9 @@ export const GetTableConfigurationResponse = {
         case 2:
           message.size = reader.double();
           break;
+        case 3:
+          message.playAudioOnTable = reader.bool();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -787,16 +770,15 @@ export const GetTableConfigurationResponse = {
   },
 
   fromJSON(object: any): GetTableConfigurationResponse {
-    const message = createBaseGetTableConfigurationResponse();
-    message.resolution =
-      object.resolution !== undefined && object.resolution !== null
+    return {
+      resolution: isSet(object.resolution)
         ? GetTableConfigurationResponse_Resolution.fromJSON(object.resolution)
-        : undefined;
-    message.size =
-      object.size !== undefined && object.size !== null
-        ? Number(object.size)
-        : 0;
-    return message;
+        : undefined,
+      size: isSet(object.size) ? Number(object.size) : 0,
+      playAudioOnTable: isSet(object.playAudioOnTable)
+        ? Boolean(object.playAudioOnTable)
+        : false,
+    };
   },
 
   toJSON(message: GetTableConfigurationResponse): unknown {
@@ -806,6 +788,8 @@ export const GetTableConfigurationResponse = {
         ? GetTableConfigurationResponse_Resolution.toJSON(message.resolution)
         : undefined);
     message.size !== undefined && (obj.size = message.size);
+    message.playAudioOnTable !== undefined &&
+      (obj.playAudioOnTable = message.playAudioOnTable);
     return obj;
   },
 
@@ -820,6 +804,7 @@ export const GetTableConfigurationResponse = {
           )
         : undefined;
     message.size = object.size ?? 0;
+    message.playAudioOnTable = object.playAudioOnTable ?? false;
     return message;
   },
 };
@@ -867,16 +852,10 @@ export const GetTableConfigurationResponse_Resolution = {
   },
 
   fromJSON(object: any): GetTableConfigurationResponse_Resolution {
-    const message = createBaseGetTableConfigurationResponse_Resolution();
-    message.width =
-      object.width !== undefined && object.width !== null
-        ? Number(object.width)
-        : 0;
-    message.height =
-      object.height !== undefined && object.height !== null
-        ? Number(object.height)
-        : 0;
-    return message;
+    return {
+      width: isSet(object.width) ? Number(object.width) : 0,
+      height: isSet(object.height) ? Number(object.height) : 0,
+    };
   },
 
   toJSON(message: GetTableConfigurationResponse_Resolution): unknown {
@@ -924,9 +903,9 @@ const btoa: (bin: string) => string =
   ((bin) => globalThis.Buffer.from(bin, "binary").toString("base64"));
 function base64FromBytes(arr: Uint8Array): string {
   const bin: string[] = [];
-  for (const byte of arr) {
+  arr.forEach((byte) => {
     bin.push(String.fromCharCode(byte));
-  }
+  });
   return btoa(bin.join(""));
 }
 
@@ -960,4 +939,8 @@ export type Exact<P, I extends P> = P extends Builtin
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;
   _m0.configure();
+}
+
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
 }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { settingsDatabase, Settings, useTableResolution, useTableSize } from '../settings';
+import { settingsDatabase, Settings, useTableResolution, useTableSize, usePlayAudioOnTable } from '../settings';
 import { sceneDatabase } from '../scene';
 import * as Types from '../protos/scene';
 import TableCanvas from './canvas';
@@ -13,6 +13,7 @@ const TablePage: React.FunctionComponent<Props> = () => {
 	const [displayedScene] = useOneSettingValue(Settings.DISPLAYED_SCENE);
 	const [tableFreeze] = useOneSettingValue(Settings.TABLE_FREEZE);
 	const [tableResolution] = useTableResolution();
+	const [playAudioOnTable] = usePlayAudioOnTable();
 
 	const [scene] = useOneValue(displayedScene as string);
 	const [tableScene, setTableScene] = useState<Types.Scene | null>(null);
@@ -38,7 +39,8 @@ const TablePage: React.FunctionComponent<Props> = () => {
 	return (
     <TableCanvas tableConfiguration={{
       resolution: tableResolution,
-      size: tableSize
+      size: tableSize,
+			playAudioOnTable: playAudioOnTable ?? false
     }} tableScene={tableScene}/>
 	)
 }

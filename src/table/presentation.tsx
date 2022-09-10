@@ -5,7 +5,7 @@ import * as ExternalTypes from '../protos/external';
 
 import { useConnection, useConnectionState, useRequestHandler } from '../external/hooks';
 import { ChannelState } from '../external/abstractChannel';
-import { useTableResolution, useTableSize } from '../settings';
+import { usePlayAudioOnTable, useTableResolution, useTableSize } from '../settings';
 import TableCanvas from './canvas';
 
 function useDisplayedScene() {
@@ -35,6 +35,7 @@ function useTableConfiguration(): ExternalTypes.GetTableConfigurationResponse | 
 	const connectionState = useConnectionState();
 	const [, setStoredTableResolution] = useTableResolution();
 	const [, setStoredTableSize] = useTableSize();
+	const [, setPlayAudioOnTable] = usePlayAudioOnTable();
 	const [tableConfiguration, setTableConfiguration] = useState<ExternalTypes.GetTableConfigurationResponse>();
 
 	useEffect(() => {
@@ -45,12 +46,13 @@ function useTableConfiguration(): ExternalTypes.GetTableConfigurationResponse | 
 				setTableConfiguration(res.getTableConfigurationResponse!)
 				setStoredTableResolution(res.getTableConfigurationResponse!.resolution!);
 				setStoredTableSize(res.getTableConfigurationResponse!.size);
+				setPlayAudioOnTable(res.getTableConfigurationResponse!.playAudioOnTable);
 			})
 		}
 		else if (connectionState === ChannelState.CONNECTING) {
 			connection.request({ helloRequest: {} })
 		}
-	}, [connection, connectionState, tableConfiguration, setStoredTableResolution, setStoredTableSize])
+	}, [connection, connectionState, tableConfiguration, setStoredTableResolution, setStoredTableSize, setPlayAudioOnTable])
 
 	return tableConfiguration;
 }

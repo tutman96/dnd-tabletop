@@ -49,7 +49,7 @@ const AssetLayer: React.FunctionComponent<Props> = ({ layer, onUpdate, active: l
 		}, layerRef.current);
 		anim.start();
 		return () => { anim.stop() }
-	}, [layerRef, layer, isTable])
+	}, [layerRef, layer.assets, isTable])
 
 	useEffect(() => {
 		if (!layerRef.current?.parent) return;

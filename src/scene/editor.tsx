@@ -14,7 +14,7 @@ import PauseIcon from '@mui/icons-material/Pause';
 
 import { sceneDatabase } from ".";
 import Canvas from "./canvas";
-import { settingsDatabase, Settings, useTableResolution, useTableSize } from "../settings";
+import { settingsDatabase, Settings, useTableResolution, useTableSize, usePlayAudioOnTable } from "../settings";
 import theme, { BACKDROP_STYLE } from "../theme";
 import * as Types from '../protos/scene';
 import { useConnection, useConnectionState, useRequestHandler } from "../external/hooks";
@@ -28,6 +28,7 @@ const { useOneValue: useOneSettingValue } = settingsDatabase();
 function useRequestHandlers() {
 	const [tableResolution] = useTableResolution();
 	const [tableSize] = useTableSize();
+	const [playAudioOnTable] = usePlayAudioOnTable();
 
 	useRequestHandler(async (req) => {
 		if (req.getAssetRequest) {
@@ -44,7 +45,8 @@ function useRequestHandlers() {
 			return {
 				getTableConfigurationResponse: {
 					resolution: tableResolution,
-					size: tableSize
+					size: tableSize,
+					playAudioOnTable: playAudioOnTable ?? false,
 				}
 			}
 		}

@@ -1,6 +1,6 @@
 /* eslint-disable */
 import Long from "long";
-import _m0 from "protobufjs/minimal";
+import * as _m0 from "protobufjs/minimal";
 
 export const protobufPackage = "";
 
@@ -56,8 +56,9 @@ export function layer_LayerTypeToJSON(object: Layer_LayerType): string {
       return "ASSETS";
     case Layer_LayerType.FOG:
       return "FOG";
+    case Layer_LayerType.UNRECOGNIZED:
     default:
-      return "UNKNOWN";
+      return "UNRECOGNIZED";
   }
 }
 
@@ -114,8 +115,9 @@ export function assetLayer_Asset_AssetTypeToJSON(
       return "IMAGE";
     case AssetLayer_Asset_AssetType.VIDEO:
       return "VIDEO";
+    case AssetLayer_Asset_AssetType.UNRECOGNIZED:
     default:
-      return "UNKNOWN";
+      return "UNRECOGNIZED";
   }
 }
 
@@ -199,8 +201,9 @@ export function fogLayer_Polygon_PolygonTypeToJSON(
       return "FOG_CLEAR";
     case FogLayer_Polygon_PolygonType.LIGHT_OBSTRUCTION:
       return "LIGHT_OBSTRUCTION";
+    case FogLayer_Polygon_PolygonType.UNRECOGNIZED:
     default:
-      return "UNKNOWN";
+      return "UNRECOGNIZED";
   }
 }
 
@@ -269,23 +272,17 @@ export const Scene = {
   },
 
   fromJSON(object: any): Scene {
-    const message = createBaseScene();
-    message.id =
-      object.id !== undefined && object.id !== null ? String(object.id) : "";
-    message.name =
-      object.name !== undefined && object.name !== null
-        ? String(object.name)
-        : "";
-    message.version =
-      object.version !== undefined && object.version !== null
-        ? Number(object.version)
-        : 0;
-    message.table =
-      object.table !== undefined && object.table !== null
+    return {
+      id: isSet(object.id) ? String(object.id) : "",
+      name: isSet(object.name) ? String(object.name) : "",
+      version: isSet(object.version) ? Number(object.version) : 0,
+      table: isSet(object.table)
         ? TableOptions.fromJSON(object.table)
-        : undefined;
-    message.layers = (object.layers ?? []).map((e: any) => Layer.fromJSON(e));
-    return message;
+        : undefined,
+      layers: Array.isArray(object?.layers)
+        ? object.layers.map((e: any) => Layer.fromJSON(e))
+        : [],
+    };
   },
 
   toJSON(message: Scene): unknown {
@@ -372,24 +369,16 @@ export const TableOptions = {
   },
 
   fromJSON(object: any): TableOptions {
-    const message = createBaseTableOptions();
-    message.displayGrid =
-      object.displayGrid !== undefined && object.displayGrid !== null
+    return {
+      displayGrid: isSet(object.displayGrid)
         ? Boolean(object.displayGrid)
-        : false;
-    message.offset =
-      object.offset !== undefined && object.offset !== null
+        : false,
+      offset: isSet(object.offset)
         ? Vector2d.fromJSON(object.offset)
-        : undefined;
-    message.rotation =
-      object.rotation !== undefined && object.rotation !== null
-        ? Number(object.rotation)
-        : 0;
-    message.scale =
-      object.scale !== undefined && object.scale !== null
-        ? Number(object.scale)
-        : 0;
-    return message;
+        : undefined,
+      rotation: isSet(object.rotation) ? Number(object.rotation) : 0,
+      scale: isSet(object.scale) ? Number(object.scale) : 0,
+    };
   },
 
   toJSON(message: TableOptions): unknown {
@@ -460,12 +449,10 @@ export const Vector2d = {
   },
 
   fromJSON(object: any): Vector2d {
-    const message = createBaseVector2d();
-    message.x =
-      object.x !== undefined && object.x !== null ? Number(object.x) : 0;
-    message.y =
-      object.y !== undefined && object.y !== null ? Number(object.y) : 0;
-    return message;
+    return {
+      x: isSet(object.x) ? Number(object.x) : 0,
+      y: isSet(object.y) ? Number(object.y) : 0,
+    };
   },
 
   toJSON(message: Vector2d): unknown {
@@ -520,16 +507,14 @@ export const Layer = {
   },
 
   fromJSON(object: any): Layer {
-    const message = createBaseLayer();
-    message.assetLayer =
-      object.assetLayer !== undefined && object.assetLayer !== null
+    return {
+      assetLayer: isSet(object.assetLayer)
         ? AssetLayer.fromJSON(object.assetLayer)
-        : undefined;
-    message.fogLayer =
-      object.fogLayer !== undefined && object.fogLayer !== null
+        : undefined,
+      fogLayer: isSet(object.fogLayer)
         ? FogLayer.fromJSON(object.fogLayer)
-        : undefined;
-    return message;
+        : undefined,
+    };
   },
 
   toJSON(message: Layer): unknown {
@@ -623,28 +608,20 @@ export const AssetLayer = {
   },
 
   fromJSON(object: any): AssetLayer {
-    const message = createBaseAssetLayer();
-    message.id =
-      object.id !== undefined && object.id !== null ? String(object.id) : "";
-    message.name =
-      object.name !== undefined && object.name !== null
-        ? String(object.name)
-        : "";
-    message.visible =
-      object.visible !== undefined && object.visible !== null
-        ? Boolean(object.visible)
-        : false;
-    message.type =
-      object.type !== undefined && object.type !== null
-        ? layer_LayerTypeFromJSON(object.type)
-        : 0;
-    message.assets = Object.entries(object.assets ?? {}).reduce<{
-      [key: string]: AssetLayer_Asset;
-    }>((acc, [key, value]) => {
-      acc[key] = AssetLayer_Asset.fromJSON(value);
-      return acc;
-    }, {});
-    return message;
+    return {
+      id: isSet(object.id) ? String(object.id) : "",
+      name: isSet(object.name) ? String(object.name) : "",
+      visible: isSet(object.visible) ? Boolean(object.visible) : false,
+      type: isSet(object.type) ? layer_LayerTypeFromJSON(object.type) : 0,
+      assets: isObject(object.assets)
+        ? Object.entries(object.assets).reduce<{
+            [key: string]: AssetLayer_Asset;
+          }>((acc, [key, value]) => {
+            acc[key] = AssetLayer_Asset.fromJSON(value);
+            return acc;
+          }, {})
+        : {},
+    };
   },
 
   toJSON(message: AssetLayer): unknown {
@@ -726,14 +703,12 @@ export const AssetLayer_AssetsEntry = {
   },
 
   fromJSON(object: any): AssetLayer_AssetsEntry {
-    const message = createBaseAssetLayer_AssetsEntry();
-    message.key =
-      object.key !== undefined && object.key !== null ? String(object.key) : "";
-    message.value =
-      object.value !== undefined && object.value !== null
+    return {
+      key: isSet(object.key) ? String(object.key) : "",
+      value: isSet(object.value)
         ? AssetLayer_Asset.fromJSON(object.value)
-        : undefined;
-    return message;
+        : undefined,
+    };
   },
 
   toJSON(message: AssetLayer_AssetsEntry): unknown {
@@ -848,30 +823,24 @@ export const AssetLayer_Asset = {
   },
 
   fromJSON(object: any): AssetLayer_Asset {
-    const message = createBaseAssetLayer_Asset();
-    message.id =
-      object.id !== undefined && object.id !== null ? String(object.id) : "";
-    message.type =
-      object.type !== undefined && object.type !== null
+    return {
+      id: isSet(object.id) ? String(object.id) : "",
+      type: isSet(object.type)
         ? assetLayer_Asset_AssetTypeFromJSON(object.type)
-        : 0;
-    message.size =
-      object.size !== undefined && object.size !== null
+        : 0,
+      size: isSet(object.size)
         ? AssetLayer_Asset_AssetSize.fromJSON(object.size)
-        : undefined;
-    message.transform =
-      object.transform !== undefined && object.transform !== null
+        : undefined,
+      transform: isSet(object.transform)
         ? AssetLayer_Asset_AssetTransform.fromJSON(object.transform)
-        : undefined;
-    message.calibration =
-      object.calibration !== undefined && object.calibration !== null
+        : undefined,
+      calibration: isSet(object.calibration)
         ? AssetLayer_Asset_AssetCalibration.fromJSON(object.calibration)
-        : undefined;
-    message.snapToGrid =
-      object.snapToGrid !== undefined && object.snapToGrid !== null
+        : undefined,
+      snapToGrid: isSet(object.snapToGrid)
         ? Boolean(object.snapToGrid)
-        : undefined;
-    return message;
+        : undefined,
+    };
   },
 
   toJSON(message: AssetLayer_Asset): unknown {
@@ -961,16 +930,10 @@ export const AssetLayer_Asset_AssetSize = {
   },
 
   fromJSON(object: any): AssetLayer_Asset_AssetSize {
-    const message = createBaseAssetLayer_Asset_AssetSize();
-    message.width =
-      object.width !== undefined && object.width !== null
-        ? Number(object.width)
-        : 0;
-    message.height =
-      object.height !== undefined && object.height !== null
-        ? Number(object.height)
-        : 0;
-    return message;
+    return {
+      width: isSet(object.width) ? Number(object.width) : 0,
+      height: isSet(object.height) ? Number(object.height) : 0,
+    };
   },
 
   toJSON(message: AssetLayer_Asset_AssetSize): unknown {
@@ -1051,24 +1014,13 @@ export const AssetLayer_Asset_AssetTransform = {
   },
 
   fromJSON(object: any): AssetLayer_Asset_AssetTransform {
-    const message = createBaseAssetLayer_Asset_AssetTransform();
-    message.x =
-      object.x !== undefined && object.x !== null ? Number(object.x) : 0;
-    message.y =
-      object.y !== undefined && object.y !== null ? Number(object.y) : 0;
-    message.rotation =
-      object.rotation !== undefined && object.rotation !== null
-        ? Number(object.rotation)
-        : 0;
-    message.width =
-      object.width !== undefined && object.width !== null
-        ? Number(object.width)
-        : 0;
-    message.height =
-      object.height !== undefined && object.height !== null
-        ? Number(object.height)
-        : 0;
-    return message;
+    return {
+      x: isSet(object.x) ? Number(object.x) : 0,
+      y: isSet(object.y) ? Number(object.y) : 0,
+      rotation: isSet(object.rotation) ? Number(object.rotation) : 0,
+      width: isSet(object.width) ? Number(object.width) : 0,
+      height: isSet(object.height) ? Number(object.height) : 0,
+    };
   },
 
   toJSON(message: AssetLayer_Asset_AssetTransform): unknown {
@@ -1149,24 +1101,12 @@ export const AssetLayer_Asset_AssetCalibration = {
   },
 
   fromJSON(object: any): AssetLayer_Asset_AssetCalibration {
-    const message = createBaseAssetLayer_Asset_AssetCalibration();
-    message.xOffset =
-      object.xOffset !== undefined && object.xOffset !== null
-        ? Number(object.xOffset)
-        : 0;
-    message.yOffset =
-      object.yOffset !== undefined && object.yOffset !== null
-        ? Number(object.yOffset)
-        : 0;
-    message.ppiX =
-      object.ppiX !== undefined && object.ppiX !== null
-        ? Number(object.ppiX)
-        : 0;
-    message.ppiY =
-      object.ppiY !== undefined && object.ppiY !== null
-        ? Number(object.ppiY)
-        : 0;
-    return message;
+    return {
+      xOffset: isSet(object.xOffset) ? Number(object.xOffset) : 0,
+      yOffset: isSet(object.yOffset) ? Number(object.yOffset) : 0,
+      ppiX: isSet(object.ppiX) ? Number(object.ppiX) : 0,
+      ppiY: isSet(object.ppiY) ? Number(object.ppiY) : 0,
+    };
   },
 
   toJSON(message: AssetLayer_Asset_AssetCalibration): unknown {
@@ -1283,34 +1223,26 @@ export const FogLayer = {
   },
 
   fromJSON(object: any): FogLayer {
-    const message = createBaseFogLayer();
-    message.id =
-      object.id !== undefined && object.id !== null ? String(object.id) : "";
-    message.name =
-      object.name !== undefined && object.name !== null
-        ? String(object.name)
-        : "";
-    message.visible =
-      object.visible !== undefined && object.visible !== null
-        ? Boolean(object.visible)
-        : false;
-    message.type =
-      object.type !== undefined && object.type !== null
-        ? layer_LayerTypeFromJSON(object.type)
-        : 0;
-    message.lightSources = (object.lightSources ?? []).map((e: any) =>
-      FogLayer_LightSource.fromJSON(e)
-    );
-    message.obstructionPolygons = (object.obstructionPolygons ?? []).map(
-      (e: any) => FogLayer_Polygon.fromJSON(e)
-    );
-    message.fogPolygons = (object.fogPolygons ?? []).map((e: any) =>
-      FogLayer_Polygon.fromJSON(e)
-    );
-    message.fogClearPolygons = (object.fogClearPolygons ?? []).map((e: any) =>
-      FogLayer_Polygon.fromJSON(e)
-    );
-    return message;
+    return {
+      id: isSet(object.id) ? String(object.id) : "",
+      name: isSet(object.name) ? String(object.name) : "",
+      visible: isSet(object.visible) ? Boolean(object.visible) : false,
+      type: isSet(object.type) ? layer_LayerTypeFromJSON(object.type) : 0,
+      lightSources: Array.isArray(object?.lightSources)
+        ? object.lightSources.map((e: any) => FogLayer_LightSource.fromJSON(e))
+        : [],
+      obstructionPolygons: Array.isArray(object?.obstructionPolygons)
+        ? object.obstructionPolygons.map((e: any) =>
+            FogLayer_Polygon.fromJSON(e)
+          )
+        : [],
+      fogPolygons: Array.isArray(object?.fogPolygons)
+        ? object.fogPolygons.map((e: any) => FogLayer_Polygon.fromJSON(e))
+        : [],
+      fogClearPolygons: Array.isArray(object?.fogClearPolygons)
+        ? object.fogClearPolygons.map((e: any) => FogLayer_Polygon.fromJSON(e))
+        : [],
+    };
   },
 
   toJSON(message: FogLayer): unknown {
@@ -1421,21 +1353,17 @@ export const FogLayer_LightSource = {
   },
 
   fromJSON(object: any): FogLayer_LightSource {
-    const message = createBaseFogLayer_LightSource();
-    message.position =
-      object.position !== undefined && object.position !== null
+    return {
+      position: isSet(object.position)
         ? Vector2d.fromJSON(object.position)
-        : undefined;
-    message.brightLightDistance =
-      object.brightLightDistance !== undefined &&
-      object.brightLightDistance !== null
+        : undefined,
+      brightLightDistance: isSet(object.brightLightDistance)
         ? Number(object.brightLightDistance)
-        : 0;
-    message.dimLightDistance =
-      object.dimLightDistance !== undefined && object.dimLightDistance !== null
+        : 0,
+      dimLightDistance: isSet(object.dimLightDistance)
         ? Number(object.dimLightDistance)
-        : 0;
-    return message;
+        : 0,
+    };
   },
 
   toJSON(message: FogLayer_LightSource): unknown {
@@ -1511,19 +1439,17 @@ export const FogLayer_Polygon = {
   },
 
   fromJSON(object: any): FogLayer_Polygon {
-    const message = createBaseFogLayer_Polygon();
-    message.type =
-      object.type !== undefined && object.type !== null
+    return {
+      type: isSet(object.type)
         ? fogLayer_Polygon_PolygonTypeFromJSON(object.type)
-        : 0;
-    message.verticies = (object.verticies ?? []).map((e: any) =>
-      Vector2d.fromJSON(e)
-    );
-    message.visibleOnTable =
-      object.visibleOnTable !== undefined && object.visibleOnTable !== null
+        : 0,
+      verticies: Array.isArray(object?.verticies)
+        ? object.verticies.map((e: any) => Vector2d.fromJSON(e))
+        : [],
+      visibleOnTable: isSet(object.visibleOnTable)
         ? Boolean(object.visibleOnTable)
-        : false;
-    return message;
+        : false,
+    };
   },
 
   toJSON(message: FogLayer_Polygon): unknown {
@@ -1594,15 +1520,12 @@ export const SceneExport = {
   },
 
   fromJSON(object: any): SceneExport {
-    const message = createBaseSceneExport();
-    message.scene =
-      object.scene !== undefined && object.scene !== null
-        ? Scene.fromJSON(object.scene)
-        : undefined;
-    message.files = (object.files ?? []).map((e: any) =>
-      SceneExport_File.fromJSON(e)
-    );
-    return message;
+    return {
+      scene: isSet(object.scene) ? Scene.fromJSON(object.scene) : undefined,
+      files: Array.isArray(object?.files)
+        ? object.files.map((e: any) => SceneExport_File.fromJSON(e))
+        : [],
+    };
   },
 
   toJSON(message: SceneExport): unknown {
@@ -1673,14 +1596,12 @@ export const SceneExport_File = {
   },
 
   fromJSON(object: any): SceneExport_File {
-    const message = createBaseSceneExport_File();
-    message.id =
-      object.id !== undefined && object.id !== null ? String(object.id) : "";
-    message.payload =
-      object.payload !== undefined && object.payload !== null
+    return {
+      id: isSet(object.id) ? String(object.id) : "",
+      payload: isSet(object.payload)
         ? bytesFromBase64(object.payload)
-        : new Uint8Array();
-    return message;
+        : new Uint8Array(),
+    };
   },
 
   toJSON(message: SceneExport_File): unknown {
@@ -1731,9 +1652,9 @@ const btoa: (bin: string) => string =
   ((bin) => globalThis.Buffer.from(bin, "binary").toString("base64"));
 function base64FromBytes(arr: Uint8Array): string {
   const bin: string[] = [];
-  for (const byte of arr) {
+  arr.forEach((byte) => {
     bin.push(String.fromCharCode(byte));
-  }
+  });
   return btoa(bin.join(""));
 }
 
@@ -1774,4 +1695,12 @@ function longToNumber(long: Long): number {
 if (_m0.util.Long !== Long) {
   _m0.util.Long = Long as any;
   _m0.configure();
+}
+
+function isObject(value: any): boolean {
+  return typeof value === "object" && value !== null;
+}
+
+function isSet(value: any): boolean {
+  return value !== null && value !== undefined;
 }
