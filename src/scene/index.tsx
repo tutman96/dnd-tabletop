@@ -128,7 +128,8 @@ export async function exportScene(scene: Types.Scene) {
 		const asset = await fileStorage.getItem(assetId);
 		files.push({
 			id: assetId,
-			payload: new Uint8Array(await asset.arrayBuffer())
+			payload: new Uint8Array(await asset.arrayBuffer()),
+			mediaType: asset.type
 		})
 	}
 

@@ -43,6 +43,7 @@ export interface GetAssetRequest {
 export interface GetAssetResponse {
   id: string;
   payload: Uint8Array;
+  mediaType: string;
 }
 
 export interface GetTableConfigurationRequest {}
@@ -601,7 +602,7 @@ export const GetAssetRequest = {
 };
 
 function createBaseGetAssetResponse(): GetAssetResponse {
-  return { id: "", payload: new Uint8Array() };
+  return { id: "", payload: new Uint8Array(), mediaType: "" };
 }
 
 export const GetAssetResponse = {
@@ -614,6 +615,9 @@ export const GetAssetResponse = {
     }
     if (message.payload.length !== 0) {
       writer.uint32(18).bytes(message.payload);
+    }
+    if (message.mediaType !== "") {
+      writer.uint32(26).string(message.mediaType);
     }
     return writer;
   },
@@ -631,6 +635,9 @@ export const GetAssetResponse = {
         case 2:
           message.payload = reader.bytes();
           break;
+        case 3:
+          message.mediaType = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -645,6 +652,7 @@ export const GetAssetResponse = {
       payload: isSet(object.payload)
         ? bytesFromBase64(object.payload)
         : new Uint8Array(),
+      mediaType: isSet(object.mediaType) ? String(object.mediaType) : "",
     };
   },
 
@@ -655,6 +663,7 @@ export const GetAssetResponse = {
       (obj.payload = base64FromBytes(
         message.payload !== undefined ? message.payload : new Uint8Array()
       ));
+    message.mediaType !== undefined && (obj.mediaType = message.mediaType);
     return obj;
   },
 
@@ -664,6 +673,7 @@ export const GetAssetResponse = {
     const message = createBaseGetAssetResponse();
     message.id = object.id ?? "";
     message.payload = object.payload ?? new Uint8Array();
+    message.mediaType = object.mediaType ?? "";
     return message;
   },
 };

@@ -215,6 +215,7 @@ export interface SceneExport {
 export interface SceneExport_File {
   id: string;
   payload: Uint8Array;
+  mediaType: string;
 }
 
 function createBaseScene(): Scene {
@@ -1557,7 +1558,7 @@ export const SceneExport = {
 };
 
 function createBaseSceneExport_File(): SceneExport_File {
-  return { id: "", payload: new Uint8Array() };
+  return { id: "", payload: new Uint8Array(), mediaType: "" };
 }
 
 export const SceneExport_File = {
@@ -1570,6 +1571,9 @@ export const SceneExport_File = {
     }
     if (message.payload.length !== 0) {
       writer.uint32(18).bytes(message.payload);
+    }
+    if (message.mediaType !== "") {
+      writer.uint32(26).string(message.mediaType);
     }
     return writer;
   },
@@ -1587,6 +1591,9 @@ export const SceneExport_File = {
         case 2:
           message.payload = reader.bytes();
           break;
+        case 3:
+          message.mediaType = reader.string();
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -1601,6 +1608,7 @@ export const SceneExport_File = {
       payload: isSet(object.payload)
         ? bytesFromBase64(object.payload)
         : new Uint8Array(),
+      mediaType: isSet(object.mediaType) ? String(object.mediaType) : "",
     };
   },
 
@@ -1611,6 +1619,7 @@ export const SceneExport_File = {
       (obj.payload = base64FromBytes(
         message.payload !== undefined ? message.payload : new Uint8Array()
       ));
+    message.mediaType !== undefined && (obj.mediaType = message.mediaType);
     return obj;
   },
 
@@ -1620,6 +1629,7 @@ export const SceneExport_File = {
     const message = createBaseSceneExport_File();
     message.id = object.id ?? "";
     message.payload = object.payload ?? new Uint8Array();
+    message.mediaType = object.mediaType ?? "";
     return message;
   },
 };

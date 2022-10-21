@@ -48,6 +48,7 @@ message GetAssetRequest {
 message GetAssetResponse {
   string id = 1;
   bytes payload = 2;
+  string mediaType = 3;
 }
 
 message GetTableConfigurationRequest {

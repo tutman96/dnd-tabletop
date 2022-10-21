@@ -36,7 +36,8 @@ function useRequestHandlers() {
 			return {
 				getAssetResponse: {
 					id: req.getAssetRequest.id,
-					payload: new Uint8Array(await file.arrayBuffer())
+					payload: new Uint8Array(await file.arrayBuffer()),
+					mediaType: file.type
 				},
 				ackResponse: undefined
 			}

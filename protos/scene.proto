@@ -109,5 +109,6 @@ message SceneExport {
   message File {
     string id = 1;
     bytes payload = 2;
+    string mediaType = 3;
   }
 }
