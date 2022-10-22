@@ -6,6 +6,7 @@ import PresentationPage from "./table/presentation";
 import { createNewScene, sceneDatabase } from "./scene";
 import { Settings, settingsDatabase } from "./settings";
 import TablePage from './table/table';
+import NetworkPage from './table/network';
 
 const { useAllValues: useAllScenes, createItem } = sceneDatabase();
 const { useOneValue: useOneSettingValue } = settingsDatabase();
@@ -45,6 +46,7 @@ const Routes: React.FunctionComponent = () => {
 			<Route path="/scenes/*" element={<ScenePage />} />
 			<Route path="/table" element={<TablePage />} />
 			<Route path="/table/presentation" element={<PresentationPage />} />
+			<Route path="/table/network" element={<NetworkPage />} />
 		</ReactRouterRoutes>
 	)
 }

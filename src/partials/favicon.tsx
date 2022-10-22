@@ -1,16 +1,18 @@
 import React from 'react';
 
 import Box from '@mui/material/Box'
+import type {SxProps} from '@mui/material'
 
 import { theme } from "../theme";
 
 const transition = theme.transitions.create('opacity')
 const FAVICON_SIZE = theme.spacing(4);
 
-type Props = { active: boolean }
-const Favicon: React.FunctionComponent<Props> = ({ active }) => {
+type Props = { active: boolean, sx?: SxProps }
+const Favicon: React.FunctionComponent<Props> = ({ active, sx }) => {
   return (
     <Box sx={{
+      ...sx,
       width: FAVICON_SIZE, height: FAVICON_SIZE
     }}>
       <img

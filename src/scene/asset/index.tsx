@@ -109,7 +109,7 @@ async function getVideoElement(file: File) {
 
 export function useAssetElement(asset: Types.AssetLayer_Asset) {
 	const [entry, setEntry] = useState<CacheEntry | null | undefined>(assetCache.get(asset.id));
-	const connection = useConnection();
+	const [connection] = useConnection();
 
 	useEffect(() => {
 		if (entry === undefined) {

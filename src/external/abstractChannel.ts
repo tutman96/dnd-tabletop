@@ -2,7 +2,10 @@ import { v4 } from 'uuid';
 import { Packet, Request, Response } from '../protos/external';
 
 export enum ChannelState {
-  CONNECTING, CONNECTED, DISCONNECTING, DISCONNECTED
+  CONNECTING = 'CONNECTING',
+  CONNECTED = 'CONNECTED', 
+  DISCONNECTING = 'DISCONNECTING',
+  DISCONNECTED = 'DISCONNECTED'
 }
 
 type RequestHandler = (request: Request) => Promise<Partial<Response> | null>
@@ -16,7 +19,7 @@ export default abstract class AbstractChannel {
   abstract disconnect(): Promise<void>;
   abstract sendOutgoingPacket(packet: Packet): Promise<void>;
   
-  private connectionStateHandlers = new Array<(state: ChannelState) => void>();
+  protected connectionStateHandlers = new Array<(state: ChannelState) => void>();
   public addConnectionStateChangeHandler(handler: (state: ChannelState) => void) {
     this.connectionStateHandlers.push(handler);
     return () => {
@@ -31,7 +34,7 @@ export default abstract class AbstractChannel {
     }
   }
 
-  private requestHandlers = new Array<RequestHandler>(async (req) => {
+  protected requestHandlers = new Array<RequestHandler>(async (req) => {
     if (req.helloRequest) {
       return {
         ackResponse: {}

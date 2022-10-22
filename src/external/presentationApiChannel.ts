@@ -85,6 +85,8 @@ export default class PresentationApiChannel extends AbstractChannel {
       await this.processIncomingPacket(packet);
     }
 
+    this.request({ helloRequest: {} })
+
     window.addEventListener('beforeunload', () => {
       this.disconnect();
     })
@@ -94,6 +96,8 @@ export default class PresentationApiChannel extends AbstractChannel {
     if (!this._presentationConnection) return;
     this._connected = false;
     this._presentationConnection.terminate();
+    this._presentationConnection.close();
+    this.notifyConnectionStateChange();
   }
 
   async sendOutgoingPacket(packet: Packet) {

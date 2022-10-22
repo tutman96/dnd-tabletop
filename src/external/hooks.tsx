@@ -1,16 +1,20 @@
-import { useEffect, useContext, createContext, useState } from "react";
-import AbstractChannel from "./abstractChannel";
-import PresentationApiChannel from "./presentationApiChannel";
+import { useEffect, useState } from "react";
+import { singletonHook } from 'react-singleton-hook';
 import { Request, Response } from '../protos/external';
+import AbstractChannel from './abstractChannel';
+import PresentationApiChannel from './presentationApiChannel';
+import WebRTCApiChannel from './webrtcChannel';
 
-export const connectionContext = createContext<AbstractChannel>(new PresentationApiChannel())
+const isTable = window.location.hash.substring(2).startsWith('table/');
+const isNetworkTable = window.location.hash.substring(2) === 'table/network';
 
-export function useConnection() {
-  return useContext(connectionContext);
-}
+const init = isTable && isNetworkTable ? new WebRTCApiChannel() : new PresentationApiChannel();
+export const useConnection = singletonHook([init, () => {}], () => {
+  return useState<AbstractChannel>(init);
+});
 
 export function useConnectionState() {
-  const connection = useConnection();
+  const [connection] = useConnection();
   const [state, setState] = useState(connection.state);
 
   useEffect(() => {
@@ -23,7 +27,7 @@ export function useConnectionState() {
 }
 
 export function useRequestHandler(handler: (request: Request) => Promise<Partial<Response> | null>) {
-  const connection = useConnection();
+  const [connection] = useConnection();
 
   useEffect(() => {
     return connection.addRequestHandler(handler)
