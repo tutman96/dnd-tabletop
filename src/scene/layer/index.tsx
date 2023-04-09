@@ -6,7 +6,7 @@ import { deleteAsset } from "../asset";
 import AssetLayer from "./assetLayer";
 import FogLayer from "./fogLayer";
 
-export type ILayer = Types.AssetLayer | Types.FogLayer;
+export type ILayer = Types.AssetLayer | Types.FogLayer | Types.CharacterLayer;
 
 export interface ILayerComponentProps<T extends ILayer = ILayer> {
 	layer: T;
@@ -63,20 +63,28 @@ export async function deleteLayer(scene: Types.Scene, layer: ILayer) {
 // delete layer w/ assets
 
 export function flattenLayer(layer: Types.Layer): ILayer {
-	return layer.assetLayer ?? layer.fogLayer!
+	return layer.assetLayer ?? layer.fogLayer ?? layer.characterLayer!;
 }
 
 export function unflattenLayer(layer: ILayer): Types.Layer {
 	if (layer.type === Types.Layer_LayerType.ASSETS) {
-		return { 
+		return {
 			assetLayer: layer as Types.AssetLayer,
-			fogLayer: undefined
+			fogLayer: undefined,
+			characterLayer: undefined,
 		}
 	}
-	else {
-		return { 
+	else if (layer.type === Types.Layer_LayerType.FOG) {
+		return {
 			assetLayer: undefined,
-			fogLayer: layer as Types.FogLayer 
+			fogLayer: layer as Types.FogLayer,
+			characterLayer: undefined,
+		}
+	} else {
+		return {
+			assetLayer: undefined,
+			fogLayer: undefined,
+			characterLayer: layer as Types.CharacterLayer,
 		}
 	}
 }

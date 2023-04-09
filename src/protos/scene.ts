@@ -27,11 +27,13 @@ export interface Vector2d {
 export interface Layer {
   assetLayer: AssetLayer | undefined;
   fogLayer: FogLayer | undefined;
+  characterLayer: CharacterLayer | undefined;
 }
 
 export enum Layer_LayerType {
   ASSETS = 0,
   FOG = 1,
+  CHARACTER = 2,
   UNRECOGNIZED = -1,
 }
 
@@ -43,6 +45,9 @@ export function layer_LayerTypeFromJSON(object: any): Layer_LayerType {
     case 1:
     case "FOG":
       return Layer_LayerType.FOG;
+    case 2:
+    case "CHARACTER":
+      return Layer_LayerType.CHARACTER;
     case -1:
     case "UNRECOGNIZED":
     default:
@@ -56,6 +61,8 @@ export function layer_LayerTypeToJSON(object: Layer_LayerType): string {
       return "ASSETS";
     case Layer_LayerType.FOG:
       return "FOG";
+    case Layer_LayerType.CHARACTER:
+      return "CHARACTER";
     case Layer_LayerType.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
@@ -202,6 +209,65 @@ export function fogLayer_Polygon_PolygonTypeToJSON(
     case FogLayer_Polygon_PolygonType.LIGHT_OBSTRUCTION:
       return "LIGHT_OBSTRUCTION";
     case FogLayer_Polygon_PolygonType.UNRECOGNIZED:
+    default:
+      return "UNRECOGNIZED";
+  }
+}
+
+export interface CharacterLayer {
+  id: string;
+  name: string;
+  visible: boolean;
+  type: Layer_LayerType;
+  characterTokens: CharacterLayer_CharacterToken[];
+}
+
+export interface CharacterLayer_CharacterToken {
+  provider: string;
+  id: string;
+  type: CharacterLayer_CharacterToken | undefined;
+  position: Vector2d | undefined;
+  rotation: number;
+}
+
+export enum CharacterLayer_CharacterToken_CharacterTokenType {
+  AVATAR = 0,
+  SMALL = 1,
+  LARGE = 2,
+  UNRECOGNIZED = -1,
+}
+
+export function characterLayer_CharacterToken_CharacterTokenTypeFromJSON(
+  object: any
+): CharacterLayer_CharacterToken_CharacterTokenType {
+  switch (object) {
+    case 0:
+    case "AVATAR":
+      return CharacterLayer_CharacterToken_CharacterTokenType.AVATAR;
+    case 1:
+    case "SMALL":
+      return CharacterLayer_CharacterToken_CharacterTokenType.SMALL;
+    case 2:
+    case "LARGE":
+      return CharacterLayer_CharacterToken_CharacterTokenType.LARGE;
+    case -1:
+    case "UNRECOGNIZED":
+    default:
+      return CharacterLayer_CharacterToken_CharacterTokenType.UNRECOGNIZED;
+  }
+}
+
+export function characterLayer_CharacterToken_CharacterTokenTypeToJSON(
+  object: CharacterLayer_CharacterToken_CharacterTokenType
+): string {
+  switch (object) {
+    case CharacterLayer_CharacterToken_CharacterTokenType.AVATAR:
+      return "AVATAR";
+    case CharacterLayer_CharacterToken_CharacterTokenType.SMALL:
+      return "SMALL";
+    case CharacterLayer_CharacterToken_CharacterTokenType.LARGE:
+      return "LARGE";
+    case CharacterLayer_CharacterToken_CharacterTokenType.UNRECOGNIZED:
     default:
       return "UNRECOGNIZED";
   }
@@ -472,7 +538,11 @@ export const Vector2d = {
 };
 
 function createBaseLayer(): Layer {
-  return { assetLayer: undefined, fogLayer: undefined };
+  return {
+    assetLayer: undefined,
+    fogLayer: undefined,
+    characterLayer: undefined,
+  };
 }
 
 export const Layer = {
@@ -482,6 +552,12 @@ export const Layer = {
     }
     if (message.fogLayer !== undefined) {
       FogLayer.encode(message.fogLayer, writer.uint32(18).fork()).ldelim();
+    }
+    if (message.characterLayer !== undefined) {
+      CharacterLayer.encode(
+        message.characterLayer,
+        writer.uint32(26).fork()
+      ).ldelim();
     }
     return writer;
   },
@@ -499,6 +575,12 @@ export const Layer = {
         case 2:
           message.fogLayer = FogLayer.decode(reader, reader.uint32());
           break;
+        case 3:
+          message.characterLayer = CharacterLayer.decode(
+            reader,
+            reader.uint32()
+          );
+          break;
         default:
           reader.skipType(tag & 7);
           break;
@@ -515,6 +597,9 @@ export const Layer = {
       fogLayer: isSet(object.fogLayer)
         ? FogLayer.fromJSON(object.fogLayer)
         : undefined,
+      characterLayer: isSet(object.characterLayer)
+        ? CharacterLayer.fromJSON(object.characterLayer)
+        : undefined,
     };
   },
 
@@ -528,6 +613,10 @@ export const Layer = {
       (obj.fogLayer = message.fogLayer
         ? FogLayer.toJSON(message.fogLayer)
         : undefined);
+    message.characterLayer !== undefined &&
+      (obj.characterLayer = message.characterLayer
+        ? CharacterLayer.toJSON(message.characterLayer)
+        : undefined);
     return obj;
   },
 
@@ -540,6 +629,10 @@ export const Layer = {
     message.fogLayer =
       object.fogLayer !== undefined && object.fogLayer !== null
         ? FogLayer.fromPartial(object.fogLayer)
+        : undefined;
+    message.characterLayer =
+      object.characterLayer !== undefined && object.characterLayer !== null
+        ? CharacterLayer.fromPartial(object.characterLayer)
         : undefined;
     return message;
   },
@@ -1477,6 +1570,236 @@ export const FogLayer_Polygon = {
     message.verticies =
       object.verticies?.map((e) => Vector2d.fromPartial(e)) || [];
     message.visibleOnTable = object.visibleOnTable ?? false;
+    return message;
+  },
+};
+
+function createBaseCharacterLayer(): CharacterLayer {
+  return { id: "", name: "", visible: false, type: 0, characterTokens: [] };
+}
+
+export const CharacterLayer = {
+  encode(
+    message: CharacterLayer,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
+    if (message.id !== "") {
+      writer.uint32(10).string(message.id);
+    }
+    if (message.name !== "") {
+      writer.uint32(26).string(message.name);
+    }
+    if (message.visible === true) {
+      writer.uint32(32).bool(message.visible);
+    }
+    if (message.type !== 0) {
+      writer.uint32(40).int32(message.type);
+    }
+    for (const v of message.characterTokens) {
+      CharacterLayer_CharacterToken.encode(
+        v!,
+        writer.uint32(50).fork()
+      ).ldelim();
+    }
+    return writer;
+  },
+
+  decode(input: _m0.Reader | Uint8Array, length?: number): CharacterLayer {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCharacterLayer();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.id = reader.string();
+          break;
+        case 3:
+          message.name = reader.string();
+          break;
+        case 4:
+          message.visible = reader.bool();
+          break;
+        case 5:
+          message.type = reader.int32() as any;
+          break;
+        case 6:
+          message.characterTokens.push(
+            CharacterLayer_CharacterToken.decode(reader, reader.uint32())
+          );
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CharacterLayer {
+    return {
+      id: isSet(object.id) ? String(object.id) : "",
+      name: isSet(object.name) ? String(object.name) : "",
+      visible: isSet(object.visible) ? Boolean(object.visible) : false,
+      type: isSet(object.type) ? layer_LayerTypeFromJSON(object.type) : 0,
+      characterTokens: Array.isArray(object?.characterTokens)
+        ? object.characterTokens.map((e: any) =>
+            CharacterLayer_CharacterToken.fromJSON(e)
+          )
+        : [],
+    };
+  },
+
+  toJSON(message: CharacterLayer): unknown {
+    const obj: any = {};
+    message.id !== undefined && (obj.id = message.id);
+    message.name !== undefined && (obj.name = message.name);
+    message.visible !== undefined && (obj.visible = message.visible);
+    message.type !== undefined &&
+      (obj.type = layer_LayerTypeToJSON(message.type));
+    if (message.characterTokens) {
+      obj.characterTokens = message.characterTokens.map((e) =>
+        e ? CharacterLayer_CharacterToken.toJSON(e) : undefined
+      );
+    } else {
+      obj.characterTokens = [];
+    }
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<CharacterLayer>, I>>(
+    object: I
+  ): CharacterLayer {
+    const message = createBaseCharacterLayer();
+    message.id = object.id ?? "";
+    message.name = object.name ?? "";
+    message.visible = object.visible ?? false;
+    message.type = object.type ?? 0;
+    message.characterTokens =
+      object.characterTokens?.map((e) =>
+        CharacterLayer_CharacterToken.fromPartial(e)
+      ) || [];
+    return message;
+  },
+};
+
+function createBaseCharacterLayer_CharacterToken(): CharacterLayer_CharacterToken {
+  return {
+    provider: "",
+    id: "",
+    type: undefined,
+    position: undefined,
+    rotation: 0,
+  };
+}
+
+export const CharacterLayer_CharacterToken = {
+  encode(
+    message: CharacterLayer_CharacterToken,
+    writer: _m0.Writer = _m0.Writer.create()
+  ): _m0.Writer {
+    if (message.provider !== "") {
+      writer.uint32(10).string(message.provider);
+    }
+    if (message.id !== "") {
+      writer.uint32(18).string(message.id);
+    }
+    if (message.type !== undefined) {
+      CharacterLayer_CharacterToken.encode(
+        message.type,
+        writer.uint32(26).fork()
+      ).ldelim();
+    }
+    if (message.position !== undefined) {
+      Vector2d.encode(message.position, writer.uint32(42).fork()).ldelim();
+    }
+    if (message.rotation !== 0) {
+      writer.uint32(49).double(message.rotation);
+    }
+    return writer;
+  },
+
+  decode(
+    input: _m0.Reader | Uint8Array,
+    length?: number
+  ): CharacterLayer_CharacterToken {
+    const reader = input instanceof _m0.Reader ? input : new _m0.Reader(input);
+    let end = length === undefined ? reader.len : reader.pos + length;
+    const message = createBaseCharacterLayer_CharacterToken();
+    while (reader.pos < end) {
+      const tag = reader.uint32();
+      switch (tag >>> 3) {
+        case 1:
+          message.provider = reader.string();
+          break;
+        case 2:
+          message.id = reader.string();
+          break;
+        case 3:
+          message.type = CharacterLayer_CharacterToken.decode(
+            reader,
+            reader.uint32()
+          );
+          break;
+        case 5:
+          message.position = Vector2d.decode(reader, reader.uint32());
+          break;
+        case 6:
+          message.rotation = reader.double();
+          break;
+        default:
+          reader.skipType(tag & 7);
+          break;
+      }
+    }
+    return message;
+  },
+
+  fromJSON(object: any): CharacterLayer_CharacterToken {
+    return {
+      provider: isSet(object.provider) ? String(object.provider) : "",
+      id: isSet(object.id) ? String(object.id) : "",
+      type: isSet(object.type)
+        ? CharacterLayer_CharacterToken.fromJSON(object.type)
+        : undefined,
+      position: isSet(object.position)
+        ? Vector2d.fromJSON(object.position)
+        : undefined,
+      rotation: isSet(object.rotation) ? Number(object.rotation) : 0,
+    };
+  },
+
+  toJSON(message: CharacterLayer_CharacterToken): unknown {
+    const obj: any = {};
+    message.provider !== undefined && (obj.provider = message.provider);
+    message.id !== undefined && (obj.id = message.id);
+    message.type !== undefined &&
+      (obj.type = message.type
+        ? CharacterLayer_CharacterToken.toJSON(message.type)
+        : undefined);
+    message.position !== undefined &&
+      (obj.position = message.position
+        ? Vector2d.toJSON(message.position)
+        : undefined);
+    message.rotation !== undefined && (obj.rotation = message.rotation);
+    return obj;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<CharacterLayer_CharacterToken>, I>>(
+    object: I
+  ): CharacterLayer_CharacterToken {
+    const message = createBaseCharacterLayer_CharacterToken();
+    message.provider = object.provider ?? "";
+    message.id = object.id ?? "";
+    message.type =
+      object.type !== undefined && object.type !== null
+        ? CharacterLayer_CharacterToken.fromPartial(object.type)
+        : undefined;
+    message.position =
+      object.position !== undefined && object.position !== null
+        ? Vector2d.fromPartial(object.position)
+        : undefined;
+    message.rotation = object.rotation ?? 0;
     return message;
   },
 };

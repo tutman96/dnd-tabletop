@@ -97,7 +97,8 @@ export function newSceneFromOldScene(oldScene: OldIScene): Scene {
             visible: oldLayer.visible,
             assets: Array.from(oldLayer.assets.values()).reduce((a, c) => ({ [c.id]: c, ...a }), {})
           },
-          fogLayer: undefined
+          fogLayer: undefined,
+          characterLayer: undefined,
         };
       }
       else if (layer.type === OldLayerType.FOG) {
@@ -113,7 +114,8 @@ export function newSceneFromOldScene(oldScene: OldIScene): Scene {
             fogPolygons: oldLayer.fogPolygons.map(polygonConvert),
             fogClearPolygons: oldLayer.fogClearPolygons.map(polygonConvert)
           },
-          assetLayer: undefined
+          assetLayer: undefined,
+          characterLayer: undefined,
         };
       }
       else {

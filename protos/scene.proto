@@ -24,10 +24,12 @@ message Layer {
   oneof layerType {
     AssetLayer assetLayer = 1;
     FogLayer fogLayer = 2;
+    CharacterLayer characterLayer = 3;
   }
   enum LayerType {
     ASSETS = 0;
     FOG = 1;
+    CHARACTER = 2;
   }
 }
 
@@ -100,6 +102,28 @@ message FogLayer {
 
     repeated Vector2d verticies = 2;
     bool visibleOnTable = 3;
+  }
+}
+
+message CharacterLayer {
+  string id = 1;
+  string name = 3;
+  bool visible = 4;
+  Layer.LayerType type = 5;
+
+  repeated CharacterToken characterTokens = 6;
+  message CharacterToken {
+    string provider = 1;
+    string id = 2;
+    CharacterToken type = 3;
+    enum CharacterTokenType {
+      AVATAR = 0;
+      SMALL = 1;
+      LARGE = 2;
+    }
+
+    Vector2d position = 5;
+    double rotation = 6; 
   }
 }
 
