@@ -9,8 +9,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
-      - run: yarn install 
-      - run: yarn build
+      - run: npm ci 
+      - run: npm run build
       - run: |
           git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
           npx gh-pages@^3 -u "github-actions-bot <support+actions@github.com>" -d build
