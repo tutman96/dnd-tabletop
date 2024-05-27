@@ -39,7 +39,7 @@ const VisualAssetSizer: React.FunctionComponent<{
       width={VISUAL_ASSET_SIZER_SIZE}
       height={VISUAL_ASSET_SIZER_SIZE}
       sx={{
-        marginLeft: '-1.5rem',
+        margin: '0 -1.5rem',
       }}
       initialZoom={VISUAL_ASSET_SIZER_SIZE / asset.size!.width}
     >
