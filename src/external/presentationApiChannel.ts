@@ -1,5 +1,3 @@
-import './presentationApi.d.ts';
-
 import {Packet} from '../protos/external';
 import AbstractChannel, {ChannelState} from './abstractChannel';
 
