@@ -8,7 +8,7 @@ import Toolbar from './toolbar';
 
 const useToolbarPortal = singletonHook([undefined, () => { }], () => useState<HTMLElement | undefined>(undefined));
 
-const ToolbarPortal: React.FunctionComponent = ({ children }) => {
+const ToolbarPortal: React.FunctionComponent<React.PropsWithChildren> = ({ children }) => {
 	const [portal] = useToolbarPortal()!;
 
 	useEffect(() => {
@@ -28,7 +28,7 @@ const ToolbarPortal: React.FunctionComponent = ({ children }) => {
 }
 export default ToolbarPortal;
 
-export const ToolbarPortalProvider: React.FunctionComponent = ({ children }) => {
+export const ToolbarPortalProvider: React.FunctionComponent<React.PropsWithChildren> = ({ children }) => {
 	const node = useRef<HTMLSpanElement>();
 	const [, setPortal] = useToolbarPortal()!;
 

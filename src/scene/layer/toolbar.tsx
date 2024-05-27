@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 
 import theme from '../../theme';
 
-const Toolbar: React.FunctionComponent = ({ children }) => {
+const Toolbar: React.FunctionComponent<React.PropsWithChildren> = ({ children }) => {
 	return (
 		<Box
 			sx={{

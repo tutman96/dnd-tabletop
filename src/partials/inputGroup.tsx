@@ -5,7 +5,7 @@ import Box from '@mui/material/Box';
 
 import theme from "../theme";
 
-const InputGroup: React.FunctionComponent<{ header: string; }> = ({ header, children }) => {
+const InputGroup: React.FunctionComponent<React.PropsWithChildren<{ header: string; }>> = ({ header, children }) => {
   return (
     <>
       <Typography variant="overline" color={theme.palette.grey[300]}>{header}</Typography>

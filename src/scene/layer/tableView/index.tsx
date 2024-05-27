@@ -113,7 +113,7 @@ const TableViewOverlay: React.FunctionComponent<Props> = ({ options, active, sho
 
     return (
       <Group
-        clipFunc={(ctx: CanvasRenderingContext2D) => {
+        clipFunc={(ctx) => {
           ctx.beginPath();
           ctx.rect(offset.x, offset.y, width, height);
           ctx.rotate(localOptions.rotation);

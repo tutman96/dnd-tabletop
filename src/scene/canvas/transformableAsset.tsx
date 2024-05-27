@@ -16,7 +16,7 @@ type Props = {
 	rotateEnabled?: boolean;
 	strokeEnabled?: boolean;
 };
-const TransformableAsset: React.FunctionComponent<Props> = ({
+const TransformableAsset: React.FunctionComponent<React.PropsWithChildren<Props>> = ({
 	rectTransform, onTransform,
 	isSelected, onSelected,
 	snapOffset,
