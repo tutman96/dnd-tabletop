@@ -10,10 +10,11 @@ import TextField from '@mui/material/TextField';
 
 const RenameDialog: React.FunctionComponent<{
   name: string;
+  isNew?: boolean;
   onConfirm: (newName: string) => void;
   onCancel: () => void;
   open: boolean;
-}> = ({name, onConfirm, onCancel, open}) => {
+}> = ({name, isNew, onConfirm, onCancel, open}) => {
   const [localName, setLocalName] = useState(name);
 
   useEffect(() => {
@@ -22,9 +23,15 @@ const RenameDialog: React.FunctionComponent<{
 
   return (
     <Dialog open={open} onClose={onCancel}>
-      <DialogTitle>Rename '{name}'</DialogTitle>
+      <DialogTitle>
+        {isNew ? 'Create new scene' : `Rename '${name}'`}
+      </DialogTitle>
       <DialogContent>
-        <DialogContentText>Edit the name of '{name}' here.</DialogContentText>
+        <DialogContentText>
+          {isNew
+            ? 'What would you like to name this scene? This can be changed later'
+            : `Edit the name of '${name}' here.`}
+        </DialogContentText>
         <TextField
           autoFocus
           margin="dense"

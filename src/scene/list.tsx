@@ -17,6 +17,7 @@ import {sceneDatabase, createNewScene, importScene} from '.';
 import * as Types from '../protos/scene';
 
 import {SceneListItem} from './listItem';
+import RenameDialog from '../partials/renameDialog';
 
 const {useAllValues, createItem} = sceneDatabase();
 
@@ -38,16 +39,18 @@ const AddButton: React.FunctionComponent<{
   const anchorEl = useRef<HTMLElement>();
   const [menuOpen, setMenuOpen] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [scene, setScene] = useState<Types.Scene | null>(null);
+  const [editNameOpen, setEditNameOpen] = useState(false);
   const allScenes = useAllValues();
 
-  function addNewScene() {
-    const scene = createNewScene();
+  async function addNewScene() {
+    const s = createNewScene();
     if (allScenes) {
-      scene.name = `Scene ${allScenes.size + 1}`;
+      s.name = `Scene ${allScenes.size + 1}`;
     }
-    createItem(scene.id, scene).then(() => {
-      onAdd(scene);
-    });
+    setScene(s);
+    setEditNameOpen(true);
+    setMenuOpen(false);
   }
 
   async function importNewScene() {
@@ -67,6 +70,19 @@ const AddButton: React.FunctionComponent<{
       <IconButton ref={anchorEl as any} onClick={() => setMenuOpen(true)}>
         <AddCircleOutlineIcon />
       </IconButton>
+      <RenameDialog
+        open={editNameOpen && scene !== null}
+        isNew
+        name={scene?.name ?? ''}
+        onConfirm={name => {
+          scene!.name = name;
+          createItem(scene!.id, scene!).then(() => {
+            onAdd(scene!);
+            setEditNameOpen(false);
+          });
+        }}
+        onCancel={() => setEditNameOpen(false)}
+      />
       <Menu
         anchorEl={anchorEl.current}
         open={menuOpen}
