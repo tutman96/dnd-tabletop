@@ -1,12 +1,12 @@
-import { Packet } from '../protos/external';
-import AbstractChannel, { ChannelState } from './abstractChannel';
+import {Packet} from '../protos/external';
+import AbstractChannel, {ChannelState} from './abstractChannel';
 
 const SIGNAL_BASE_URL = 'https://dndttapi.tutman96.workers.dev';
 
 function makeid(length: number) {
   let result = '';
   const characters = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // A-Z0-9 omitting O, 0, 1, I, L
-  for (var i = 0; i < length; i++) {
+  for (let i = 0; i < length; i++) {
     result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
   return result;
@@ -38,9 +38,7 @@ export default class WebRTCApiChannel extends AbstractChannel {
       id: 0,
     });
 
-    await new Promise(
-      (res) => (this.peerConnection!.onnegotiationneeded = res)
-    );
+    await new Promise(res => (this.peerConnection!.onnegotiationneeded = res));
 
     this.connecting = true;
     this.notifyConnectionStateChange();
@@ -50,11 +48,11 @@ export default class WebRTCApiChannel extends AbstractChannel {
     };
 
     this.dataChannel.onerror = e => {
-      console.warn('Data channel error', e)
+      console.warn('Data channel error', e);
       this.notifyConnectionStateChange();
     };
 
-    this.dataChannel.onmessage = async (event) => {
+    this.dataChannel.onmessage = async event => {
       if (!(event.data instanceof ArrayBuffer)) {
         console.warn("Got a message that wasn't a ArrayBuffer", event);
         return;
@@ -69,6 +67,7 @@ export default class WebRTCApiChannel extends AbstractChannel {
 
     if (isTable) {
       let offer: string;
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         try {
           const resp = await fetch(
@@ -82,10 +81,10 @@ export default class WebRTCApiChannel extends AbstractChannel {
         } catch {
           // no-op
         }
-        await new Promise((res) => setTimeout(res, 5_000));
+        await new Promise(res => setTimeout(res, 5_000));
       }
 
-      console.log('Got offer', { offer });
+      console.log('Got offer', {offer});
 
       await this.peerConnection.setRemoteDescription(
         new RTCSessionDescription({
@@ -107,8 +106,8 @@ export default class WebRTCApiChannel extends AbstractChannel {
       console.log('setLocalDescription');
       await this.peerConnection.setLocalDescription(firstOffer);
 
-      await new Promise<void>((res) => {
-        this.peerConnection!.onicecandidate = (e) => {
+      await new Promise<void>(res => {
+        this.peerConnection!.onicecandidate = e => {
           console.log('onicecandidate', e.candidate);
           if (e.candidate) {
             this.peerConnection!.addIceCandidate(e.candidate);
@@ -121,7 +120,7 @@ export default class WebRTCApiChannel extends AbstractChannel {
       const offer = await this.peerConnection.createOffer();
       await this.peerConnection.setLocalDescription(offer);
 
-      console.log('PUT offer', { offer });
+      console.log('PUT offer', {offer});
       const resp = await fetch(
         `${SIGNAL_BASE_URL}/session/${this.sessionId}/offer`,
         {
@@ -137,6 +136,7 @@ export default class WebRTCApiChannel extends AbstractChannel {
       }
 
       let answer: string;
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         try {
           const resp = await fetch(
@@ -151,10 +151,10 @@ export default class WebRTCApiChannel extends AbstractChannel {
           // no-op
         }
 
-        await new Promise((res) => setTimeout(res, 5_000));
+        await new Promise(res => setTimeout(res, 5_000));
       }
 
-      console.log('Got answer', { answer });
+      console.log('Got answer', {answer});
 
       await this.peerConnection.setRemoteDescription(
         new RTCSessionDescription({
@@ -164,14 +164,14 @@ export default class WebRTCApiChannel extends AbstractChannel {
       );
     }
 
-    await new Promise((res) => (this.dataChannel!.onopen = res));
+    await new Promise(res => (this.dataChannel!.onopen = res));
     this.connecting = false;
 
     this.notifyConnectionStateChange();
   }
 
   async disconnect() {
-    console.warn('disconnecting')
+    console.warn('disconnecting');
     if (this.connecting) {
       console.warn("Can't disconnect while connecting");
       return;

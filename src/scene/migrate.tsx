@@ -1,8 +1,23 @@
-import { Scene, AssetLayer_Asset, FogLayer_LightSource, FogLayer_Polygon_PolygonType, FogLayer_Polygon, Layer_LayerType } from '../protos/scene';
-import { newStorage } from './'
-import { oldStorage, OldIScene, OldIAssetLayer, OldLayerType, OldIPolygon, OldPolygonType, OldIFogLayer } from './oldStorage';
-import { defaultLightSource } from "./layer/fogLayer/rayCastRevealPolygon";
-import { tablePPI } from '../settings';
+import {
+  Scene,
+  AssetLayer_Asset,
+  FogLayer_LightSource,
+  FogLayer_Polygon_PolygonType,
+  FogLayer_Polygon,
+  Layer_LayerType,
+} from '../protos/scene';
+import {newStorage} from './';
+import {
+  oldStorage,
+  OldIScene,
+  OldIAssetLayer,
+  OldLayerType,
+  OldIPolygon,
+  OldPolygonType,
+  OldIFogLayer,
+} from './oldStorage';
+import {defaultLightSource} from './layer/fogLayer/rayCastRevealPolygon';
+import {tablePPI} from '../settings';
 
 function scaleAsset(asset: AssetLayer_Asset, scale: number): AssetLayer_Asset {
   return {
@@ -12,17 +27,20 @@ function scaleAsset(asset: AssetLayer_Asset, scale: number): AssetLayer_Asset {
       y: asset.transform!.y! * scale,
       width: asset.transform!.width! * scale,
       height: asset.transform!.height! * scale,
-      rotation: asset.transform!.rotation
-    }
-  }
+      rotation: asset.transform!.rotation,
+    },
+  };
 }
 
-function scalePolygon(polygon: FogLayer_Polygon, scale: number): FogLayer_Polygon {
+function scalePolygon(
+  polygon: FogLayer_Polygon,
+  scale: number
+): FogLayer_Polygon {
   return {
     type: polygon.type,
     visibleOnTable: polygon.visibleOnTable,
-    verticies: polygon.verticies.map((v) => ({ x: v.x * scale, y: v.y * scale }))
-  }
+    verticies: polygon.verticies.map(v => ({x: v.x * scale, y: v.y * scale})),
+  };
 }
 
 function scaleScene(scene: Scene, scale: number): Scene {
@@ -35,14 +53,19 @@ function scaleScene(scene: Scene, scale: number): Scene {
       for (const [assetId, asset] of Object.entries(assetLayer.assets)) {
         assetLayer.assets[assetId] = scaleAsset(asset, scale);
       }
-    }
-    else if (layer.fogLayer) {
-      layer.fogLayer.lightSources = layer.fogLayer.lightSources.map((l) => ({
-        ...l, position: { x: l.position!.x * scale, y: l.position!.y * scale }
-      }))
-      layer.fogLayer.obstructionPolygons = layer.fogLayer.obstructionPolygons.map((p) => scalePolygon(p, scale));
-      layer.fogLayer.fogPolygons = layer.fogLayer.fogPolygons.map((p) => scalePolygon(p, scale));
-      layer.fogLayer.fogClearPolygons = layer.fogLayer.fogClearPolygons.map((p) => scalePolygon(p, scale));
+    } else if (layer.fogLayer) {
+      layer.fogLayer.lightSources = layer.fogLayer.lightSources.map(l => ({
+        ...l,
+        position: {x: l.position!.x * scale, y: l.position!.y * scale},
+      }));
+      layer.fogLayer.obstructionPolygons =
+        layer.fogLayer.obstructionPolygons.map(p => scalePolygon(p, scale));
+      layer.fogLayer.fogPolygons = layer.fogLayer.fogPolygons.map(p =>
+        scalePolygon(p, scale)
+      );
+      layer.fogLayer.fogClearPolygons = layer.fogLayer.fogClearPolygons.map(p =>
+        scalePolygon(p, scale)
+      );
     }
   }
   return scene;
@@ -59,7 +82,9 @@ export async function migrate() {
     return;
   }
 
-  console.warn('Migrating ' + newSceneIds.length + ' scenes and scaling down by ' + scale);
+  console.warn(
+    'Migrating ' + newSceneIds.length + ' scenes and scaling down by ' + scale
+  );
 
   migrated = true;
   const sceneIds = await oldStorage.storage.keys();
@@ -77,8 +102,8 @@ export function newSceneFromOldScene(oldScene: OldIScene): Scene {
   function polygonConvert(newPolygon: OldIPolygon): FogLayer_Polygon {
     return {
       ...newPolygon,
-      type: FogLayer_Polygon_PolygonType[OldPolygonType[newPolygon.type]]
-    }
+      type: FogLayer_Polygon_PolygonType[OldPolygonType[newPolygon.type]],
+    };
   }
 
   return {
@@ -86,7 +111,7 @@ export function newSceneFromOldScene(oldScene: OldIScene): Scene {
     name: oldScene.name,
     version: oldScene.version ?? 0,
     table: oldScene.table,
-    layers: oldScene.layers.map((layer) => {
+    layers: oldScene.layers.map(layer => {
       if (layer.type === OldLayerType.ASSETS) {
         const oldLayer = layer as OldIAssetLayer;
         return {
@@ -95,12 +120,14 @@ export function newSceneFromOldScene(oldScene: OldIScene): Scene {
             name: oldLayer.name,
             type: Layer_LayerType.ASSETS,
             visible: oldLayer.visible,
-            assets: Array.from(oldLayer.assets.values()).reduce((a, c) => ({ [c.id]: c, ...a }), {})
+            assets: Array.from(oldLayer.assets.values()).reduce(
+              (a, c) => ({[c.id]: c, ...a}),
+              {}
+            ),
           },
-          fogLayer: undefined
+          fogLayer: undefined,
         };
-      }
-      else if (layer.type === OldLayerType.FOG) {
+      } else if (layer.type === OldLayerType.FOG) {
         const oldLayer = layer as OldIFogLayer;
         return {
           fogLayer: {
@@ -108,17 +135,19 @@ export function newSceneFromOldScene(oldScene: OldIScene): Scene {
             name: oldLayer.name,
             type: Layer_LayerType.FOG,
             visible: oldLayer.visible,
-            lightSources: oldLayer.lightSources.map((l) => defaultLightSource(l) as FogLayer_LightSource),
-            obstructionPolygons: oldLayer.obstructionPolygons.map(polygonConvert),
+            lightSources: oldLayer.lightSources.map(
+              l => defaultLightSource(l) as FogLayer_LightSource
+            ),
+            obstructionPolygons:
+              oldLayer.obstructionPolygons.map(polygonConvert),
             fogPolygons: oldLayer.fogPolygons.map(polygonConvert),
-            fogClearPolygons: oldLayer.fogClearPolygons.map(polygonConvert)
+            fogClearPolygons: oldLayer.fogClearPolygons.map(polygonConvert),
           },
-          assetLayer: undefined
+          assetLayer: undefined,
         };
+      } else {
+        throw new Error('Unsupported layer type');
       }
-      else {
-        throw new Error('Unsupported layer type')
-      }
-    })
-  }
+    }),
+  };
 }

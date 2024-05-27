@@ -1,16 +1,18 @@
 declare class PresentationConnectionList {
-  connections: Array<PresentationConnection>
+  connections: Array<PresentationConnection>;
 }
 
 declare class PresentationConnection {
-  public binaryType: "arraybuffer";
+  public binaryType: 'arraybuffer';
   public readonly id: string;
-  public readonly state: "connecting" | "connected" | "closed" | "terminated";
+  public readonly state: 'connecting' | 'connected' | 'closed' | 'terminated';
   public readonly url: string;
 
   public onclose: () => void;
   public onconnect: () => void;
-  public onmessage: (event: { data: string | ArrayBuffer | Array<string | ArrayBuffer> }) => void;
+  public onmessage: (event: {
+    data: string | ArrayBuffer | Array<string | ArrayBuffer>;
+  }) => void;
   public onterminated: () => void;
 
   send(data: string | ArrayBuffer | Array<string | ArrayBuffer>): void;
@@ -24,11 +26,13 @@ declare class PresentationAvailability extends EventTarget {
 }
 
 declare class PresentationRequest {
-  constructor(urls: string | Array<string>)
+  constructor(urls: string | Array<string>);
   public onconnectionavailable: () => void;
   start(): Promise<PresentationConnection>;
   reconnect(presentationId: string): Promise<PresentationConnection>;
-  getAvailability(presentationUrls?: Array<string>): Promise<PresentationAvailability>;
+  getAvailability(
+    presentationUrls?: Array<string>
+  ): Promise<PresentationAvailability>;
 }
 
 declare class PresentationReceiver {
@@ -42,7 +46,7 @@ declare class Presentation {
 
 interface Navigator {
   presentation: {
-    receiver: PresentationReceiver | null,
-    defaultRequest: PresentationRequest | null,
-  }
+    receiver: PresentationReceiver | null;
+    defaultRequest: PresentationRequest | null;
+  };
 }

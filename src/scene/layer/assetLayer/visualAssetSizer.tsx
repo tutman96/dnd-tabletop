@@ -1,16 +1,19 @@
 import React from 'react';
-import { Layer, Rect } from 'react-konva';
+import {Layer, Rect} from 'react-konva';
 import Konva from 'konva';
 
 import DraggableStage from '../../canvas/draggableStage';
 import Asset from './asset';
-import theme, { VISUAL_ASSET_SIZER_SIZE } from '../../../theme';
+import theme, {VISUAL_ASSET_SIZER_SIZE} from '../../../theme';
 import TransformableAsset from '../../canvas/transformableAsset';
 import * as Types from '../../../protos/scene';
 
 const RESIZE_SQUARES = 3;
 
-const VisualAssetSizer: React.FunctionComponent<{ asset: Types.AssetLayer_Asset; onUpdate: (calibration: Types.AssetLayer_Asset_AssetCalibration) => void; }> = ({ asset, onUpdate }) => {
+const VisualAssetSizer: React.FunctionComponent<{
+  asset: Types.AssetLayer_Asset;
+  onUpdate: (calibration: Types.AssetLayer_Asset_AssetCalibration) => void;
+}> = ({asset, onUpdate}) => {
   if (!asset.calibration) {
     return null;
   }
@@ -21,14 +24,14 @@ const VisualAssetSizer: React.FunctionComponent<{ asset: Types.AssetLayer_Asset;
       width: asset.calibration.ppiX * RESIZE_SQUARES,
       height: asset.calibration.ppiY * 1,
       x: 0,
-      y: asset.calibration.ppiY * i
-    })
+      y: asset.calibration.ppiY * i,
+    });
     innerRectangles.push({
       width: asset.calibration.ppiX * 1,
       height: asset.calibration.ppiY * RESIZE_SQUARES,
       x: asset.calibration.ppiX * i,
-      y: 0
-    })
+      y: 0,
+    });
   }
 
   return (
@@ -36,9 +39,9 @@ const VisualAssetSizer: React.FunctionComponent<{ asset: Types.AssetLayer_Asset;
       width={VISUAL_ASSET_SIZER_SIZE}
       height={VISUAL_ASSET_SIZER_SIZE}
       sx={{
-        marginLeft: `-1.5rem`
+        marginLeft: '-1.5rem',
       }}
-      initialZoom={(VISUAL_ASSET_SIZER_SIZE / asset.size!.width)}
+      initialZoom={VISUAL_ASSET_SIZER_SIZE / asset.size!.width}
     >
       <Layer>
         <Asset
@@ -48,12 +51,12 @@ const VisualAssetSizer: React.FunctionComponent<{ asset: Types.AssetLayer_Asset;
               ...asset.size!,
               rotation: 0,
               x: 0,
-              y: 0
-            }
+              y: 0,
+            },
           }}
-          onSelected={() => { }}
+          onSelected={() => {}}
           selected={false}
-          onUpdate={() => { }}
+          onUpdate={() => {}}
           playAudio={false}
         />
       </Layer>
@@ -64,19 +67,20 @@ const VisualAssetSizer: React.FunctionComponent<{ asset: Types.AssetLayer_Asset;
             height: asset.calibration.ppiY * RESIZE_SQUARES,
             x: asset.calibration.xOffset,
             y: asset.calibration.yOffset,
-            rotation: 0
+            rotation: 0,
           }}
           rotateEnabled={false}
           strokeEnabled={false}
           isSelected={true}
-          onSelected={() => { }}
-          onTransform={(transform) => {
+          onSelected={() => {}}
+          onTransform={transform => {
             onUpdate({
-              ppiX: Math.round(transform.width! / RESIZE_SQUARES * 100) / 100,
-              ppiY: Math.round(transform.height! / RESIZE_SQUARES * 100) / 100,
+              ppiX: Math.round((transform.width! / RESIZE_SQUARES) * 100) / 100,
+              ppiY:
+                Math.round((transform.height! / RESIZE_SQUARES) * 100) / 100,
               xOffset: Math.round(transform.x! * 100) / 100,
-              yOffset: Math.round(transform.y! * 100) / 100
-            })
+              yOffset: Math.round(transform.y! * 100) / 100,
+            });
           }}
         >
           {/* Outside rect */}

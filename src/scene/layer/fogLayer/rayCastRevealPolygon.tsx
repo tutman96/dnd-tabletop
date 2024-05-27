@@ -1,22 +1,26 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Shape, Line } from 'react-konva';
+import React, {useState, useRef, useEffect, useMemo} from 'react';
+import {Shape, Line} from 'react-konva';
 import Konva from 'konva';
 
-import { yellow } from '@mui/material/colors';
+import {yellow} from '@mui/material/colors';
 
-import { getVisibilityPolygon } from './rayCastingUtils';
+import {getVisibilityPolygon} from './rayCastingUtils';
 import theme from '../../../theme';
 import * as Types from '../../../protos/scene';
 
-
 export function defaultLightSource(light: Partial<Types.FogLayer_LightSource>) {
   // default to torch light
-  light.brightLightDistance = light.brightLightDistance === undefined ? 4 : light.brightLightDistance;
-  light.dimLightDistance = light.dimLightDistance === undefined ? 8 : light.dimLightDistance;
+  light.brightLightDistance =
+    light.brightLightDistance === undefined ? 4 : light.brightLightDistance;
+  light.dimLightDistance =
+    light.dimLightDistance === undefined ? 8 : light.dimLightDistance;
   return light as Types.FogLayer_LightSource;
 }
 
-function calculateBoundsPolygon(lightSource: Konva.Vector2d, fogPolygons: Array<Types.FogLayer_Polygon>): Types.FogLayer_Polygon {
+function calculateBoundsPolygon(
+  lightSource: Konva.Vector2d,
+  fogPolygons: Array<Types.FogLayer_Polygon>
+): Types.FogLayer_Polygon {
   let minX: number = lightSource.x;
   let maxX: number = lightSource.x;
   let minY: number = lightSource.y;
@@ -28,8 +32,8 @@ function calculateBoundsPolygon(lightSource: Konva.Vector2d, fogPolygons: Array<
       maxX = Math.max(maxX, v.x);
       minY = Math.min(minY, v.y);
       maxY = Math.max(maxY, v.y);
-    })
-  })
+    });
+  });
 
   // Expand Bounds Around Light to make
   // sure there's no weird issue with the light
@@ -42,29 +46,37 @@ function calculateBoundsPolygon(lightSource: Konva.Vector2d, fogPolygons: Array<
   return {
     type: Types.FogLayer_Polygon_PolygonType.LIGHT_OBSTRUCTION,
     verticies: [
-      { x: minX, y: minY }, // top left
-      { x: maxX, y: minY }, // top right
-      { x: maxX, y: maxY }, // bottom right
-      { x: minX, y: maxY }, // bottom left
-      { x: minX, y: minY }, // top left (close the poly)
+      {x: minX, y: minY}, // top left
+      {x: maxX, y: minY}, // top right
+      {x: maxX, y: maxY}, // bottom right
+      {x: minX, y: maxY}, // bottom left
+      {x: minX, y: minY}, // top left (close the poly)
     ],
-    visibleOnTable: true
+    visibleOnTable: true,
   };
 }
 
 // const fillGradientColorStops = [0, 'rgba(255,255,255,0.90)', 0.10, 'rgba(255,255,255,0.70)', 0.40, 'rgba(255,255,255,0.40)', 0.60, 'rgba(255,255,255,0.10)', 1, 'transparent'];
 
 type Props = {
-  light: Types.FogLayer_LightSource,
-  displayIcon: boolean,
-  obstructionPolygons: Array<Types.FogLayer_Polygon>,
-  fogPolygons: Array<Types.FogLayer_Polygon>
-  onUpdate: (light: Types.FogLayer_LightSource) => void,
-  isTable: boolean,
-  selected: boolean,
-  onSelected: () => void
+  light: Types.FogLayer_LightSource;
+  displayIcon: boolean;
+  obstructionPolygons: Array<Types.FogLayer_Polygon>;
+  fogPolygons: Array<Types.FogLayer_Polygon>;
+  onUpdate: (light: Types.FogLayer_LightSource) => void;
+  isTable: boolean;
+  selected: boolean;
+  onSelected: () => void;
 };
-const RayCastRevealPolygon: React.FunctionComponent<Props> = ({ light, displayIcon, fogPolygons, obstructionPolygons, onUpdate, selected, onSelected }) => {
+const RayCastRevealPolygon: React.FunctionComponent<Props> = ({
+  light,
+  displayIcon,
+  fogPolygons,
+  obstructionPolygons,
+  onUpdate,
+  selected,
+  onSelected,
+}) => {
   const iconRef = useRef<Konva.Shape>();
 
   const [localPosition, setLocalPosition] = useState(light.position!);
@@ -72,25 +84,35 @@ const RayCastRevealPolygon: React.FunctionComponent<Props> = ({ light, displayIc
   const positionX = light.position!.x;
   const positionY = light.position!.y;
   useEffect(() => {
-    setLocalPosition({ x: positionX, y: positionY });
-  }, [positionX, positionY])
+    setLocalPosition({x: positionX, y: positionY});
+  }, [positionX, positionY]);
 
   const defaultedLight = defaultLightSource(light);
-  
+
   const visibilityPolygon = useMemo(() => {
-    let fogPolygon = calculateBoundsPolygon(localPosition, fogPolygons);
-    const obstructionWithFogPoly = [...obstructionPolygons.filter((p) => p.visibleOnTable), fogPolygon];
-    return getVisibilityPolygon(localPosition, obstructionWithFogPoly)
+    const fogPolygon = calculateBoundsPolygon(localPosition, fogPolygons);
+    const obstructionWithFogPoly = [
+      ...obstructionPolygons.filter(p => p.visibleOnTable),
+      fogPolygon,
+    ];
+    return getVisibilityPolygon(localPosition, obstructionWithFogPoly);
   }, [localPosition, obstructionPolygons, fogPolygons]);
 
   const visibilityLinePoints = visibilityPolygon.verticies
-    .map((v) => [v.x, v.y]).flat();
+    .map(v => [v.x, v.y])
+    .flat();
 
   if (iconRef.current) {
     iconRef.current.setZIndex(9999);
   }
 
-  let dimlightBrightLightRatio = Math.max(0, Math.min(1, defaultedLight.brightLightDistance! / defaultedLight.dimLightDistance!));
+  let dimlightBrightLightRatio = Math.max(
+    0,
+    Math.min(
+      1,
+      defaultedLight.brightLightDistance! / defaultedLight.dimLightDistance!
+    )
+  );
   if (isNaN(dimlightBrightLightRatio)) {
     dimlightBrightLightRatio = 0;
   }
@@ -98,31 +120,36 @@ const RayCastRevealPolygon: React.FunctionComponent<Props> = ({ light, displayIc
   return (
     <>
       <Line
-        name={"Polygon"}
+        name={'Polygon'}
         points={visibilityLinePoints}
         listening={false}
-
         closed={true}
         fillRadialGradientStartPoint={localPosition}
         fillRadialGradientEndPoint={localPosition}
         fillRadialGradientStartRadius={0}
-        fillRadialGradientEndRadius={Math.max(defaultedLight.brightLightDistance!, defaultedLight.dimLightDistance!)}
+        fillRadialGradientEndRadius={Math.max(
+          defaultedLight.brightLightDistance!,
+          defaultedLight.dimLightDistance!
+        )}
         fillRadialGradientColorStops={[
-          0, 'rgba(255,255,255,1)',
-          dimlightBrightLightRatio, 'rgba(255,255,255,0.30)',
-          1, 'rgba(255,255,255,0)'
+          0,
+          'rgba(255,255,255,1)',
+          dimlightBrightLightRatio,
+          'rgba(255,255,255,0.30)',
+          1,
+          'rgba(255,255,255,0)',
         ]}
         globalCompositeOperation="destination-out"
       />
       {displayIcon && (
         <Shape
-          name={"Icon"}
+          name={'Icon'}
           x={light.position!.x}
           y={light.position!.y}
           ref={iconRef as any}
-          onMouseDown={(e) => {
+          onMouseDown={e => {
             if (e.evt.button === 0 && selected) {
-              iconRef.current?.startDrag(e)
+              iconRef.current?.startDrag(e);
               e.cancelBubble = true;
             }
           }}
@@ -138,15 +165,15 @@ const RayCastRevealPolygon: React.FunctionComponent<Props> = ({ light, displayIc
           onDragMove={e => {
             setLocalPosition({
               x: e.target.x(),
-              y: e.target.y()
-            })
+              y: e.target.y(),
+            });
           }}
           onDragEnd={e => {
             light.position!.x = e.target.x();
             light.position!.y = e.target.y();
             onUpdate(light);
           }}
-          onClick={(e) => {
+          onClick={e => {
             if (e.evt.button === 0) {
               e.cancelBubble = true;
               onSelected();
@@ -162,5 +189,5 @@ const RayCastRevealPolygon: React.FunctionComponent<Props> = ({ light, displayIc
       )}
     </>
   );
-}
+};
 export default RayCastRevealPolygon;

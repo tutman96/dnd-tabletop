@@ -1,8 +1,8 @@
 import React from 'react';
 
-import Box from '@mui/material/Box'
-import IconButton from '@mui/material/IconButton'
-import Button from '@mui/material/Button'
+import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
 
 import ZoomInOutlinedIcon from '@mui/icons-material/ZoomInOutlined';
 import ZoomOutOutlinedIcon from '@mui/icons-material/ZoomOutOutlined';
@@ -10,14 +10,13 @@ import theme from '../../../theme';
 
 const ZOOM_RATE = 1.5;
 
-type Props = { zoom: number, onUpdate: (zoom: number) => void };
-const ZoomToolbarItem: React.FunctionComponent<Props> = ({ zoom, onUpdate }) => {
+type Props = {zoom: number; onUpdate: (zoom: number) => void};
+const ZoomToolbarItem: React.FunctionComponent<Props> = ({zoom, onUpdate}) => {
   let zoomDisplay: string;
   if (zoom < 1) {
-    zoomDisplay = `1/${+(1 / zoom).toFixed(1)}x`
-  }
-  else {
-    zoomDisplay = `${+zoom.toFixed(1)}x`
+    zoomDisplay = `1/${+(1 / zoom).toFixed(1)}x`;
+  } else {
+    zoomDisplay = `${+zoom.toFixed(1)}x`;
   }
 
   return (
@@ -25,16 +24,16 @@ const ZoomToolbarItem: React.FunctionComponent<Props> = ({ zoom, onUpdate }) => 
       sx={{
         display: 'flex',
         alignItems: 'center',
-        paddingX: theme.spacing(1)
+        paddingX: theme.spacing(1),
       }}
     >
       Zoom:
       <IconButton
         size="small"
         onClick={() => {
-          let newZoom = Math.round(zoom / ZOOM_RATE * 100) / 100;
+          let newZoom = Math.round((zoom / ZOOM_RATE) * 100) / 100;
           if (newZoom > 0.95 && newZoom < 1.05) newZoom = 1;
-          onUpdate(newZoom)
+          onUpdate(newZoom);
         }}
       >
         <ZoomOutOutlinedIcon />
@@ -42,15 +41,17 @@ const ZoomToolbarItem: React.FunctionComponent<Props> = ({ zoom, onUpdate }) => 
       <Box
         sx={{
           minWidth: theme.spacing(2),
-          textAlign: 'center'
+          textAlign: 'center',
         }}
-      >{zoomDisplay}</Box>
+      >
+        {zoomDisplay}
+      </Box>
       <IconButton
         size="small"
         onClick={() => {
           let newZoom = Math.round(zoom * ZOOM_RATE * 100) / 100;
           if (newZoom > 0.95 && newZoom < 1.05) newZoom = 1;
-          onUpdate(newZoom)
+          onUpdate(newZoom);
         }}
       >
         <ZoomInOutlinedIcon />
@@ -66,6 +67,6 @@ const ZoomToolbarItem: React.FunctionComponent<Props> = ({ zoom, onUpdate }) => 
         </Button>
       )}
     </Box>
-  )
-}
+  );
+};
 export default ZoomToolbarItem;

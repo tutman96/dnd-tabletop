@@ -1,14 +1,14 @@
-import { v4 } from 'uuid';
-import { Packet, Request, Response } from '../protos/external';
+import {v4} from 'uuid';
+import {Packet, Request, Response} from '../protos/external';
 
 export enum ChannelState {
   CONNECTING = 'CONNECTING',
-  CONNECTED = 'CONNECTED', 
+  CONNECTED = 'CONNECTED',
   DISCONNECTING = 'DISCONNECTING',
-  DISCONNECTED = 'DISCONNECTED'
+  DISCONNECTED = 'DISCONNECTED',
 }
 
-type RequestHandler = (request: Request) => Promise<Partial<Response> | null>
+type RequestHandler = (request: Request) => Promise<Partial<Response> | null>;
 
 export default abstract class AbstractChannel {
   private _responseListeners = new Map<string, (message: Packet) => void>();
@@ -18,34 +18,43 @@ export default abstract class AbstractChannel {
   abstract connect(): Promise<void>;
   abstract disconnect(): Promise<void>;
   abstract sendOutgoingPacket(packet: Packet): Promise<void>;
-  
-  protected connectionStateHandlers = new Array<(state: ChannelState) => void>();
-  public addConnectionStateChangeHandler(handler: (state: ChannelState) => void) {
+
+  protected connectionStateHandlers = new Array<
+    (state: ChannelState) => void
+  >();
+  public addConnectionStateChangeHandler(
+    handler: (state: ChannelState) => void
+  ) {
     this.connectionStateHandlers.push(handler);
     return () => {
-      this.connectionStateHandlers.splice(this.connectionStateHandlers.indexOf(handler), 1)
+      this.connectionStateHandlers.splice(
+        this.connectionStateHandlers.indexOf(handler),
+        1
+      );
     };
   }
 
   protected notifyConnectionStateChange() {
-    console.debug('Channel connection state changed to ' + ChannelState[this.state]);
+    console.debug(
+      'Channel connection state changed to ' + ChannelState[this.state]
+    );
     for (const handler of this.connectionStateHandlers) {
       handler(this.state);
     }
   }
 
-  protected requestHandlers = new Array<RequestHandler>(async (req) => {
+  protected requestHandlers = new Array<RequestHandler>(async req => {
     if (req.helloRequest) {
       return {
-        ackResponse: {}
-      }
+        ackResponse: {},
+      };
     }
     return null;
   });
   public addRequestHandler(handler: RequestHandler) {
     this.requestHandlers.push(handler);
     return () => {
-      this.requestHandlers.splice(this.requestHandlers.indexOf(handler), 1)
+      this.requestHandlers.splice(this.requestHandlers.indexOf(handler), 1);
     };
   }
 
@@ -62,18 +71,18 @@ export default abstract class AbstractChannel {
   public async request(request: Partial<Request>): Promise<Response> {
     const requestId = v4();
 
-    const responsePromise = new Promise<Packet>((res) => {
-      this._responseListeners.set(requestId, res)
-    })
+    const responsePromise = new Promise<Packet>(res => {
+      this._responseListeners.set(requestId, res);
+    });
 
     await this.sendOutgoingPacket({
       requestId,
       request: Request.fromPartial(request),
-      response: undefined
-    })
+      response: undefined,
+    });
 
     const responsePacket = await responsePromise;
-    return responsePacket.response!!;
+    return responsePacket.response!;
   }
 
   protected async processIncomingPacket(packet: Packet) {
@@ -81,8 +90,7 @@ export default abstract class AbstractChannel {
       // console.debug(`Received Response (${packet.requestId})`, packet.response)
       this._responseListeners.get(packet.requestId)!(packet);
       this._responseListeners.delete(packet.requestId);
-    }
-    else if (packet.request) {
+    } else if (packet.request) {
       // console.debug(`Received Request (${packet.requestId})`, packet.request)
       const requestId = packet.requestId;
       const response = await this.handleRequest(packet.request);
@@ -92,5 +100,5 @@ export default abstract class AbstractChannel {
         response,
       });
     }
-  };
+  }
 }

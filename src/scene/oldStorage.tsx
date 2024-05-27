@@ -4,55 +4,54 @@ import globalStorage from '../storage';
 export enum OldLayerType {
   ASSETS,
   FOG,
-  TABLE_VIEW
+  TABLE_VIEW,
 }
 export interface OldILayer {
-  id: string
-  type: OldLayerType
-  name: string
-  visible: boolean
+  id: string;
+  type: OldLayerType;
+  name: string;
+  visible: boolean;
 }
 export interface OldIAssetLayer extends OldILayer {
-	assets: Map<string, OldIAsset>
+  assets: Map<string, OldIAsset>;
 }
 export enum OldAssetType {
-	IMAGE,
-	VIDEO
+  IMAGE,
+  VIDEO,
 }
 
 export interface OldIAssetCalibration {
-	xOffset: number;
-	yOffset: number;
-	ppiX: number;
-	ppiY: number;
+  xOffset: number;
+  yOffset: number;
+  ppiX: number;
+  ppiY: number;
 }
-export type OldAssetTransform = Konva.RectConfig & { rotation: number };
+export type OldAssetTransform = Konva.RectConfig & {rotation: number};
 
 export interface OldIAsset {
-	id: string;
-	size: { width: number, height: number };
-	transform: OldAssetTransform;
-	overrideCalibration?: boolean;
-	calibration?: OldIAssetCalibration
-	type: OldAssetType;
-	snapToGrid?: boolean
+  id: string;
+  size: {width: number; height: number};
+  transform: OldAssetTransform;
+  overrideCalibration?: boolean;
+  calibration?: OldIAssetCalibration;
+  type: OldAssetType;
+  snapToGrid?: boolean;
 }
-
 
 export enum OldPolygonType {
   FOG,
   FOG_CLEAR,
-  LIGHT_OBSTRUCTION
+  LIGHT_OBSTRUCTION,
 }
 export interface OldIPolygon {
-  type: OldPolygonType,
-  verticies: Array<Konva.Vector2d>
+  type: OldPolygonType;
+  verticies: Array<Konva.Vector2d>;
   visibleOnTable: boolean;
 }
 export interface OldILightSource {
-  position: Konva.Vector2d,
-  brightLightDistance?: number,
-  dimLightDistance?: number,
+  position: Konva.Vector2d;
+  brightLightDistance?: number;
+  dimLightDistance?: number;
 }
 export interface OldIFogLayer extends OldILayer {
   lightSources: Array<OldILightSource>;
@@ -62,17 +61,17 @@ export interface OldIFogLayer extends OldILayer {
 }
 
 export interface OldTableOptions {
-	displayGrid: boolean,
-	offset: Konva.Vector2d,
-	rotation: number,
-	scale: number,
+  displayGrid: boolean;
+  offset: Konva.Vector2d;
+  rotation: number;
+  scale: number;
 }
 
 export interface OldIScene {
   id: string;
   name: string;
   version: number;
-  table: OldTableOptions,
+  table: OldTableOptions;
   layers: Array<OldILayer>;
 }
 

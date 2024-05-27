@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';
@@ -12,48 +12,58 @@ import InputWithUnit from '../../../partials/inputWithUnit';
 import InputGroup from '../../../partials/inputGroup';
 import * as Types from '../../../protos/scene';
 
-const AdvancedAssetSizer: React.FunctionComponent<{ calibration: Types.AssetLayer_Asset_AssetCalibration; onUpdate: (calibration: Types.AssetLayer_Asset_AssetCalibration) => void; }> = ({ calibration, onUpdate }) => {
-  function updateCalibrationValue(keys: Array<keyof Types.AssetLayer_Asset_AssetCalibration>, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+const AdvancedAssetSizer: React.FunctionComponent<{
+  calibration: Types.AssetLayer_Asset_AssetCalibration;
+  onUpdate: (calibration: Types.AssetLayer_Asset_AssetCalibration) => void;
+}> = ({calibration, onUpdate}) => {
+  function updateCalibrationValue(
+    keys: Array<keyof Types.AssetLayer_Asset_AssetCalibration>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) {
     const value = Number(e.target.value);
     if (!isNaN(value)) {
-      const newCal = { ...calibration! };
+      const newCal = {...calibration!};
       for (const key of keys) {
         newCal[key] = value;
       }
-      onUpdate(newCal)
+      onUpdate(newCal);
     }
   }
 
-  const [ppiLocked, setPPILocked] = useState(calibration.ppiX === calibration.ppiY);
+  const [ppiLocked, setPPILocked] = useState(
+    calibration.ppiX === calibration.ppiY
+  );
   useEffect(() => {
     if (ppiLocked && calibration.ppiX !== calibration.ppiY) {
       setPPILocked(false);
     }
-  }, [calibration, onUpdate, ppiLocked])
+  }, [calibration, onUpdate, ppiLocked]);
 
   return (
-    <Box sx={{ marginTop: theme.spacing(1) }}>
+    <Box sx={{marginTop: theme.spacing(1)}}>
       <InputGroup header="Pixels per Inch">
         <InputWithUnit
           type="number"
-          inputProps={{ min: 1 }}
+          inputProps={{min: 1}}
           placeholder="Horizontal PPI"
           unit="ppi"
           fullWidth
           value={calibration.ppiX}
-          onChange={(e) => updateCalibrationValue((ppiLocked ? ['ppiX', 'ppiY'] : ['ppiX']), e)}
+          onChange={e =>
+            updateCalibrationValue(ppiLocked ? ['ppiX', 'ppiY'] : ['ppiX'], e)
+          }
         />
         <Tooltip title={ppiLocked ? 'Unlock PPI' : 'Lock PPI'}>
           <IconButton
-            sx={{ marginX: theme.spacing(1) }}
+            sx={{marginX: theme.spacing(1)}}
             onClick={() => {
               if (calibration.ppiX !== calibration.ppiY) {
                 onUpdate({
                   ...calibration,
-                  ppiY: calibration.ppiX
-                })
+                  ppiY: calibration.ppiX,
+                });
               }
-              setPPILocked(!ppiLocked)
+              setPPILocked(!ppiLocked);
             }}
           >
             {ppiLocked ? <LockOutlinedIcon /> : <LockOpenOutlinedIcon />}
@@ -61,13 +71,13 @@ const AdvancedAssetSizer: React.FunctionComponent<{ calibration: Types.AssetLaye
         </Tooltip>
         <InputWithUnit
           type="number"
-          inputProps={{ min: 1 }}
+          inputProps={{min: 1}}
           placeholder="Vertical PPI"
           unit="ppi"
           fullWidth
           value={ppiLocked ? calibration.ppiX : calibration.ppiY}
           disabled={ppiLocked}
-          onChange={(e) => updateCalibrationValue(['ppiY'], e)}
+          onChange={e => updateCalibrationValue(['ppiY'], e)}
         />
       </InputGroup>
       <InputGroup header="Offset">
@@ -77,16 +87,16 @@ const AdvancedAssetSizer: React.FunctionComponent<{ calibration: Types.AssetLaye
           unit="px"
           fullWidth
           value={calibration.xOffset}
-          onChange={(e) => updateCalibrationValue(['xOffset'], e)}
+          onChange={e => updateCalibrationValue(['xOffset'], e)}
         />
-        <Box sx={{ margin: theme.spacing(1) }}>x</Box>
+        <Box sx={{margin: theme.spacing(1)}}>x</Box>
         <InputWithUnit
           type="number"
           placeholder="Vertical Offset"
           unit="px"
           fullWidth
           value={calibration.yOffset}
-          onChange={(e) => updateCalibrationValue(['yOffset'], e)}
+          onChange={e => updateCalibrationValue(['yOffset'], e)}
         />
       </InputGroup>
     </Box>
