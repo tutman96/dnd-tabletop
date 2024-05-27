@@ -1,13 +1,13 @@
 import {ThemeProvider} from '@mui/system';
 import React, {useEffect, useRef, useState} from 'react';
-import {Root, createRoot} from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import {singletonHook} from 'react-singleton-hook';
 
 import theme from '../../theme';
 import Toolbar from './toolbar';
 
 const useToolbarPortal = singletonHook([undefined, () => {}], () =>
-  useState<Root | undefined>(undefined)
+  useState<HTMLElement | undefined>(undefined)
 );
 
 const ToolbarPortal: React.FunctionComponent<React.PropsWithChildren> = ({
@@ -17,14 +17,17 @@ const ToolbarPortal: React.FunctionComponent<React.PropsWithChildren> = ({
 
   useEffect(() => {
     if (portal) {
-      portal.render(<ThemeProvider theme={theme}>{children}</ThemeProvider>);
+      ReactDOM.render(
+        <ThemeProvider theme={theme}>{children}</ThemeProvider>,
+        portal
+      );
     }
   }, [children, portal]);
 
   useEffect(() => {
     if (portal) {
       return () => {
-        portal.unmount();
+        ReactDOM.unmountComponentAtNode(portal);
       };
     }
     return () => {};
@@ -38,16 +41,11 @@ export const ToolbarPortalProvider: React.FunctionComponent<
   React.PropsWithChildren
 > = ({children}) => {
   const node = useRef<HTMLSpanElement>();
-  const [root, setRoot] = useState<Root | undefined>(undefined);
   const [, setPortal] = useToolbarPortal()!;
 
   useEffect(() => {
-    if (node.current && !root) {
-      const r = createRoot(node.current);
-      setRoot(r);
-      setPortal(r);
-    }
-  }, [node, root]);
+    setPortal(node.current);
+  }, [node, setPortal]);
 
   return (
     <>
