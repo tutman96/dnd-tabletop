@@ -7,6 +7,7 @@ import InputGroup from '../partials/inputGroup';
 
 import globalStorage from '../storage';
 import ScreenSizeSettings from './ScreenSizeSettings';
+import ExportAllButton from '../scene/exportAllButton';
 
 export enum Settings {
   DISPLAYED_SCENE = 'displayed_scene',
@@ -139,6 +140,7 @@ const SettingsPanel: React.FunctionComponent = () => {
           label="Play Audio on Table"
         />
       </InputGroup>
+      <ExportAllButton />
     </>
   );
 };

@@ -1,11 +1,12 @@
 import {v4} from 'uuid';
+import {useCallback, useEffect, useState} from 'react';
+import {TarWriter} from '@gera2ld/tarjs';
 
 import globalStorage from '../storage';
 import {createNewLayer, unflattenLayer} from './layer';
 import {deleteAsset, fileStorage} from './asset';
 import * as Types from '../protos/scene';
 import {oldStorage} from './oldStorage';
-import {useCallback, useEffect, useState} from 'react';
 
 export const newStorage = globalStorage<Uint8Array>('scene_2');
 export function sceneDatabase() {
@@ -124,7 +125,7 @@ export function createNewScene(): Types.Scene {
   };
 }
 
-export async function exportScene(scene: Types.Scene) {
+async function sceneToSceneExport(scene: Types.Scene): Promise<Uint8Array> {
   const assetIds = new Set<string>();
   for (const layer of scene.layers) {
     if (!layer.assetLayer) continue;
@@ -144,12 +145,34 @@ export async function exportScene(scene: Types.Scene) {
     });
   }
 
-  const exp = Types.SceneExport.encode({scene, files}).finish();
+  return Types.SceneExport.encode({scene, files}).finish();
+}
+
+export async function exportScene(scene: Types.Scene) {
+  const exp = await sceneToSceneExport(scene);
 
   const blob = new Blob([exp], {type: 'application/octet-stream'});
   const objectUrl = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.download = scene.name + '.scene';
+  link.href = objectUrl;
+  link.click();
+}
+
+// Export all scenes as individual .scene files in a single tarball
+export async function exportAllScenes() {
+  const tar = new TarWriter();
+  const sceneIds = await newStorage.storage.keys();
+  for (const sceneId of sceneIds) {
+    const scene = Types.Scene.decode(await newStorage.storage.getItem(sceneId));
+    const exp = await sceneToSceneExport(scene);
+    tar.addFile(scene.name + '.scene', exp);
+  }
+
+  const blob = await tar.write();
+  const objectUrl = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.download = 'scenes.tar';
   link.href = objectUrl;
   link.click();
 }

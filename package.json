@@ -6,6 +6,7 @@
   "dependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
+    "@gera2ld/tarjs": "^0.3.1",
     "@mui/icons-material": "^5.2.5",
     "@mui/material": "^5.2.5",
     "@mui/system": "^5.2.5",
