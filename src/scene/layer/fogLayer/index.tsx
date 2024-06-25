@@ -11,18 +11,51 @@ import CastleOutlinedIcon from '@mui/icons-material/CastleOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import Bluetooth from '@mui/icons-material/Bluetooth';
 
 import {ILayerComponentProps} from '..';
 import ToolbarPortal from '../toolbarPortal';
 import ToolbarItem, {ToolbarSeparator} from '../toolbarItem';
 import EditablePolygon from './editablePolygon';
-import {useTablePPI} from '../../../settings';
+import {useTableDimensions, useTablePPI} from '../../../settings';
 import RayCastRevealPolygon, {defaultLightSource} from './rayCastRevealPolygon';
 import {calculateViewportCenter} from '../../canvas';
 import EditLightToolbarItem from './editLightToolbarItem';
 import * as Types from '../../../protos/scene';
+import {
+  useBluetoothDevice,
+  useCharacteristicValue,
+} from '../../../external/bluetooth';
 
 export const BLUR_RADIUS = 1 / 20;
+
+function markersDecoder(value: DataView) {
+  // Consists of three byte tuples, each representing an id, an x value and a y value
+  const markers = new Array<{id: number; x: number; y: number}>();
+  for (let i = 0; i < value!.byteLength; i += 3) {
+    const id = value!.getUint8(i);
+    const x = value!.getUint8(i + 1);
+    const y = value!.getUint8(i + 2);
+    markers.push({id, x, y});
+  }
+  return markers;
+}
+
+function useMarkerLights(
+  service: BluetoothRemoteGATTService | null
+): Array<Types.FogLayer_LightSource> {
+  const markers = useCharacteristicValue(service, 0x12343344, markersDecoder);
+  const tableDimensions = useTableDimensions();
+  if (!markers || !tableDimensions) return [];
+
+  return markers
+    .sort((a, b) => a.id - b.id)
+    .map(marker => {
+      const x = (marker.x / 255) * tableDimensions.width;
+      const y = (marker.y / 255) * tableDimensions.height;
+      return defaultLightSource({position: {x, y}});
+    });
+}
 
 type Props = ILayerComponentProps<Types.FogLayer>;
 const FogLayer: React.FunctionComponent<Props> = ({
@@ -40,6 +73,9 @@ const FogLayer: React.FunctionComponent<Props> = ({
     useState<Types.FogLayer_Polygon | null>(null);
   const [selectedLight, setSelectedLight] =
     useState<Types.FogLayer_LightSource | null>(null);
+
+  const {connect, disconnect, status, service} = useBluetoothDevice();
+  const markerLights = useMarkerLights(service);
 
   const collections = useMemo(
     () => ({
@@ -78,6 +114,22 @@ const FogLayer: React.FunctionComponent<Props> = ({
   const toolbar = useMemo(() => {
     return (
       <>
+        <ToolbarItem
+          label={
+            status === 'connected'
+              ? 'Disconnect table-camera'
+              : 'Connect table-camera'
+          }
+          disabled={status === 'connecting'}
+          icon={<Bluetooth />}
+          onClick={() => {
+            if (status === 'connected') {
+              disconnect();
+            } else {
+              connect();
+            }
+          }}
+        />
         <ToolbarItem
           label="Add Fog"
           icon={<CloudOutlinedIcon />}
@@ -198,7 +250,15 @@ const FogLayer: React.FunctionComponent<Props> = ({
         />
       </>
     );
-  }, [selectedPolygon, selectedLight, layer, onUpdate, collections, layerRef]);
+  }, [
+    selectedPolygon,
+    selectedLight,
+    layer,
+    onUpdate,
+    collections,
+    layerRef,
+    status,
+  ]);
 
   useEffect(() => {
     if (isTable && layerRef.current && tablePPI) {
@@ -315,6 +375,34 @@ const FogLayer: React.FunctionComponent<Props> = ({
   };
 
   layer.lightSources.forEach(defaultLightSource);
+
+  useEffect(() => {
+    if (status === 'connected' && markerLights.length > 0) {
+      // update lights in place to prevent extra updates
+      let hasUpdate = false;
+      for (let i = 0; i < markerLights.length; i++) {
+        if (!layer.lightSources[i]) {
+          layer.lightSources[i] = markerLights[i];
+          hasUpdate = true;
+        } else {
+          if (
+            layer.lightSources[i].position?.x !== markerLights[i].position?.x ||
+            layer.lightSources[i].position?.y !== markerLights[i].position?.y
+          ) {
+            layer.lightSources[i].position = markerLights[i].position;
+            hasUpdate = true;
+          }
+        }
+      }
+
+      if (markerLights.length < layer.lightSources.length) {
+        layer.lightSources.splice(markerLights.length);
+        hasUpdate = true;
+      }
+
+      if (hasUpdate) onUpdate(layer);
+    }
+  }, [markerLights]);
 
   return (
     <Layer ref={layerRef as any} listening={active}>
